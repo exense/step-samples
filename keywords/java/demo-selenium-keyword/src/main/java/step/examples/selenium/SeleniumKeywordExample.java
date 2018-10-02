@@ -2,6 +2,7 @@ package step.examples.selenium;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -10,6 +11,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 import step.handlers.javahandler.AbstractKeyword;
 import step.handlers.javahandler.Keyword;
@@ -18,7 +20,14 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 	@Keyword(name = "Open Chrome")
 	public void openChrome() throws Exception {
-		WebDriver driver = new ChromeDriver();
+		
+		ChromeOptions options = new ChromeOptions();
+		boolean headless = input.getBoolean("headless", false);
+		if (headless) {
+			options.addArguments(Arrays.asList("headless", "disable-infobars", "disable-gpu", "no-sandbox"));
+		}
+		
+		WebDriver driver = new ChromeDriver(options);
 		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 		session.put(new DriverWrapper(driver));
 	}
