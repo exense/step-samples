@@ -43,7 +43,7 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 			driver.get("http://www.google.com");
 
-			WebElement searchInput = driver.findElement(By.id("lst-ib"));
+			WebElement searchInput = driver.findElement(By.name("q"));
 
 			String searchString = input.getString("search");
 			searchInput.sendKeys(searchString + Keys.ENTER);
