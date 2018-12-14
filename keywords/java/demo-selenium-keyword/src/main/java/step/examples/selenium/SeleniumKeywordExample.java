@@ -23,8 +23,8 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 		
 		ChromeOptions options = new ChromeOptions();
 		boolean headless = input.getBoolean("headless", false);
-		if (headless) {
-			options.addArguments(Arrays.asList("headless", "disable-infobars", "disable-gpu", "no-sandbox"));
+		if (headless) { //headless", 
+			options.addArguments(Arrays.asList("disable-infobars", "disable-gpu", "no-sandbox"));
 		}
 		
 		WebDriver driver = new ChromeDriver(options);
@@ -50,7 +50,7 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 			WebElement resultCountDiv = driver.findElement(By.xpath("//div/nobr"));
 
-			List<WebElement> resultHeaders = driver.findElements(By.xpath("//h3[@class='r']"));
+			List<WebElement> resultHeaders = driver.findElements(By.xpath("//div[@class='r']//h3"));
 			for (WebElement result : resultHeaders) {
 				output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
 			}
