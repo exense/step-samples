@@ -21,11 +21,13 @@ package step.examples.java;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.json.JsonObject;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import step.grid.io.OutputMessage;
+import step.functions.io.Output;
 import step.handlers.javahandler.KeywordRunner;
 import step.handlers.javahandler.KeywordRunner.ExecutionContext;
 
@@ -40,17 +42,17 @@ public class JavaKeywordExampleTest {
 	}
 
 	@Test
-	public void getTime() {
-		OutputMessage result = ctx.run("Current time", "{ \"format\" : \"ddMMyyyy\" }");
+	public void getTime() throws Exception {
+		Output<JsonObject> result = ctx.run("Current time", "{ \"format\" : \"ddMMyyyy\" }");
 		Assert.assertTrue(result.getPayload().containsKey("time"));
 	}
 
 	@Test
-	public void Demo_Keyword_Sequence() {
+	public void Demo_Keyword_Sequence() throws Exception {
 		Map<String, String> properties = new HashMap<>();
 		ExecutionContext ctx = KeywordRunner.getExecutionContext(properties, JavaKeywordExample.class);
 
-		OutputMessage result;
+		Output<JsonObject> result;
 		result = ctx.run("Set date format", "{ \"format\" : \"ddMMyyyy\" }");
 		result = ctx.run("Get time using previously defined format", "{}");
 
