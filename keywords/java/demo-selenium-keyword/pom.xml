@@ -15,19 +15,9 @@
 	<dependencies>
 		<dependency>
 			<groupId>ch.exense.step</groupId>
-			<artifactId>script-dev-java</artifactId>
+			<artifactId>script-dev-selenium-3</artifactId>
 			<version>${step.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-api</artifactId>
-			<version>${selenium.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.seleniumhq.selenium</groupId>
-			<artifactId>selenium-java</artifactId>
-			<version>${selenium.version}</version>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
