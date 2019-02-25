@@ -8,7 +8,7 @@
 	<artifactId>demo-java-keyword</artifactId>
 	
 	<properties>
-		<step.version>3.9.0</step.version>
+		<step.version>3.9.3</step.version>
 		<junit.version>4.8.1</junit.version>
 	</properties>
 
