@@ -27,11 +27,11 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 		
 		boolean headless = input.getBoolean("headless", false);
 		if (headless) {
-			options.addArguments(Arrays.asList("headless"));
+			options.addArguments(Arrays.asList("headless","disable-gpu"));
 		}
-		boolean sandbox = input.getBoolean("sandbox", false);
-		if (sandbox) {
-			options.addArguments(Arrays.asList("disable-gpu", "no-sandbox"));
+		boolean sandbox = input.getBoolean("sandbox", true);
+		if (!sandbox) {
+			options.addArguments(Arrays.asList("no-sandbox"));
 		}
 		
 		WebDriver driver = new ChromeDriver(options);
