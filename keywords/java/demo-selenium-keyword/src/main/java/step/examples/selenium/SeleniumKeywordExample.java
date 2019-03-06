@@ -22,9 +22,16 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 	public void openChrome() throws Exception {
 		
 		ChromeOptions options = new ChromeOptions();
+		
+		options.addArguments(Arrays.asList("disable-infobars"));
+		
 		boolean headless = input.getBoolean("headless", false);
-		if (headless) { //headless", 
-			options.addArguments(Arrays.asList("disable-infobars", "disable-gpu", "no-sandbox"));
+		if (headless) {
+			options.addArguments(Arrays.asList("headless"));
+		}
+		boolean sandbox = input.getBoolean("sandbox", false);
+		if (sandbox) {
+			options.addArguments(Arrays.asList("disable-gpu", "no-sandbox"));
 		}
 		
 		WebDriver driver = new ChromeDriver(options);
