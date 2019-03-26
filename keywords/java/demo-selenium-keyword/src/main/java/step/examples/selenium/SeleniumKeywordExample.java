@@ -8,11 +8,15 @@ import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import step.grid.io.Attachment;
+import step.grid.io.AttachmentHelper;
 import step.handlers.javahandler.AbstractKeyword;
 import step.handlers.javahandler.Keyword;
 
@@ -54,11 +58,23 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 			for (WebElement result : resultHeaders) {
 				output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
 			}
+			
+			attachScreenshot(driver);
+			
 		} else {
 			throw new Exception("Input parameter 'search' not defined");
 		}
 	}
 	
+	public void attachScreenshot(WebDriver driver) {
+		try {
+			byte[] bytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+			Attachment attachment = AttachmentHelper.generateAttachmentFromByteArray(bytes, "screenshot.jpg");
+			output.addAttachment(attachment);
+		} catch (Exception ex) {
+			output.appendError("Unable to generate screenshot");
+		}
+	}
 	// Wrapping the WebDriver instance as it is not implementing the Closeable interface
 	public class DriverWrapper implements Closeable {
 
