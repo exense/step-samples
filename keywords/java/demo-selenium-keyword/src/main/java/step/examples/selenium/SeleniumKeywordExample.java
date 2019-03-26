@@ -26,9 +26,16 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 	public void openChrome() throws Exception {
 		
 		ChromeOptions options = new ChromeOptions();
+		
+		options.addArguments(Arrays.asList("disable-infobars"));
+		
 		boolean headless = input.getBoolean("headless", false);
 		if (headless) {
-			options.addArguments(Arrays.asList("headless", "disable-infobars", "disable-gpu", "no-sandbox"));
+			options.addArguments(Arrays.asList("headless","disable-gpu"));
+		}
+		boolean sandbox = input.getBoolean("sandbox", true);
+		if (!sandbox) {
+			options.addArguments(Arrays.asList("no-sandbox"));
 		}
 		
 		WebDriver driver = new ChromeDriver(options);
@@ -47,14 +54,14 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 			driver.get("http://www.google.com");
 
-			WebElement searchInput = driver.findElement(By.id("lst-ib"));
+			WebElement searchInput = driver.findElement(By.name("q"));
 
 			String searchString = input.getString("search");
 			searchInput.sendKeys(searchString + Keys.ENTER);
 
 			WebElement resultCountDiv = driver.findElement(By.xpath("//div/nobr"));
 
-			List<WebElement> resultHeaders = driver.findElements(By.xpath("//h3[@class='r']"));
+			List<WebElement> resultHeaders = driver.findElements(By.xpath("//div[@class='r']//h3"));
 			for (WebElement result : resultHeaders) {
 				output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
 			}
