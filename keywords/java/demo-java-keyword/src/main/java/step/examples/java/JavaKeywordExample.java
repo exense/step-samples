@@ -27,7 +27,7 @@ public class JavaKeywordExample extends AbstractKeyword {
 
 	@Keyword(name="Current time")
 	public void getTime() throws Exception {
-		SimpleDateFormat format = new SimpleDateFormat(input.getString("format"));
+		SimpleDateFormat format = new SimpleDateFormat(input.getString("format", "dd.MM.yyyy HH:mm:ss"));
 		Date date;
 		output.startMeasure("Demo_Java_Clock_subMeasurement");
 		date = new Date();
