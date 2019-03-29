@@ -8,15 +8,15 @@
 	<artifactId>demo-java-keyword</artifactId>
 	
 	<properties>
-		<step.version>3.9.4</step.version>
+		<step-api.version>1.0.0-SNAPSHOT</step-api.version>
 		<junit.version>4.8.1</junit.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>ch.exense.step</groupId>
-			<artifactId>script-dev-java</artifactId>
-			<version>${step.version}</version>  
+			<artifactId>step-api-keyword</artifactId>
+			<version>${step-api.version}</version>  
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
