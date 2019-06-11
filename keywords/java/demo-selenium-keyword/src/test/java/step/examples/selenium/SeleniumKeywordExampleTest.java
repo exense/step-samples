@@ -31,7 +31,7 @@ public class SeleniumKeywordExampleTest {
 		result = ctx.run("Search in google", "{ \"search\" : \"exense step\" }");
 		result = ctx.run("Search in google", "{ \"search\" : \"exense djigger\" }");
 		Assert.assertNull(result.getError());
-		Assert.assertTrue(result.getPayload().containsKey("GitHub - exense/djigger: A production-ready monitoring and profiling ..."));
+		Assert.assertTrue(result.getPayload().containsKey("exense/djigger: A production-ready monitoring and profiling ... - GitHub"));
 	}
 
 	@After
