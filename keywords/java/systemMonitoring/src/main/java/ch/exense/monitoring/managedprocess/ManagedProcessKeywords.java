@@ -96,6 +96,7 @@ public class ManagedProcessKeywords extends AbstractEnhancedKeyword {
 			String outputName, File file) throws IOException {
 		StringBuilder processOutput = new StringBuilder();
 		if(file.length()<maxOutputPayloadSize) {
+			// Why adding \n at on every line ?
 			Files.readAllLines(file.toPath(), Charset.defaultCharset()).forEach(l->processOutput.append(l).append("\n"));
 			
 			output.add(outputName, processOutput.toString());
