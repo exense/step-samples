@@ -33,7 +33,7 @@ public class ManagedProcessKeywordsTest {
 	ExecutionContext ctx;
 	@Before
 	public void setUp() {
-		ctx = KeywordRunner.getExecutionContext( ManagedProcessKeywords.class,JavaManagedProcessKeywords.class,TypePerfManagedProcessKeywords.class);	
+		ctx = KeywordRunner.getExecutionContext(ManagedProcessKeywords.class, JavaManagedProcessKeywords.class,TypePerfManagedProcessKeywords.class);	
 	}
 
 	@After
@@ -42,6 +42,27 @@ public class ManagedProcessKeywordsTest {
 	}
 	
 	@Test
+	public void testPowershellServiceStatusKeyword() {
+		JsonObject input;
+		Output<JsonObject> output;
+		
+		input = Json.createObjectBuilder()
+	            .add("timeoutInMillis", "100000")
+	            .add("maxOutputPayloadSize", "10000000000000000")
+	            .add("maxOutputAttachmentSize", "0")
+	            .add("executablePath", "powershell")
+	            .add("args", " Get-Service -DisplayName 'DHCP Client' | Format-List Status")
+	            .build();
+		try {
+			output = ctx.run("ManagedProcessKeyword", input.toString());
+			System.out.println(output.getPayload());
+			assertTrue(output.getPayload().getString("stdout").contains("Running"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//@Test
 	public void testTypePerfManagedProcessKeyword() {
 		JsonObject input;
 		Output<JsonObject> output;
