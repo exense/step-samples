@@ -20,6 +20,7 @@ import org.junit.Test;
 
 import ch.exense.monitoring.managedprocess.JavaManagedProcessKeywords;
 import ch.exense.monitoring.managedprocess.ManagedProcessKeywords;
+import ch.exense.monitoring.managedprocess.WindowsServiceStatusKeywords;
 import ch.exense.monitoring.managedprocess.TypePerfManagedProcessKeywords;
 import step.commons.processmanager.ManagedProcess;
 import step.functions.io.Output;
@@ -33,7 +34,7 @@ public class ManagedProcessKeywordsTest {
 	ExecutionContext ctx;
 	@Before
 	public void setUp() {
-		ctx = KeywordRunner.getExecutionContext(ManagedProcessKeywords.class, JavaManagedProcessKeywords.class,TypePerfManagedProcessKeywords.class);	
+		ctx = KeywordRunner.getExecutionContext(ManagedProcessKeywords.class, JavaManagedProcessKeywords.class,TypePerfManagedProcessKeywords.class, WindowsServiceStatusKeywords.class);	
 	}
 
 	@After
@@ -51,12 +52,12 @@ public class ManagedProcessKeywordsTest {
 	            .add("maxOutputPayloadSize", "10000000000000000")
 	            .add("maxOutputAttachmentSize", "0")
 	            .add("executablePath", "powershell")
-	            .add("args", " Get-Service -DisplayName 'DHCP Client' | Format-List Status")
+	            .add("serviceDisplayName", "DHCP Client")
 	            .build();
 		try {
-			output = ctx.run("ManagedProcessKeyword", input.toString());
+			output = ctx.run("WindowsServiceStatusKeyword", input.toString());
 			System.out.println(output.getPayload());
-			assertTrue(output.getPayload().getString("stdout").contains("Running"));
+			assertTrue(output.getPayload().getString("status").contains("running"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
