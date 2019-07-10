@@ -69,7 +69,7 @@ public class ManagedProcessKeywords extends AbstractEnhancedKeyword {
 			setSuccess();
 			if (stdout != null ) {
 				executionPostProcess(process.getProcessOutputLog());
-			}
+			} 
 			
 		} catch (TimeoutException e) {
 			failWithErrorMessage("Timeout while waiting for process termination.");
@@ -91,7 +91,7 @@ public class ManagedProcessKeywords extends AbstractEnhancedKeyword {
 	protected void executionPostProcess(File file) throws IOException {
 		//override this method 
 	}
-
+	
 	protected String attachOutput(Long maxOutputPayloadSize, Long maxOutputAttachmentSize, OutputBuilder output,
 			String outputName, File file) throws IOException {
 		StringBuilder processOutput = new StringBuilder();

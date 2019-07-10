@@ -1,3 +1,0 @@
-Metric_name,Typeperf_counter,groovy
-CPU(%),\Processor(_Total)\% Idle Time,100-value
-MemoryAvailableMB,\Memory\Available MBytes,
