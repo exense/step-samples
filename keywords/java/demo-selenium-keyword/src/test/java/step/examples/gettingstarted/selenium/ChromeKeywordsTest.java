@@ -21,6 +21,7 @@ public class ChromeKeywordsTest {
 		ExecutionContext ctx = KeywordRunner.getExecutionContext(ChromeKeywords.class);
 		Output<JsonObject> output = ctx.run("createAndNavigate2", "{\"url\" : \"http://exense.ch/solutions\"}");
 		System.out.println(output.getPayload());
+		System.err.println(output.getError());
 	}
 	
 }
