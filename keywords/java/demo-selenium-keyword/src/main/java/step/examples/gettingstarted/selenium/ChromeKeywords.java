@@ -22,6 +22,12 @@ public class ChromeKeywords extends AbstractKeyword {
 		String homeUrl = "http://www.exense.ch";
 		chrome.navigate().to(homeUrl);
 		chrome.findElement(By.xpath("//a[contains(text(),'Consulting')]")).click();
+
+	    // Pausing artificially for demo
+		pause();
+		
+		// Closing browser
+		chrome.quit();
 	}
 	
 	@Keyword
@@ -36,7 +42,22 @@ public class ChromeKeywords extends AbstractKeyword {
 	    chrome.navigate().to(homeUrl);
 	    String extractedValue = chrome.findElement(By.xpath("//p[1]")).getText();
 
-	    // Return the extracted text to the keyword output
+	    // Pausing artificially for demo
+		pause();
+		
+		// Closing browser
+	    chrome.quit();
+	    
+	    // Returning the extracted text to the keyword output
 	    output.add("description", extractedValue);
+	}
+	
+	
+	public static void pause() {
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 }
