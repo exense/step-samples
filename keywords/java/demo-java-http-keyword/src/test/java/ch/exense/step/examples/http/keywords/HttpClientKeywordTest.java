@@ -35,7 +35,7 @@ public class HttpClientKeywordTest {
 	public void initTest() {
 	}
 
-	//@Test
+	@Test
 	public void stepLoginTest() throws Exception {
 		
 		Logger LOG = (Logger) org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);

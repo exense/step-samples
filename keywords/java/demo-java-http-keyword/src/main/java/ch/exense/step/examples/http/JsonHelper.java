@@ -9,7 +9,7 @@ import javax.json.JsonReader;
 import javax.json.JsonStructure;
 import javax.json.JsonValue.ValueType;
 
-import step.grid.agent.handler.context.OutputMessageBuilder;
+import step.functions.io.OutputBuilder;
 
 public class JsonHelper {
 	
@@ -17,7 +17,7 @@ public class JsonHelper {
 	// TODO mark unknown error to RTM transaction
 	
 	//Error body are always of type object and contains keys errorCode and errorMessage
-	protected static String getBusinessError(JsonStructure response, OutputMessageBuilder output) {
+	protected static String getBusinessError(JsonStructure response, OutputBuilder output) {
 		String errorCode = null;
 		if (response.getValueType().equals(ValueType.OBJECT)) {
 			errorCode = addJsonObjectField2output((JsonObject) response, "errorCode", output,false);
@@ -26,7 +26,7 @@ public class JsonHelper {
 		return errorCode;
 	}
 	
-	public static JsonStructure checkJsonResponse(HttpResponse httpResponse, ValueType valueType, int httpStatus, OutputMessageBuilder output) {		
+	public static JsonStructure checkJsonResponse(HttpResponse httpResponse, ValueType valueType, int httpStatus, OutputBuilder output) {		
 		int status = httpResponse.getStatus();
 		String responsePayload = httpResponse.getResponsePayload();
 		JsonStructure response = toJsonStructure(responsePayload);
@@ -48,12 +48,12 @@ public class JsonHelper {
 		return response;
 	}
 	
-	public static String addJsonArrayField2output(JsonArray responseArray, int index, String key, OutputMessageBuilder output, boolean mandatory) {
+	public static String addJsonArrayField2output(JsonArray responseArray, int index, String key, OutputBuilder output, boolean mandatory) {
 		JsonObject responseObject = responseArray.getJsonObject(index);				
 		return addJsonObjectField2output(responseObject, key , output, mandatory);
 	}
 	
-	public static String addJsonObjectField2output(JsonObject responseObject, String key, OutputMessageBuilder output, boolean mandatory) {
+	public static String addJsonObjectField2output(JsonObject responseObject, String key, OutputBuilder output, boolean mandatory) {
 		String value = null;
 		if (responseObject.containsKey(key)) {
 			value = responseObject.get(key).toString();
