@@ -34,6 +34,7 @@ public class AppiumOperationsKeyword extends AbstractKeyword {
 	@Keyword
 	public void stopAppium() throws Exception {
 		AppiumDriverLocalService service = getAppiumDriverLocalService();
+		getDriver().quit();
 		service.stop();
 	}
 	

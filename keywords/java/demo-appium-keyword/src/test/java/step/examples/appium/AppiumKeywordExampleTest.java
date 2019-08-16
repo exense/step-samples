@@ -26,27 +26,26 @@ public class AppiumKeywordExampleTest {
 		//String apkPath = Paths.get(this.getClass().getClassLoader().getResource("apk/ApiDemos-debug.apk").toURI()).toString().replace("\\", "/");
 		String apkPath = "https://github.com/appium/java-client/raw/master/src/test/java/io/appium/java_client/ApiDemos-debug.apk";
 		String avd = "Nexus_5X_API_28_Demo_1";
-		
+
 		ctx.run("startAppium");
 		ctx.run("startEmulator", "{"
-				+ "\"avd\":\"" + avd + "\","
-				//+ "\"avdArgs\":\"-no-audio -wipe-data\","
-				+ "\"avdArgs\":\"-no-audio\","
-				+ "\"avdLaunchTimeout\": 600000,"
-				+ "\"avdReadyTimeout\": 600000,"
-				+ "\"newCommandTimeout\": 0,"
-				+ "\"appPath\":\""+ apkPath +"\""
-				+ "}");
-	
-		ctx.run("startApplication");
+			+ "\"avd\":\"" + avd + "\","
+			+ "\"avdArgs\":\"-no-audio -wipe-data\","
+			+ "\"avdLaunchTimeout\": 600000,"
+			+ "\"avdReadyTimeout\": 600000,"
+			+ "\"newCommandTimeout\": 0,"
+			+ "\"appPath\":\""+ apkPath +"\""
+			+ "}");
 		
-		ctx.run("animateDrawable");
-		ctx.run("testClick");
-		ctx.run("testSlider");	
-		ctx.run("displayTextClock");
-		
-		ctx.run("stopApplication");
-		ctx.run("stopAppium");
+			ctx.run("startApplication");
+			
+			ctx.run("animateDrawable");
+			ctx.run("testClick");
+			ctx.run("testSlider");	
+			ctx.run("displayTextClock");
+			
+			ctx.run("stopApplication");
+			ctx.run("stopAppium");
 	}
 
 	@After
