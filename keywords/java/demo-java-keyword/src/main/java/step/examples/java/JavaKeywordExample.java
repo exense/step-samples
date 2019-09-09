@@ -36,7 +36,7 @@ public class JavaKeywordExample extends AbstractKeyword {
 		output.add("time", format.format(date));
 	}
 	
-	@Keyword(name="Set date format")
+	@Keyword(name="Set date format", schema="{\"format\":\"string\"}")
 	public void setDateFormat() throws Exception {
 		SimpleDateFormat format = new SimpleDateFormat(input.getString("format"));
 		session.put("format", format);
