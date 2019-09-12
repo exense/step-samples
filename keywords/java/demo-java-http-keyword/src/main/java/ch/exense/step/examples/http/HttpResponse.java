@@ -61,11 +61,12 @@ public class HttpResponse {
 	}
 	
 	public void logDebugInfo() {
-
-		logger.debug("Http response code: " + status);
-		logger.debug("Http Response header: " + getResponseHeaders().toString());
-		logger.debug("Cookies: " + getCookies().toString());
-//		logger.debug("Response Payload: " + getResponsePayload());
+		if (logger.isDebugEnabled()) {
+			logger.debug("Http response code: " + status);
+			logger.debug("Http Response header: " + getResponseHeaders().toString());
+			logger.debug("Cookies: " + getCookies().toString());
+	//		logger.debug("Response Payload: " + getResponsePayload());
+		}
 	
 	}
 

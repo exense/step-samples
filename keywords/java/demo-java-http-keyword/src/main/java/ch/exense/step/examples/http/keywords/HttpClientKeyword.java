@@ -1,25 +1,20 @@
 package ch.exense.step.examples.http.keywords;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-
 import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 
 import ch.exense.step.examples.common.helper.AbstractEnhancedKeyword;
 import ch.exense.step.examples.http.HttpClient;
 import ch.exense.step.examples.http.HttpRequest;
 import ch.exense.step.examples.http.HttpResponse;
-import ch.exense.step.examples.http.JsonHelper;
 import step.handlers.javahandler.Keyword;
 
 public class HttpClientKeyword extends AbstractEnhancedKeyword {
@@ -96,12 +91,9 @@ public class HttpClientKeyword extends AbstractEnhancedKeyword {
 			httpClient = new HttpClient(keyStorePath, keyStorePassword, targetIP, hostWithCustomDns, 
 					basic_auth_host_scheme, basic_auth_host, basic_auth_port, basic_auth_user, basic_auth_password);
 
-			if (httpClient != null) {
-				getSession().put("httpClient", httpClient);
-				setSuccess();
-			} else {
-				failWithErrorMessage("httpClient could not be created.");
-			}
+			getSession().put("httpClient", httpClient);
+			setSuccess();
+			
 			
        } catch(Exception e) {
     	   failWithException(e);
@@ -124,6 +116,7 @@ public class HttpClientKeyword extends AbstractEnhancedKeyword {
 	 * step Keyword to execute one HTTP request
 	 * 
 	 * Keyword inputs:
+	 *   name (optional): name of the request used for RTM measurements (default: defaultName) 
 	 *   protocol: (i.e. http://,https://...)
 	 *   host: hostname or ip address 
 	 *   port (optional): (i.e. 8080
@@ -144,26 +137,30 @@ public class HttpClientKeyword extends AbstractEnhancedKeyword {
 	 *   
 	 *  
 	 *  Keyword output
-	 *    success: Keyword status (based on standard Http errors and provided checks)
+	 *    success: Keyword status (false only in case of exceptions)
 	 *    httpStatusCode: Request status code
 	 *    headers: headers
 	 *    cookies: cookies set in this response's header
-	 *    payload: response payload (only in DEBUG)
+	 *    payload: response payload (depends on input returnResponsePayload, default true)
 	 *    extract_*: extracted fields
+	 *    check_*: content checks result (true if found)
 	 *    Error: Error message if any
 	 *    
 	 * @throws Exception
 	 */
 	@Keyword
 	public void HttpRequestKW() throws Exception {	
-		HttpClient httpClient = (HttpClient) getSession().get("httpClient");
-		System.out.println("KW input: " + input);
 		checkMandatoryInputs("protocol","host", "uri","method");
+		String requestName = (input.containsKey("name")) ? input.getString("name") : "defaultName"; 
+		output.startMeasure(requestName + "_AGENT");
+		HttpClient httpClient = (HttpClient) getSession().get("httpClient");
 		String protocol = input.getString("protocol");
 		String host = input.getString("host");
 		String port = (input.containsKey("port")) ? ":" + input.getString("port") : "";
 		String uri = input.getString("uri");
 		String method = input.getString("method");
+		
+		boolean addResponsePayload = (input.containsKey("returnResponsePayload")) ? input.getBoolean("returnResponsePayload") : returnResponsePayload;
 		
 		//Init request
 		HttpRequest request = new HttpRequest(protocol + host + port + uri, method);
@@ -196,11 +193,15 @@ public class HttpClientKeyword extends AbstractEnhancedKeyword {
 			request.setRowPayload(payload);
 		}
 		
+		Map<String, Object> networkExceptionMap = new HashMap<>();
+		networkExceptionMap.put("DestIP", httpClient.getTargetIP());
 		try {
+			output.startMeasure(requestName + "_NETWORK");
 			HttpResponse httpResponse = httpClient.executeRequestInContext(request);
-			httpResponse.logDebugInfo();
-			httpResponse.extractAllInfo(output, returnResponsePayload);
+			output.stopMeasure(networkExceptionMap);
 			
+			httpResponse.logDebugInfo();
+			httpResponse.extractAllInfo(output, addResponsePayload);
 			//extract all fields
 			for (String key: extractRegexp.keySet()) {
 				String value = "";
@@ -220,10 +221,16 @@ public class HttpClientKeyword extends AbstractEnhancedKeyword {
 			for (String key: textChecks.keySet()) {
 				output.add(CHECK_PREFIX.concat(key), httpResponse.getResponsePayload().contains(textChecks.get(key)));
 			}
+			setSuccess();
 			
 		} catch (Exception e) {
+			//stop network measure
+			networkExceptionMap.put("ExceptionType", e.getClass().toString());
+			networkExceptionMap.put("ExceptionMessage", (e.getMessage() == null) ? "null" : e.getMessage());
+			output.stopMeasure(networkExceptionMap);
 			failWithException(e);
 		}
+		output.stopMeasure(networkExceptionMap);
 	}
 	
 	@Keyword
@@ -231,4 +238,53 @@ public class HttpClientKeyword extends AbstractEnhancedKeyword {
 		HttpClient httpClient = (HttpClient) getSession().get("httpClient");
 		output.add("cookies", httpClient.getCookiesFromStore().toString());
 	}
+	
+	@Keyword
+	public void AddCookiesKW() {	
+		Arrays.asList("cookies")
+			.forEach(in -> { if(!input.containsKey(in)) failWithErrorMessage("Input " + in + " is null"); } );
+		HttpClient httpClient = (HttpClient) getSession().get("httpClient");
+		String cookiesStr = input.getString("cookies");
+		List<String> cookiesList = new ArrayList<String>(Arrays.asList(cookiesStr.substring(1, cookiesStr.length()-1).split(",")));
+		httpClient.setCookiesToStore(cookiesList);
+		output.add("cookies", httpClient.getCookiesFromStore().toString());
+	}
+	
+	@Keyword
+	public void EnableProxyKW() {
+		
+		
+		System.setProperty("http.proxyHost", input.getString("proxyHost"));
+	    System.setProperty("http.proxyPort", input.getString("proxyPort"));
+	    System.setProperty("http.nonProxyHosts", "*.pfin.ch|*.post.ch|*.pnet.ch|*.postfinance.ch");
+	    System.setProperty("https.proxyHost",  input.getString("proxyHost"));
+	    System.setProperty("https.proxyPort", input.getString("proxyPort"));
+	    System.setProperty("https.nonProxyHosts", "*.pfin.ch|*.post.ch|*.pnet.ch|*.postfinance.ch");
+	    System.setProperty("java.net.preferIPv4Stack", "true");
+	    
+	}
+	
+	
+	@Keyword
+	public void DisableProxyKW() {
+		System.setProperty("http.proxyHost", "");
+	    System.setProperty("http.proxyPort", "");
+	    System.setProperty("http.nonProxyHosts", "");
+	    System.setProperty("https.proxyHost", "");
+	    System.setProperty("https.proxyPort", "");
+	    System.setProperty("https.nonProxyHosts", "");
+	    System.setProperty("java.net.preferIPv4Stack", "false");
+	    
+	}
+	
+	@Keyword
+	public void ShowProxySettingKW() {
+		output.add("http.proxyHost", System.getProperty("http.proxyHost"));
+		output.add("http.proxyPort", System.getProperty("http.proxyPort"));
+		output.add("https.proxyHost", System.getProperty("https.proxyHost"));
+		output.add("https.proxyPort", System.getProperty("https.proxyPort"));
+		output.add("java.net.preferIPv4Stack", System.getProperty("java.net.preferIPv4Stack"));
+		
+	}
+	
 }

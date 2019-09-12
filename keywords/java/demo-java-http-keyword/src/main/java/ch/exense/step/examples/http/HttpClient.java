@@ -28,6 +28,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -36,10 +37,12 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -227,6 +230,23 @@ public class HttpClient {
 					+ cookie.getPath());
 		}
 		return cookieNames;
+	}
+	
+	public void setCookiesToStore (List<String> cookies) {
+		//Cookie store only created after first request
+		if (context.getCookieStore() == null) {
+			context.setCookieStore(new BasicCookieStore());
+		}
+		for (String cookieStr: cookies) {
+			String[] cookieArray = cookieStr.split(";");
+			String[] nameValuePair = cookieArray[0].trim().split("=");
+			BasicClientCookie cookie = new BasicClientCookie(nameValuePair[0].trim(), nameValuePair[1].trim());
+			nameValuePair = cookieArray[1].trim().split("=");
+			cookie.setDomain(nameValuePair[1].trim());
+			nameValuePair = cookieArray[2].trim().split("=");
+			cookie.setPath(nameValuePair[1].trim());	
+			context.getCookieStore().addCookie(cookie);
+		}
 	}
 
 	public String getTargetIP() {

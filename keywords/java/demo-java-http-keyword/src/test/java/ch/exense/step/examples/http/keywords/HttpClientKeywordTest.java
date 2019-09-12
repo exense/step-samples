@@ -3,15 +3,11 @@ package ch.exense.step.examples.http.keywords;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-
 import javax.json.Json;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import org.apache.http.HttpHeaders;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -23,7 +19,7 @@ import step.handlers.javahandler.KeywordRunner.ExecutionContext;
 
 public class HttpClientKeywordTest {
 
-	private static String VERSION = "3.11.0-SNAPSHOT";
+	private static String VERSION = "3.9.5";
 
 	ExecutionContext ctx = KeywordRunner.getExecutionContext(HttpClientKeyword.class);
 	private Output<JsonObject> output;
@@ -47,6 +43,8 @@ public class HttpClientKeywordTest {
 		output = ctx.run("InitHttpClientKW", "{}");
 		assertEquals("true", output.getPayload().getString("success"));
 
+		output = ctx.run("AddCookiesKW","{\"cookies\":\"[sessionid=298a3299-7c7f-4263-bcc6-4850c4c0edd1; Domain=localhost; Path=/]\"}");		
+		
 		// Navigate to login page
 		System.out.println("Go_to_Step");
 		
@@ -95,11 +93,16 @@ public class HttpClientKeywordTest {
 		assertEquals(output.getPayload().getInt("httpStatusCode"),200);
 		assertEquals(output.getPayload().getString("extract_role"),"admin");
 		
+		
+		output = ctx.run("GetCookiesKW");
+		System.out.println(output.getPayload());
+		output = ctx.run("AddCookiesKW",output.getPayload().toString());
+		System.out.println(output.getPayload());
 		output = ctx.run("CloseHttpClientKW", "{}");
 		
 	}
 	
-	@Test
+	//@Test
 	public void tomcatManagerTest() throws Exception {
 		Logger LOG = (Logger) org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 		((ch.qos.logback.classic.Logger) LOG).setLevel(Level.DEBUG);
