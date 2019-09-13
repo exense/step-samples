@@ -8,7 +8,12 @@
 	<artifactId>demo-java-keyword</artifactId>
 	
 	<properties>
+<<<<<<< HEAD
 		<step-api.version>1.0.0</step-api.version>
+=======
+    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<step.version>3.10.0</step.version>
+>>>>>>> refs/remotes/origin/master
 		<junit.version>4.8.1</junit.version>
 	</properties>
 

@@ -9,6 +9,7 @@ import javax.json.JsonReader;
 import javax.json.JsonStructure;
 import javax.json.JsonValue.ValueType;
 
+<<<<<<< HEAD
 import step.functions.io.OutputBuilder;
 
 public class JsonHelper {
@@ -54,6 +55,53 @@ public class JsonHelper {
 	}
 	
 	public static String addJsonObjectField2output(JsonObject responseObject, String key, OutputBuilder output, boolean mandatory) {
+=======
+import step.grid.agent.handler.context.OutputMessageBuilder;
+
+public class JsonHelper {
+	
+	// TODO Add the error code to RTM transaction
+	// TODO mark unknown error to RTM transaction
+	
+	//Error body are always of type object and contains keys errorCode and errorMessage
+	protected static String getBusinessError(JsonStructure response, OutputMessageBuilder output) {
+		String errorCode = null;
+		if (response.getValueType().equals(ValueType.OBJECT)) {
+			errorCode = addJsonObjectField2output((JsonObject) response, "errorCode", output,false);
+			addJsonObjectField2output((JsonObject) response, "errorMessage", output, false);
+		}
+		return errorCode;
+	}
+	
+	public static JsonStructure checkJsonResponse(HttpResponse httpResponse, ValueType valueType, int httpStatus, OutputMessageBuilder output) {		
+		int status = httpResponse.getStatus();
+		String responsePayload = httpResponse.getResponsePayload();
+		JsonStructure response = toJsonStructure(responsePayload);
+		
+		//always add the http status code to output
+		output.add("HttpStatus", httpStatus);
+		
+		//if httpCode and json value type are not as expected, set error messages and return null 
+		if (status != httpStatus || !response.getValueType().equals(valueType)) {
+			//Response might contain business error, add them to output if any
+			getBusinessError(response, output);
+			//TODO probably remove full response from output once dev is complete
+			output.add("response", response.toString());
+			return null;//failWithErrorMessage("Unexpected response", output);
+		} //checks for business errors anyway
+		else if (getBusinessError(response, output) != null) {
+			return null;//failWithErrorMessage("Business errors returned", output);
+		}	
+		return response;
+	}
+	
+	public static String addJsonArrayField2output(JsonArray responseArray, int index, String key, OutputMessageBuilder output, boolean mandatory) {
+		JsonObject responseObject = responseArray.getJsonObject(index);				
+		return addJsonObjectField2output(responseObject, key , output, mandatory);
+	}
+	
+	public static String addJsonObjectField2output(JsonObject responseObject, String key, OutputMessageBuilder output, boolean mandatory) {
+>>>>>>> refs/remotes/origin/master
 		String value = null;
 		if (responseObject.containsKey(key)) {
 			value = responseObject.get(key).toString();
