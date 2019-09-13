@@ -99,7 +99,7 @@ public class HttpClientKeywordTest {
 		
 	}
 	
-	@Test
+	//@Test
 	public void tomcatManagerTest() throws Exception {
 		Logger LOG = (Logger) org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 		((ch.qos.logback.classic.Logger) LOG).setLevel(Level.DEBUG);
