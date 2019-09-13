@@ -7,7 +7,7 @@
 	<artifactId>demo-selenium-keyword</artifactId>
 
 	<properties>
-		<step-api.version>1.0.0-SNAPSHOT</step-api.version>
+		<step-api.version>1.0.0</step-api.version>
 		<selenium.version>3.141.59</selenium.version>
 		<junit.version>4.8.1</junit.version>
 	</properties>
