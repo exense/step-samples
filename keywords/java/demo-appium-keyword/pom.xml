@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ch.exense.step.examples</groupId>
 	<version>0.0.1-SNAPSHOT</version>
-	<artifactId>demo-selenium-keyword</artifactId>
+	<artifactId>demo-appium-keyword</artifactId>
 
 	<properties>
 		<step.version>3.10.2</step.version>
