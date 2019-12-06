@@ -18,11 +18,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import ch.exense.commons.processes.ManagedProcess;
 import ch.exense.monitoring.managedprocess.JavaManagedProcessKeywords;
 import ch.exense.monitoring.managedprocess.ManagedProcessKeywords;
-import ch.exense.monitoring.managedprocess.WindowsServiceStatusKeywords;
 import ch.exense.monitoring.managedprocess.TypePerfManagedProcessKeywords;
-import step.commons.processmanager.ManagedProcess;
+import ch.exense.monitoring.managedprocess.WindowsServiceStatusKeywords;
 import step.functions.io.Output;
 import step.handlers.javahandler.KeywordRunner;
 import step.handlers.javahandler.KeywordRunner.ExecutionContext;
@@ -63,7 +63,7 @@ public class ManagedProcessKeywordsTest {
 		}
 	}
 	
-	//@Test
+	@Test
 	public void testTypePerfManagedProcessKeyword() {
 		JsonObject input;
 		Output<JsonObject> output;
@@ -83,7 +83,7 @@ public class ManagedProcessKeywordsTest {
 		}
 	}
 	
-	//@Test
+	@Test
 	public void testManagedProcessKW() {
 		JsonObject input;
 		Output<JsonObject> output;
@@ -104,7 +104,7 @@ public class ManagedProcessKeywordsTest {
 		}
 	}
 	
-	//@Test
+	@Test
 	public void testJavaManagedProcessKW() {
 		JsonObject input;
 		Output<JsonObject> output;
@@ -128,14 +128,14 @@ public class ManagedProcessKeywordsTest {
 		}
 	}
 
-	//@Test
+	@Test
 	public void testSystemMonitoring() {
 		
 		String[] keys = {"CPU_idle(%)","MemoryAvailableMB"};
 		String hostname ="DESKTOP-UD66RM4";
 		String cmd = "typeperf \"\\Processor(_Total)\\% Idle Time\" \"\\Memory\\Available MBytes\" -sc 1 -s " + hostname;
 		//String cmd = "java -version";
-		try (ManagedProcess process = new ManagedProcess(cmd, "typeperf")){
+		try (ManagedProcess process = new ManagedProcess("typeperf",cmd)){
 			process.start();	
 			process.waitFor(5000);
 			List<String> output = Files.readAllLines(process.getProcessOutputLog().toPath(), Charset.defaultCharset());

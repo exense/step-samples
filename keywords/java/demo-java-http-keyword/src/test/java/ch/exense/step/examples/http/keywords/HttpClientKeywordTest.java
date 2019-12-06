@@ -23,7 +23,7 @@ import step.handlers.javahandler.KeywordRunner.ExecutionContext;
 
 public class HttpClientKeywordTest {
 
-	private static String VERSION = "3.11.0";
+	private static String VERSION = "3.12.0";
 
 	ExecutionContext ctx = KeywordRunner.getExecutionContext(HttpClientKeyword.class);
 	private Output<JsonObject> output;
@@ -186,7 +186,7 @@ public class HttpClientKeywordTest {
 	}
 	
 	
-	//@Test
+	@Test
 	public void googleSearchTest() throws Exception {
 		Logger LOG = (Logger) org.slf4j.LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 		((ch.qos.logback.classic.Logger) LOG).setLevel(Level.DEBUG);

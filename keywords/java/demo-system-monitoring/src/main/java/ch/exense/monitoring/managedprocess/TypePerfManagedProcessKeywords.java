@@ -18,7 +18,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
-import step.commons.processmanager.ManagedProcess.ManagedProcessException;
+import ch.exense.commons.processes.ManagedProcess.ManagedProcessException;
 import step.expressions.ExpressionHandler;
 import step.handlers.javahandler.Keyword;
 

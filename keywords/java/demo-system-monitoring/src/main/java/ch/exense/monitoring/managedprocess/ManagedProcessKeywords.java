@@ -6,14 +6,15 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.concurrent.TimeoutException;
 
-import step.commons.helpers.FileHelper;
-import step.commons.processmanager.ManagedProcess;
-import step.commons.processmanager.ManagedProcess.ManagedProcessException;
+import ch.exense.commons.io.FileHelper;
+import ch.exense.commons.processes.ManagedProcess;
+import ch.exense.commons.processes.ManagedProcess.ManagedProcessException;
+import ch.exense.monitoring.managedprocess.helper.AbstractEnhancedKeyword;
 import step.functions.io.OutputBuilder;
 import step.grid.io.Attachment;
 import step.grid.io.AttachmentHelper;
 import step.handlers.javahandler.Keyword;
-import toolkit.keyword.AbstractEnhancedKeyword;
+
 
 
 public class ManagedProcessKeywords extends AbstractEnhancedKeyword {
@@ -58,7 +59,7 @@ public class ManagedProcessKeywords extends AbstractEnhancedKeyword {
 	
 	protected void executeManagedCommand(String cmd) throws ManagedProcessException, IOException {
 		logger.info(cmd);
-		ManagedProcess process = new ManagedProcess(cmd, "ManagedProcess");
+		ManagedProcess process = new ManagedProcess("ManagedProcess", cmd);
 
 		try {
 			process.start();

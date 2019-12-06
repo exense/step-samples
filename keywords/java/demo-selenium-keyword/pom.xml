@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>ch.exense.step.examples</groupId>
-	<version>0.0.1</version>
+	<version>3.12.0</version>
 	<artifactId>demo-selenium-keyword</artifactId>
 
 	<properties>
-		<step-api.version>1.0.0</step-api.version>
+		<step-api.version>1.1.0</step-api.version>
 		<selenium.version>3.141.59</selenium.version>
 		<junit.version>4.8.1</junit.version>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

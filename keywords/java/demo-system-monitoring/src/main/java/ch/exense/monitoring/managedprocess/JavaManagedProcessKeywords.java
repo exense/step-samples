@@ -2,7 +2,7 @@ package ch.exense.monitoring.managedprocess;
 
 import java.io.IOException;
 
-import step.commons.processmanager.ManagedProcess.ManagedProcessException;
+import ch.exense.commons.processes.ManagedProcess.ManagedProcessException;
 import step.handlers.javahandler.Keyword;
 
 public class JavaManagedProcessKeywords extends ManagedProcessKeywords {

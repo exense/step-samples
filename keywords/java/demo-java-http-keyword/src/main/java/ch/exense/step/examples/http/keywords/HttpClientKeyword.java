@@ -41,7 +41,16 @@ public class HttpClientKeyword extends AbstractEnhancedKeyword {
 	 *   basic_auth_port: target host port number
 	 *   
 	 */
-	@Keyword
+	@Keyword(schema="{\"properties\":{\"keyStorePath\":{\"type\":\"string\"},"
+			+ "\"keyStorePassword\":{\"type\":\"string\"},"
+			+ "\"targetIP\":{\"type\":\"string\"},"
+			+ "\"hostWithCustomDns\":{\"type\":\"string\"},"
+			+ "\"basic_auth_user\":{\"type\":\"string\"},"
+			+ "\"basic_auth_password\":{\"type\":\"string\"},"
+			+ "\"basic_auth_host\":{\"type\":\"string\"},"
+			+ "\"basic_auth_host_scheme\":{\"type\":\"string\"},"
+			+ "\"basic_auth_port\":{\"type\":\"string\"}},"
+			+ "\"required\":[]}" , properties= {"app.user.name","app.user.{app.user.name}.pwd"}) 
 	public void InitHttpClientKW() {	
 		try {
 			HttpClient httpClient=null;
@@ -98,6 +107,15 @@ public class HttpClientKeyword extends AbstractEnhancedKeyword {
        } catch(Exception e) {
     	   failWithException(e);
         }
+	}
+	
+	@Keyword
+	public void testGetProperty() {
+		//String propName = input.getString("name");
+		for (String key: getProperties().keySet()) {
+			output.add(key, getProperties().get(key));
+		}
+		//output.add("value", getProperties().get(propName));	
 	}
 
 	/**
