@@ -1,22 +1,17 @@
 package ch.exense.monitoring.managedprocess;
 
-import java.io.IOException;
-
-import ch.exense.commons.processes.ManagedProcess.ManagedProcessException;
 import step.handlers.javahandler.Keyword;
 
 public class JavaManagedProcessKeywords extends ManagedProcessKeywords {
 
-	@Keyword
-	public void JavaManagedProcessKeyword() throws IOException, ManagedProcessException{
+
+	@Keyword(schema = "{\"properties\":{\"mainClassOrJar\":{\"type\":\"string\"},\"timeoutInMillis\":{\"type\":\"string\"},\"maxOutputPayloadSize\":{\"type\":\"string\"},\"maxOutputAttachmentSize\":{\"type\":\"string\"},\"executablePath\":{\"type\":\"string\"}},\"required\":[\"timeoutInMillis\",\"maxOutputPayloadSize\", \"maxOutputAttachmentSize\",\"executablePath\",\"mainClassOrJar\"]}")
+	public void JavaManagedProcessKeyword() throws Exception{
 		  
 		getManagedProcessMandatoryInput();
-		checkMandatoryInputs("mainClassOrJar");
-		
 		String cmd = buildCommandLine();
 		
 		executeManagedCommand(cmd);
-		
 	}
 	
 	@Override

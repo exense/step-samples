@@ -2,7 +2,6 @@ package ch.exense.monitoring.managedprocess;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -17,26 +16,30 @@ import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
+import javax.script.Bindings;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
-import ch.exense.commons.processes.ManagedProcess.ManagedProcessException;
-import step.expressions.ExpressionHandler;
 import step.handlers.javahandler.Keyword;
 
 public class TypePerfManagedProcessKeywords extends ManagedProcessKeywords {
 	
 	List<Metric> metrics;
-	ExpressionHandler expressionHandler;
+	ScriptEngine engine;
 	String hostname;
 	
 	public TypePerfManagedProcessKeywords() {
 		metrics = new ArrayList<Metric>();
-		expressionHandler = new ExpressionHandler();
+		
+		ScriptEngineManager manager = new ScriptEngineManager();
+		engine = manager.getEngineByName("groovy");
+		
 		hostname = getLocalHostname();
 	}
 	
 	
 	@Keyword
-	public void TypePerfManagedProcessKeyword() throws IOException, ManagedProcessException{
+	public void TypePerfManagedProcessKeyword() throws Exception{
 		  
 		getManagedProcessMandatoryInput();
 		
@@ -45,7 +48,7 @@ public class TypePerfManagedProcessKeywords extends ManagedProcessKeywords {
 		executeManagedCommand(cmd);
 	}
 	
-	private String createTypePerfArgs() throws IOException {
+	private String createTypePerfArgs() throws Exception {
 		StringBuilder sb = new StringBuilder();
 		InputStream inputStream = this.getClass().getResourceAsStream("/typePerf.csv");
 		BufferedReader bf = new BufferedReader(new InputStreamReader(inputStream));
@@ -67,22 +70,21 @@ public class TypePerfManagedProcessKeywords extends ManagedProcessKeywords {
 	}
 
 	@Override
-	protected void executionPostProcess(File file) throws IOException {
+	protected void executionPostProcess(File file) throws Exception {
 		//Extract the output line with values ex: "04/04/2019 14:05:07.730","79.863592","9181.000000"
 		String line = Files.readAllLines(file.toPath(), Charset.defaultCharset()).get(2).replaceAll("\"", "");
 		String[] values = line.split(",");		
 		JsonArrayBuilder measurementArrayBuilder = Json.createArrayBuilder();
 		JsonObjectBuilder measurementBuilder = Json.createObjectBuilder();		
-		Map<String, Object> bindings = new HashMap<String, Object> ();
+		Bindings bindings = engine.createBindings();
 		
 		if (metrics.size() == (values.length-1)) {
-			String ts = values[0];
 			for (int i=1; i < values.length;i++) {
 				
 				long value = Math.round(Double.parseDouble(values[i]));
 				if (!metrics.get(i-1).getGroovyExpression().isEmpty()) {
-					bindings.put("value",value);					
-					Object gResult = expressionHandler.evaluateGroovyExpression(metrics.get(i-1).getGroovyExpression(), bindings);
+					bindings.put("value",value);
+					Object gResult = engine.eval(metrics.get(i-1).getGroovyExpression(), bindings);
 					value= (long) gResult;
 				}						
 				long thisTime = System.currentTimeMillis();
@@ -102,12 +104,11 @@ public class TypePerfManagedProcessKeywords extends ManagedProcessKeywords {
 	}
 	
 	@Override
-	protected String buildCommandLine() throws IOException {
+	protected String buildCommandLine() throws Exception {
 		return new StringBuilder()
 			.append(executablePath)
 			.append(" ")
 			.append(createTypePerfArgs()).toString();
-		
 	}
 	
 	protected String getLocalHostname() {

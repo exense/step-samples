@@ -4,45 +4,38 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.concurrent.TimeoutException;
+import java.util.Arrays;
 
 import ch.exense.commons.io.FileHelper;
 import ch.exense.commons.processes.ManagedProcess;
-import ch.exense.commons.processes.ManagedProcess.ManagedProcessException;
-import ch.exense.monitoring.managedprocess.helper.AbstractEnhancedKeyword;
 import step.functions.io.OutputBuilder;
 import step.grid.io.Attachment;
 import step.grid.io.AttachmentHelper;
+import step.handlers.javahandler.AbstractKeyword;
 import step.handlers.javahandler.Keyword;
 
 
-
-public class ManagedProcessKeywords extends AbstractEnhancedKeyword {
+public class ManagedProcessKeywords extends AbstractKeyword {
 	
 	int timeoutInMillis;
-	Long maxOutputPayloadSize;
-	Long maxOutputAttachmentSize;
+	int maxOutputPayloadSize;
+	int maxOutputAttachmentSize;
 	String executablePath;
 	
-	@Keyword
-	public void ManagedProcessKeyword() throws IOException, ManagedProcessException{
+	@Keyword(schema = "{\"properties\":{\"timeoutInMillis\":{\"type\":\"string\"},\"maxOutputPayloadSize\":{\"type\":\"string\"},\"maxOutputAttachmentSize\":{\"type\":\"string\"},\"executablePath\":{\"type\":\"string\"}},\"required\":[\"executablePath\"]}")
+	public void ManagedProcessKeyword() throws Exception{
 		
 		getManagedProcessMandatoryInput();
 		 
-		String cmd;
-		try {
-			cmd = buildCommandLine();
-			executeManagedCommand(cmd);
-		} catch (Exception e) {
-			failWithException(e);
-		}
+		String cmd = buildCommandLine();
+		executeManagedCommand(cmd);
 	}
 	
 	protected  void getManagedProcessMandatoryInput() {
-		checkMandatoryInputs("timeoutInMillis","maxOutputPayloadSize", "maxOutputAttachmentSize","executablePath");
-		timeoutInMillis = Integer.parseInt(input.getString("timeoutInMillis"));
-		maxOutputPayloadSize = Long.parseLong(input.getString("maxOutputPayloadSize"));
-		maxOutputAttachmentSize = Long.parseLong(input.getString("maxOutputAttachmentSize"));
+		timeoutInMillis = Integer.parseInt(input.getString("timeoutInMillis","10000"));
+		maxOutputPayloadSize = Integer.parseInt(input.getString("maxOutputPayloadSize","256"));
+		maxOutputAttachmentSize = Integer.parseInt(input.getString("maxOutputAttachmentSize","100000"));
+		
 		executablePath = input.getString("executablePath");
 	}
 	
@@ -55,27 +48,24 @@ public class ManagedProcessKeywords extends AbstractEnhancedKeyword {
 		return sb.toString();
 	}
 	
-	
-	
-	protected void executeManagedCommand(String cmd) throws ManagedProcessException, IOException {
+	protected void executeManagedCommand(String cmd) throws Exception {
 		logger.info(cmd);
-		ManagedProcess process = new ManagedProcess("ManagedProcess", cmd);
+		ManagedProcess process = new ManagedProcess("ManagedProcess",cmd);
 
 		try {
 			process.start();
-			process.waitFor(Math.max(0, timeoutInMillis));
-
+			int exitCode = process.waitFor(Math.max(0, timeoutInMillis));
+			
+			if (exitCode!=0) {
+				output.setBusinessError("Exit code was not null (was "+exitCode+")");
+			}
+				
 			String stdout = attachOutput(maxOutputPayloadSize, maxOutputAttachmentSize, output, "stdout", process.getProcessOutputLog());
 			attachOutput(maxOutputPayloadSize, maxOutputAttachmentSize, output, "stderr", process.getProcessErrorLog());
-			setSuccess();
+			
 			if (stdout != null ) {
 				executionPostProcess(process.getProcessOutputLog());
-			} 
-			
-		} catch (TimeoutException e) {
-			failWithErrorMessage("Timeout while waiting for process termination.");
-		} catch (Exception e) {
-			failWithException(e);
+			}
 		} finally {
 			process.close();
 			File pfolder = null;
@@ -89,29 +79,34 @@ public class ManagedProcessKeywords extends AbstractEnhancedKeyword {
 		}
 	}
 	
-	protected void executionPostProcess(File file) throws IOException {
+	protected void executionPostProcess(File file) throws Exception {
 		//override this method 
 	}
 	
-	protected String attachOutput(Long maxOutputPayloadSize, Long maxOutputAttachmentSize, OutputBuilder output,
+	protected String attachOutput(int maxOutputPayloadSize, int maxOutputAttachmentSize, OutputBuilder output,
 			String outputName, File file) throws IOException {
 		StringBuilder processOutput = new StringBuilder();
+		Files.readAllLines(file.toPath(), Charset.defaultCharset()).forEach(l->processOutput.append(l).append("\n"));
+		
 		if(file.length()<maxOutputPayloadSize) {
-			Files.readAllLines(file.toPath(), Charset.defaultCharset()).forEach(l->processOutput.append(l).append("\n"));
-			
 			output.add(outputName, processOutput.toString());
 			return processOutput.toString();
 		} else {
-			if(file.length()<maxOutputAttachmentSize) {
-				byte[] bytes = Files.readAllBytes(file.toPath());
-				Attachment attachment = AttachmentHelper.generateAttachmentFromByteArray(bytes, outputName+".log");
-				output.addAttachment(attachment);		
-				output.add("technicalWarning", outputName + " size exceeded. "+outputName+" has been attached.");
+			byte[] bytes;
+			
+			output.add(outputName, processOutput.toString().substring(0, maxOutputPayloadSize));
+			
+			if(file.length()>maxOutputAttachmentSize) {
+				bytes = Arrays.copyOf(Files.readAllBytes(file.toPath()),maxOutputAttachmentSize);
 			} else {
-				output.add("technicalWarning", outputName + " size exceeded. "+outputName+" couldn't be attached.");
+				bytes = Files.readAllBytes(file.toPath());
 			}
+			Attachment attachment = AttachmentHelper.generateAttachmentFromByteArray(bytes, outputName+".log");
+			output.addAttachment(attachment);
+			
+			output.add("technicalWarning", outputName + " size exceeded. "+outputName+" has been attached and truncated.");
+			
 			return null;
 		}
 	}
-	
 }
