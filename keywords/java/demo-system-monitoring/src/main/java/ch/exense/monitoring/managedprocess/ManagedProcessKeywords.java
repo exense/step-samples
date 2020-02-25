@@ -20,9 +20,14 @@ public class ManagedProcessKeywords extends AbstractKeyword {
 	int timeoutInMillis;
 	int maxOutputPayloadSize;
 	int maxOutputAttachmentSize;
+	int expectedExitCode;
 	String executablePath;
 	
-	@Keyword(schema = "{\"properties\":{\"timeoutInMillis\":{\"type\":\"string\"},\"maxOutputPayloadSize\":{\"type\":\"string\"},\"maxOutputAttachmentSize\":{\"type\":\"string\"},\"executablePath\":{\"type\":\"string\"}},\"required\":[\"executablePath\"]}")
+	@Keyword(schema = "{\"properties\":{\"timeoutInMillis\":{\"type\":\"string\"},"
+			+ "\"maxOutputPayloadSize\":{\"type\":\"string\"},"
+			+ "\"maxOutputAttachmentSize\":{\"type\":\"string\"},"
+			+ "\"expectedExitCode\":{\"type\":\"string\"},"
+			+ "\"executablePath\":{\"type\":\"string\"}},\"required\":[\"executablePath\"]}")
 	public void ManagedProcessKeyword() throws Exception{
 		
 		getManagedProcessMandatoryInput();
@@ -35,7 +40,8 @@ public class ManagedProcessKeywords extends AbstractKeyword {
 		timeoutInMillis = Integer.parseInt(input.getString("timeoutInMillis","10000"));
 		maxOutputPayloadSize = Integer.parseInt(input.getString("maxOutputPayloadSize","256"));
 		maxOutputAttachmentSize = Integer.parseInt(input.getString("maxOutputAttachmentSize","100000"));
-		
+		expectedExitCode = Integer.parseInt(input.getString("expectedExitCode","0"));
+				
 		executablePath = input.getString("executablePath");
 	}
 	
@@ -56,7 +62,7 @@ public class ManagedProcessKeywords extends AbstractKeyword {
 			process.start();
 			int exitCode = process.waitFor(Math.max(0, timeoutInMillis));
 			
-			if (exitCode!=0) {
+			if (exitCode!=expectedExitCode) {
 				output.setBusinessError("Exit code was not null (was "+exitCode+")");
 			}
 				
