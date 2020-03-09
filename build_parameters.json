@@ -1,0 +1,35 @@
+{
+	"NAME": "Step Samples",
+	"OS": "LINUX",
+	
+	"SUBPROJECTS":
+	{
+		"TYPE":		["POM","POM","POM","POM","POM"],
+		"FOLDER":	[
+      "keywords/java/demo-appium-keyword/",
+      "keywords/java/demo-java-http-keyword/",
+      "keywords/java/demo-java-keyword/",
+      "keywords/java/demo-selenium-keyword/",
+      "keywords/java/demo-system-monitoring/"
+    ],
+		
+		"URL_STAGING":	[ 
+			"nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/",
+			"nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/",
+			"nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/",
+			"nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/",
+			"nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/"
+		],
+		"URL_PROD":		[ 
+			"sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2",
+			"sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2",
+			"sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2",
+			"sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2",
+			"sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2"
+		],
+		
+		"CONFIG_STAGING": [ "DefaultBuild","DefaultBuild","DefaultBuild","DefaultBuild","DefaultBuild"],
+		"CONFIG_PROD":    [ "DefaultBuild","DefaultBuild","DefaultBuild","DefaultBuild","DefaultBuild"]
+	},
+	"DISTRIBUTIONS": { "TYPE":[],"ORIGIN_FILE":[],"DESTINATION_NAME":[],"URL_STAGING":[],"URL_PROD":[],"OS":[],"CONFIG":[] }
+}

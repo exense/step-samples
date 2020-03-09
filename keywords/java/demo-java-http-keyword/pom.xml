@@ -4,11 +4,43 @@
 	
 	<groupId>ch.exense.step.examples</groupId>
 	<version>3.12.0</version>
-
-	<artifactId>demo-java-http-keyword</artifactId>
+  <artifactId>demo-java-http-keyword</artifactId>
 	
+	<name>Step Samples</name>
+	<description>
+		Step Samples
+	</description>
+	<url>http://exense.ch/</url>
+	<licenses>
+		<license>
+			<name>The GNU Affero General Public License 3.0</name>
+			<url>http://www.gnu.org/licenses/</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<name>Jerome Comte</name>
+			<email>jerome.comte@exense.ch</email>
+			<organization>Exense</organization>
+			<organizationUrl>http://exense.ch</organizationUrl>
+			<url>http://step.exense.ch/</url>
+		</developer>
+		<developer>
+			<name>Dorian Cransac</name>
+			<email>dorian.cransac@exense.ch</email>
+			<organization>Exense</organization>
+			<organizationUrl>http://exense.ch</organizationUrl>
+			<url>http://step.exense.ch/</url>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:https://github.com/exense/step-samples/</connection>
+		<developerConnection>scm:git:https://github.com/exense/step-samples.git</developerConnection>
+		<url>https://github.com/exense/step-samples/</url>
+  </scm>
+  
 	<properties>
-    	<step-api.version>1.1.0</step-api.version>
+    <step-api.version>1.1.0</step-api.version>
 		<junit.version>4.8.1</junit.version>
 	</properties>
 
@@ -23,7 +55,6 @@
 			<artifactId>logback-classic</artifactId>
 			<version>1.0.13</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 		<dependency>
 		    <groupId>org.apache.httpcomponents</groupId>
 		    <artifactId>httpclient</artifactId>
@@ -39,6 +70,11 @@
 	
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>3.0.0-M1</version>
+			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
@@ -64,7 +100,80 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>		
+      <!-- Source -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Javadoc -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<quiet>true</quiet>
+					<source>8</source>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
+  
+	<profiles>
+		<profile>
+			<id>Default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<!-- Local compilation - no signature -->
+		</profile>
+		<profile>
+			<id>DefaultBuild</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<!-- Signature -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<gpgArguments>
+										<arg>--pinentry-mode</arg>
+										<arg>loopback</arg>
+									</gpgArguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
