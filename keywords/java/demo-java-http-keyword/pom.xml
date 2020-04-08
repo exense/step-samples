@@ -41,7 +41,7 @@
 	</scm>
 
 	<properties>
-		<step-api.version>${project.version}</step-api.version>
+		<step-api.version>1.1.3</step-api.version>
 		<junit.version>4.8.1</junit.version>
 	</properties>
 
