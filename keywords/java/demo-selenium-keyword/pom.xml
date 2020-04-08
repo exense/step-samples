@@ -149,6 +149,14 @@
 			</activation>
 			<build>
 				<plugins>
+					<!-- No remote tests -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
 					<!-- Signature -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
