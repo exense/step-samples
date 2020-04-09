@@ -5,7 +5,7 @@
 	
 	<groupId>ch.exense.step.examples</groupId>
 	<artifactId>demo-system-monitoring</artifactId>
-	<version>0.0.0</version>
+	<version>3.13.0</version>
 
 	<name>Step Samples</name>
 	<description>
