@@ -23,30 +23,9 @@ import step.handlers.javahandler.Keyword;
 public class SeleniumKeywordExample extends AbstractKeyword {
 	
 	final List<String> defaultOptions = Arrays.asList(new String[] { "disable-infobars", "ignore-certificate-errors" });
-	final List<String> headlessOptions = Arrays.asList(new String[] { "headless", "disable-gpu", "no-sandbox" });
-	
+	final List<String> headlessOptions = Arrays.asList(new String[] { "headless", "disable-gpu", "disable-sotfware-rasterizer" });
+		
 	@Keyword(name = "Open Chrome")
-	public void openChrome() throws Exception {
-		
-		ChromeOptions options = new ChromeOptions();
-		
-		options.addArguments(Arrays.asList("disable-infobars"));
-		
-		boolean headless = input.getBoolean("headless", false);
-		if (headless) {
-			options.addArguments(Arrays.asList("headless","disable-gpu"));
-		}
-		boolean sandbox = input.getBoolean("sandbox", true);
-		if (!sandbox) {
-			options.addArguments(Arrays.asList("no-sandbox"));
-		}
-		
-		WebDriver driver = new ChromeDriver(options);
-		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-		session.put(new DriverWrapper(driver));
-	}
-	
-	@Keyword(name = "Open Chrome New")
 	public void Open_chrome_new() {										
 		ChromeOptions options = new ChromeOptions();
 		options.setAcceptInsecureCerts(true);
