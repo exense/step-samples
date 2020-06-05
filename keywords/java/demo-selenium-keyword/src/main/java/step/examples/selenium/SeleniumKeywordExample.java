@@ -91,7 +91,7 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 	}
 	
 	 private void setDriver(WebDriver driver) {
-		    this.session.put("DriverWrapper", new DriverWrapper(driver));
+		    this.session.put(new DriverWrapper(driver));
 		  }
 		  
 

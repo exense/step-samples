@@ -28,7 +28,7 @@ public class SeleniumKeywordExampleTest {
 	public void test() throws Exception {
 		Output<JsonObject> result;
 		result = ctx.run("Open Chrome");
-		result = ctx.run("Search in google", "{ \"search\" : \"exense step\" }");
+		result = ctx.run("Search in google", "{ \"search\" : \"step exense\" }");
 		result = ctx.run("Search in google", "{ \"search\" : \"exense djigger\" }");
 		Assert.assertNull(result.getError());
 		Assert.assertTrue(result.getPayload().containsKey("exense/djigger: A production-ready monitoring and ... - GitHub"));
