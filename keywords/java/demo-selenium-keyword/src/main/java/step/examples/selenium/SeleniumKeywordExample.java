@@ -72,10 +72,19 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 		WebElement resultCountDiv = driver.findElement(By.xpath("//div/nobr"));
 
+		List<WebElement> elements = driver.findElements(By.xpath("//div[@id='cnsw']/iframe"));
+		if(elements.size()>0) {
+			driver.switchTo().frame(elements.get(0));
+			driver.findElement(By.xpath("//div[@id='introAgreeButton']")).click();
+			new WebDriverWait(driver, 10).until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//*[@id='cnsw']/iframe")));
+			driver.switchTo().defaultContent();
+		}
+
 		List<WebElement> resultHeaders = driver.findElements(By.xpath("//div[@class='r']//h3"));
 		for (WebElement result : resultHeaders) {
 			output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
 		}
+		output.add("Results",resultHeaders.size());
 		
 		attachScreenshot(driver);
 	}
@@ -110,6 +119,20 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 		WebElement element = new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"+label.toLowerCase()+"']")));
 		element.click();
 		
+		attachScreenshot(driver);
+	}
+
+	private static final String INPUT_XPATH = "XPath";
+
+	@Keyword(name = "ClickByXPath", schema = "{\"properties\":{\""+INPUT_XPATH+"\":{\"type\":\"string\"}}, \"required\":[\""+INPUT_XPATH+"\"]}")
+	public void clickByXPath() throws Exception {
+		WebDriver driver = getDriverFromSession();
+
+		String xpath = input.getString(INPUT_XPATH);
+
+		WebElement element =new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+		element.click();
+
 		attachScreenshot(driver);
 	}
 	
