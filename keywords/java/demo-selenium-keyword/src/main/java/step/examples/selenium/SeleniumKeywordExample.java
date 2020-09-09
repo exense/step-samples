@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -14,6 +15,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import step.grid.io.Attachment;
 import step.grid.io.AttachmentHelper;
@@ -45,39 +48,78 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 		if (input.getBoolean("maximize", false)) {
 			driver.manage().window().maximize();
+		} else {
+			driver.manage().window().setSize(new Dimension(1366,784));
 		}
 
 		setDriver(driver);
 	}
 
-	@Keyword(name = "Search in google")
+	private static final String INPUT_SEARCH = "search";
+	
+	@Keyword(name = "Search in google", schema = "{\"properties\":{\""+INPUT_SEARCH+"\":{\"type\":\"string\"}}, \"required\":[\""+INPUT_SEARCH+"\"]}")
 	public void searchInGoogle() throws Exception {
-		if (input.containsKey("search")) {
-			if (session.get(DriverWrapper.class) == null) {
-				throw new Exception(
-						"Please first execute keyword \"Open Chome\" in order to have a driver available for this keyword");
-			}
-			WebDriver driver = session.get(DriverWrapper.class).driver;
+		validateInput();
+		String searchString = input.getString(INPUT_SEARCH);
 
-			driver.get("http://www.google.com");
+		WebDriver driver = getDriverFromSession();
 
-			WebElement searchInput = driver.findElement(By.name("q"));
+		driver.get("http://www.google.com");
 
-			String searchString = input.getString("search");
-			searchInput.sendKeys(searchString + Keys.ENTER);
+		WebElement searchInput = driver.findElement(By.name("q"));
 
-			WebElement resultCountDiv = driver.findElement(By.xpath("//div/nobr"));
+		searchInput.sendKeys(searchString + Keys.ENTER);
 
-			List<WebElement> resultHeaders = driver.findElements(By.xpath("//div[@class='r']//h3"));
-			for (WebElement result : resultHeaders) {
-				output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
-			}
-			
-			attachScreenshot(driver);
-			
-		} else {
+		WebElement resultCountDiv = driver.findElement(By.xpath("//div/nobr"));
+
+		List<WebElement> resultHeaders = driver.findElements(By.xpath("//div[@class='r']//h3"));
+		for (WebElement result : resultHeaders) {
+			output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
+		}
+		
+		attachScreenshot(driver);
+	}
+
+	protected void validateInput() throws Exception {
+		if (!input.containsKey(INPUT_SEARCH)) {
 			throw new Exception("Input parameter 'search' not defined");
 		}
+	}
+	
+	private static final String INPUT_URL = "URL";
+	
+	@Keyword(name = "Navigate to", schema = "{\"properties\":{\""+INPUT_URL+"\":{\"type\":\"string\"}}, \"required\":[\""+INPUT_URL+"\"]}")
+	public void navigateTo() throws Exception {
+		WebDriver driver = getDriverFromSession();
+
+		String url = input.getString(INPUT_URL);
+		
+		driver.navigate().to(url);
+		
+		attachScreenshot(driver);
+	}
+
+	private static final String INPUT_TEXT = "Text";
+	
+	@Keyword(name = "Click", schema = "{\"properties\":{\""+INPUT_TEXT+"\":{\"type\":\"string\"}}, \"required\":[\""+INPUT_TEXT+"\"]}")
+	public void click() throws Exception {
+		WebDriver driver = getDriverFromSession();
+
+		String label = input.getString(INPUT_TEXT);
+		
+		WebElement element = new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"+label.toLowerCase()+"']")));
+		element.click();
+		
+		attachScreenshot(driver);
+	}
+	
+	protected WebDriver getDriverFromSession() throws Exception {
+		if (session.get(DriverWrapper.class) == null) {
+			throw new Exception(
+					"Please first execute keyword \"Open Chome\" in order to have a driver available for this keyword");
+		}
+		WebDriver driver = session.get(DriverWrapper.class).driver;
+		return driver;
 	}
 	
 	public void attachScreenshot(WebDriver driver) {
