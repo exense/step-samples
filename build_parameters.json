@@ -7,7 +7,6 @@
 		"TYPE":		["POM","POM","POM","POM","POM"],
 		"FOLDER":	[
       "keywords/java/demo-appium-keyword/",
-      "keywords/java/demo-java-http-keyword/",
       "keywords/java/demo-java-keyword/",
       "keywords/java/demo-selenium-keyword/",
       "keywords/java/demo-system-monitoring/"
