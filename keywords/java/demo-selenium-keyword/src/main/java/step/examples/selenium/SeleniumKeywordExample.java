@@ -84,7 +84,7 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 		for (WebElement result : resultHeaders) {
 			output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
 		}
-		output.add("Results",resultHeaders.size());
+		output.add("Results",String.valueOf(resultHeaders.size()));
 		
 		attachScreenshot(driver);
 	}
