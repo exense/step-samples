@@ -19,18 +19,11 @@
 	</licenses>
 	<developers>
 		<developer>
-			<name>Jerome Comte</name>
-			<email>jerome.comte@exense.ch</email>
-			<organization>Exense</organization>
-			<organizationUrl>http://exense.ch</organizationUrl>
-			<url>http://step.exense.ch/</url>
-		</developer>
-		<developer>
-			<name>Dorian Cransac</name>
-			<email>dorian.cransac@exense.ch</email>
-			<organization>Exense</organization>
-			<organizationUrl>http://exense.ch</organizationUrl>
-			<url>http://step.exense.ch/</url>
+			<name>exense Team</name>
+			<email>contact@exense.ch</email>
+			<organization>exense GmbH</organization>
+			<organizationUrl>http://www.exense.ch</organizationUrl>
+			<url>http://step.exense.ch</url>
 		</developer>
 	</developers>
 	<scm>
