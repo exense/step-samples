@@ -25,6 +25,7 @@ import step.handlers.javahandler.Keyword;
 
 public class SeleniumKeywordExample extends AbstractKeyword {
 	
+	private static final int IMPLICIT_WAIT = 30;
 	final List<String> defaultOptions = Arrays.asList(new String[] { "disable-infobars", "ignore-certificate-errors" });
 	final List<String> headlessOptions = Arrays.asList(new String[] { "headless", "disable-gpu", "disable-sotfware-rasterizer" });
 		
@@ -43,8 +44,8 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 				
 					
 		final WebDriver driver = new ChromeDriver(options);		
-		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-		driver.manage().timeouts().pageLoadTimeout(30, TimeUnit.SECONDS);
+		setImplicitWait(driver, IMPLICIT_WAIT);
+		driver.manage().timeouts().pageLoadTimeout(IMPLICIT_WAIT, TimeUnit.SECONDS);
 
 		if (input.getBoolean("maximize", false)) {
 			driver.manage().window().maximize();
@@ -53,6 +54,10 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 		}
 
 		setDriver(driver);
+	}
+
+	private void setImplicitWait(final WebDriver driver, long implicitWaitIsSec) {
+		driver.manage().timeouts().implicitlyWait(implicitWaitIsSec, TimeUnit.SECONDS);
 	}
 
 	private static final String INPUT_SEARCH = "search";
@@ -70,17 +75,20 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 		searchInput.sendKeys(searchString + Keys.ENTER);
 
-		WebElement resultCountDiv = driver.findElement(By.xpath("//div/nobr"));
+		driver.findElement(By.xpath("//div/nobr"));
 
+		setImplicitWait(driver, 0);
 		List<WebElement> elements = driver.findElements(By.xpath("//div[@id='cnsw']/iframe"));
+		setImplicitWait(driver, IMPLICIT_WAIT);
 		if(elements.size()>0) {
 			driver.switchTo().frame(elements.get(0));
-			driver.findElement(By.xpath("//div[@id='introAgreeButton']")).click();
-			new WebDriverWait(driver, 10).until(ExpectedConditions.invisibilityOfElementLocated(By.xpath("//*[@id='cnsw']/iframe")));
+			WebElement button = driver.findElement(By.xpath("//div[@id='introAgreeButton']"));
+			button.click();
+			new WebDriverWait(driver, 10).until(ExpectedConditions.invisibilityOfAllElements(button));
 			driver.switchTo().defaultContent();
 		}
 
-		List<WebElement> resultHeaders = driver.findElements(By.xpath("//div[@class='r']//h3"));
+		List<WebElement> resultHeaders = driver.findElements(By.xpath("//div[@class='rc']//h3"));
 		for (WebElement result : resultHeaders) {
 			output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
 		}
