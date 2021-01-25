@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>ch.exense.step.examples</groupId>
-	<version>0.0.0</version>
+	<version>2021.01.25-ID9d49d03</version>
 	<artifactId>demo-selenium-keyword</artifactId>
 
 	<name>Step Samples</name>
