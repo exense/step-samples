@@ -60,19 +60,18 @@
 			<artifactId>junit</artifactId>
 			<version>${junit.version}</version>
 		</dependency>
-		<!-- dependency to the step keyword API
+		<!-- dependency to the step keyword API -->
 		<dependency>
 			<groupId>ch.exense.step</groupId>
 			<artifactId>step-api-keyword</artifactId>
 			<version>${step-api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		-->
 	</dependencies>
 
 	<build>
 		<plugins>
-			<!-- using shade plugin to create uber JAR
+			<!-- using shade plugin to create uber JAR -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
@@ -86,7 +85,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			-->
 			<!-- next plugins only required for our build/release process -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
