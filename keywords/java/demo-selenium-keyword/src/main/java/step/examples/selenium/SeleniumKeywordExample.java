@@ -24,33 +24,33 @@ import step.handlers.javahandler.AbstractKeyword;
 import step.handlers.javahandler.Keyword;
 
 public class SeleniumKeywordExample extends AbstractKeyword {
-	
+
 	private static final int IMPLICIT_WAIT = 30;
 	final List<String> defaultOptions = Arrays.asList(new String[] { "disable-infobars", "ignore-certificate-errors" });
-	final List<String> headlessOptions = Arrays.asList(new String[] { "headless", "disable-gpu", "disable-sotfware-rasterizer" });
-		
+	final List<String> headlessOptions = Arrays
+			.asList(new String[] { "headless", "disable-gpu", "disable-sotfware-rasterizer" });
+
 	@Keyword(name = "Open Chrome")
-	public void Open_chrome_new() {										
+	public void openChrome() {
 		ChromeOptions options = new ChromeOptions();
 		options.setAcceptInsecureCerts(true);
 		options.addArguments(defaultOptions);
 		options.setExperimentalOption("w3c", false);
-        
+
 		if (input.getBoolean("headless", false)) {
 			options.addArguments(headlessOptions);
 		}
-		
+
 		session.put("enableHarCapture", input.getBoolean("enableHarCapture", false));
-				
-					
-		final WebDriver driver = new ChromeDriver(options);		
+
+		final WebDriver driver = new ChromeDriver(options);
 		setImplicitWait(driver, IMPLICIT_WAIT);
 		driver.manage().timeouts().pageLoadTimeout(IMPLICIT_WAIT, TimeUnit.SECONDS);
 
 		if (input.getBoolean("maximize", false)) {
 			driver.manage().window().maximize();
 		} else {
-			driver.manage().window().setSize(new Dimension(1366,784));
+			driver.manage().window().setSize(new Dimension(1366, 784));
 		}
 
 		setDriver(driver);
@@ -61,8 +61,9 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 	}
 
 	private static final String INPUT_SEARCH = "search";
-	
-	@Keyword(name = "Search in google", schema = "{\"properties\":{\""+INPUT_SEARCH+"\":{\"type\":\"string\"}}, \"required\":[\""+INPUT_SEARCH+"\"]}")
+
+	@Keyword(name = "Search in google", schema = "{\"properties\":{\"" + INPUT_SEARCH
+			+ "\":{\"type\":\"string\"}}, \"required\":[\"" + INPUT_SEARCH + "\"]}")
 	public void searchInGoogle() throws Exception {
 		validateInput();
 		String searchString = input.getString(INPUT_SEARCH);
@@ -80,7 +81,7 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 		setImplicitWait(driver, 0);
 		List<WebElement> elements = driver.findElements(By.xpath("//div[@id='cnsw']/iframe"));
 		setImplicitWait(driver, IMPLICIT_WAIT);
-		if(elements.size()>0) {
+		if (elements.size() > 0) {
 			driver.switchTo().frame(elements.get(0));
 			WebElement button = driver.findElement(By.xpath("//div[@id='introAgreeButton']"));
 			button.click();
@@ -92,8 +93,8 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 		for (WebElement result : resultHeaders) {
 			output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
 		}
-		output.add("Results",String.valueOf(resultHeaders.size()));
-		
+		output.add("Results", String.valueOf(resultHeaders.size()));
+
 		attachScreenshot(driver);
 	}
 
@@ -102,57 +103,64 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 			throw new Exception("Input parameter 'search' not defined");
 		}
 	}
-	
+
 	private static final String INPUT_URL = "URL";
-	
-	@Keyword(name = "Navigate to", schema = "{\"properties\":{\""+INPUT_URL+"\":{\"type\":\"string\"}}, \"required\":[\""+INPUT_URL+"\"]}")
+
+	@Keyword(name = "Navigate to", schema = "{\"properties\":{\"" + INPUT_URL
+			+ "\":{\"type\":\"string\"}}, \"required\":[\"" + INPUT_URL + "\"]}")
 	public void navigateTo() throws Exception {
 		WebDriver driver = getDriverFromSession();
 
 		String url = input.getString(INPUT_URL);
-		
+
 		driver.navigate().to(url);
-		
+
 		attachScreenshot(driver);
 	}
 
 	private static final String INPUT_TEXT = "Text";
-	
-	@Keyword(name = "Click", schema = "{\"properties\":{\""+INPUT_TEXT+"\":{\"type\":\"string\"}}, \"required\":[\""+INPUT_TEXT+"\"]}")
+
+	@Keyword(name = "Click", schema = "{\"properties\":{\"" + INPUT_TEXT + "\":{\"type\":\"string\"}}, \"required\":[\""
+			+ INPUT_TEXT + "\"]}")
 	public void click() throws Exception {
 		WebDriver driver = getDriverFromSession();
 
 		String label = input.getString(INPUT_TEXT);
-		
-		WebElement element = new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"+label.toLowerCase()+"']")));
+
+		WebElement element = new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(
+				By.xpath("//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
+						+ label.toLowerCase() + "']")));
 		element.click();
-		
+
 		attachScreenshot(driver);
 	}
 
 	private static final String INPUT_XPATH = "XPath";
 
-	@Keyword(name = "ClickByXPath", schema = "{\"properties\":{\""+INPUT_XPATH+"\":{\"type\":\"string\"}}, \"required\":[\""+INPUT_XPATH+"\"]}")
+	@Keyword(name = "ClickByXPath", schema = "{\"properties\":{\"" + INPUT_XPATH
+			+ "\":{\"type\":\"string\"}}, \"required\":[\"" + INPUT_XPATH + "\"]}")
 	public void clickByXPath() throws Exception {
 		WebDriver driver = getDriverFromSession();
 
 		String xpath = input.getString(INPUT_XPATH);
 
-		WebElement element =new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+		WebElement element = new WebDriverWait(driver, 10)
+				.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
 		element.click();
 
 		attachScreenshot(driver);
 	}
-	
+
 	protected WebDriver getDriverFromSession() throws Exception {
 		if (session.get(DriverWrapper.class) == null) {
 			throw new Exception(
 					"Please first execute keyword \"Open Chome\" in order to have a driver available for this keyword");
 		}
+		@SuppressWarnings("resource")
 		WebDriver driver = session.get(DriverWrapper.class).driver;
 		return driver;
 	}
-	
+
 	public void attachScreenshot(WebDriver driver) {
 		try {
 			byte[] bytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
@@ -162,13 +170,13 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 			output.appendError("Unable to generate screenshot");
 		}
 	}
-	
-	 private void setDriver(WebDriver driver) {
-		    this.session.put(new DriverWrapper(driver));
-		  }
-		  
 
-	// Wrapping the WebDriver instance as it is not implementing the Closeable interface
+	private void setDriver(WebDriver driver) {
+		this.session.put(new DriverWrapper(driver));
+	}
+
+	// Wrapping the WebDriver instance to put it to the Session
+	// as it is not implementing the Closeable interface
 	public class DriverWrapper implements Closeable {
 
 		final WebDriver driver;

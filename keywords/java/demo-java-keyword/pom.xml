@@ -8,16 +8,15 @@
 	<artifactId>demo-java-keyword</artifactId>
 
 	<name>Step Samples</name>
-	<description>
-		Step Samples
-	</description>
 	<url>http://exense.ch/</url>
+
 	<licenses>
 		<license>
-			<name>The GNU Affero General Public License 3.0</name>
-			<url>http://www.gnu.org/licenses/</url>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
 		</license>
 	</licenses>
+
 	<developers>
 		<developer>
 			<name>exense Team</name>
@@ -27,16 +26,11 @@
 			<url>http://step.exense.ch</url>
 		</developer>
 	</developers>
-	<scm>
-		<connection>scm:git:https://github.com/exense/step-samples/</connection>
-		<developerConnection>scm:git:https://github.com/exense/step-samples.git</developerConnection>
-		<url>https://github.com/exense/step-samples/</url>
-	</scm>
 
 	<properties>
 		<step-api.version>1.1.5</step-api.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<junit.version>4.13.1</junit.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>
@@ -55,11 +49,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>3.0.0-M1</version>
-			</plugin>
-			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
@@ -67,34 +56,17 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<!-- Source -->
+			<!-- Create a uber-jar which is the default packaging format for Keyword 
+				Packages -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.0.1</version>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
-						<id>attach-sources</id>
+						<phase>package</phase>
 						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- Javadoc -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.1.1</version>
-				<configuration>
-					<quiet>true</quiet>
-					<source>8</source>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
+							<goal>shade</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -102,44 +74,4 @@
 		</plugins>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>Default</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<!-- Local compilation - no signature -->
-		</profile>
-		<profile>
-			<id>DefaultBuild</id>
-			<activation>
-				<activeByDefault>false</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<!-- Signature -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-								<configuration>
-									<gpgArguments>
-										<arg>--pinentry-mode</arg>
-										<arg>loopback</arg>
-									</gpgArguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>

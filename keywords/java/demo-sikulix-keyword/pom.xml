@@ -6,6 +6,7 @@
 	<groupId>ch.exense.step.examples</groupId>
 	<version>0.0.0</version>
 	<artifactId>demo-sikulix-keyword</artifactId>
+	
 	<name>Step Samples - Sikuli Keyword</name>
 	<url>http://step.exense.ch/</url>
 	
@@ -13,7 +14,6 @@
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
 			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
 		</license>
 	</licenses>
 	
