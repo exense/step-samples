@@ -1,0 +1,10 @@
+bin/
+target/
+.settings/
+*.class
+*.log
+*.bak
+.classpath
+.project
+.DS_Store
+out*.html

@@ -1,38 +1,49 @@
 # step-samples
-Sample projects for STEP
-
-## Prerequisites
-
-* Maven is installed
-* JDK 8 is installed
-* Using a Java IDE is recommended (for instance Eclipse)
-* Chrome is installed
+Sample projects for *[step](https://step.exense.ch)*
 
 ## Overview
 
-This repo contains two maven projects showcasing the basic capability of step's Keyword API.
+This repository contains various examples and templates of *step* artifacts (Keywords, Plans and *step* Client).
 
-The project *demo-java-keyword* contains a keyword class and package as well as a JUnit test class allowing you to understand how the java dependency and API work.
-
-The project *demo-selenium-keyword* has similar content as the first project but this time, extended dependencies will allow the use of the chrome WebDriver and the corresponding JUnit test class will trigger a basic Selenium workflow.
+The repository is structured as follow:<br><br>
+&nbsp;**/keywords**: contains various examples and templates of *step* Keywords for the different plugins (Java, .NET, Selenium, Cypress, etc)<br>
+&nbsp;**/plans**: contains examples of *step* Plans<br>
+&nbsp;**/step-client**: contains sample projects showcasing the use of the *step* Client relying on the *step* Controller API<br>
 
 ## Goal
 
-The purpose of this repo, once you've familiarized yourself with the project's contents, is to help you package and deploy the keywords onto a STEP platform. For a local installation, just download the latest [release](https://github.com/exense/step/releases) and follow our [installation guidelines](http://docs.exense.ch/wiki/step/view/Versions/3.9.x/Operations/#HInstallation).
+The purpose of this repo, once you've familiarized yourself with the project's contents, is to help you package and deploy the keywords onto a *step* platform. For a local installation of *step*, just download the latest [release](https://github.com/exense/step/releases) and follow our [installation guidelines](https://step.exense.ch/knowledgebase/3.17/getting-started/quick-setup/).
 
-ALternatively, if you're not interested in experimenting with a local instance and are not planing on running step on premise, you could skip this step and just contact us through our company contact form to request a cloud cluster directly. In that scenario, step is offered as a SaaS application and you don't have to worry about any operational aspects such as infrastructure, installation, upgrades or housekeeping.
+Alternatively, if you're not interested in experimenting with a local instance and are not planing on running step on premise, you could skip this step and just contact us through our company [contact form](https://step.exense.ch/contact/) to request a cloud cluster directly. In that scenario, step is offered as a SaaS application and you don't have to worry about any operational aspects such as infrastructure, installation, upgrades or housekeeping.
 
-## Project setup
+## Setup
 
-Ideally using an IDE like Eclipse, and after cloning this repo and checking the prerequisites from above, you can start by just running the two JUnit classes. _JavaKeywordExampleTest_ will make use of keyword methods defined in _JavaKeywordExample_ and _SeleniumKeywordExampleTest_ will make use of keyword methods defined in _SeleniumKeywordExampleTest_. 
+This project contains samples of open-source and enterprise features of *step*.
 
-## Packaging
+Samples of open-source features exclusively rely on public dependencies and should build without any specific prerequisite.
 
-Just run maven's _package_ goal against the pom files of both projects. In addition to also executing the JUnit tests, two jar files containing the keyword classes will be built as a result: _demo-java-keyword-0.0.1-SNAPSHOT.jar_ _demo-selenium-keyword-0.0.1-SNAPSHOT-shaded.jar_ which you'll find in their corresponding project output folders.
+Enterprise samples require *step* Enterprise and rely on dependencies hosted on exense's private nexus. In order to use the enterprise samples, you'll have to add following lines to your maven settings.xml:
 
-## Deployment
-
-Deployment onto either a local step instance or a cloud instance can then ensue. Please follow the recommendations from our [official documentation](http://docs.exense.ch/wiki/step/view/Versions/3.9.x/Development/#HPackaginganddeployment).
+```xml
+<servers>
+	<server>
+		<id>nexus-exense</id>
+		<username>your_step_enterprise_username</username>
+		<password>password</password>
+	</server>
+</servers>
+<!-- if your compagny uses a proxy, add these lines: -->
+<proxies>
+	<proxy>
+		<id>step-proxy</id>
+		<active>true</active>
+		<protocol>http</protocol>
+		<host>your_proxy</host>
+		<port>your_proxy_port</port>
+		<nonProxyHosts>*.yourdomain</nonProxyHosts>
+	</proxy>
+</proxies>
+```
 
 ## Help
 
