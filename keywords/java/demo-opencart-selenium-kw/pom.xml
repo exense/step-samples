@@ -8,7 +8,7 @@
 	<artifactId>demo-opencart-selenium-kw</artifactId>
 
 	<!-- optional maven meta-data section -->
-	<name>Step Samples</name>
+	<name>Step Samples - OpenCart Keyword</name>
 	<description>
 		Step Samples
 	</description>
