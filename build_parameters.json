@@ -1,3 +1,4 @@
+
 {
 	"NAME": "Step Samples",
 
@@ -8,17 +9,29 @@
 			"PARAMETERS": [
 				{
 					"NAME": "DEVELOPMENT",
-					"URL": "nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/",
+					"URL": "nexus-staging::default::https://nexus-enterprise.exense.ch/repository/staging-maven/",
 					"CONFIG": "DefaultBuild"
 				},
 				{
 					"NAME": "PRODUCTION",
-					"URL": "sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2",
+					"URL": "sonatype::default::https://oss.sonatype.org/service/local/staging/deploy/maven2",
 					"CONFIG": "DefaultBuild"
 				}
 			],
 			"ACTIONS": [
 				{
+					"PARAMETERS": [
+						{
+							"NAME": "DEVELOPMENT",
+							"URL": "nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/",
+							"CONFIG": "DefaultBuild"
+						},
+						{
+							"NAME": "PRODUCTION",
+							"URL": "sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2",
+							"CONFIG": "DefaultBuild"
+						}
+					],
 					"FOLDER": "keywords/java/demo-appium-keyword/"
 				},
 				{
