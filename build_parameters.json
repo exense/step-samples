@@ -1,41 +1,48 @@
+
 {
 	"NAME": "Step Samples",
-	"OS": "LINUX",
-	
-	"SUBPROJECTS":
-	{
-		"TYPE":		["POM","POM","POM"],
-		"FOLDER":	[
-      		"keywords/java/demo-appium-keyword/",
-      		"keywords/java/demo-java-keyword/",
-      		"keywords/java/demo-selenium-keyword/"
-		],
-		
-		"URL_STAGING":	[ 
-			"nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/",
-			"nexus-staging::default::https://nexus-enterprise.exense.ch/repository/staging-maven/",
-			"nexus-staging::default::https://nexus-enterprise.exense.ch/repository/staging-maven/"
-		],
-		"URL_PROD":		[ 
-			"sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2",
-			"sonatype::default::https://oss.sonatype.org/service/local/staging/deploy/maven2",
-			"sonatype::default::https://oss.sonatype.org/service/local/staging/deploy/maven2"
-		],
-		
-		"CONFIG_STAGING": [ "DefaultBuild","DefaultBuild","DefaultBuild"],
-		"CONFIG_PROD":    [ "DefaultBuild","DefaultBuild","DefaultBuild"]
-	},
-	"DISTRIBUTIONS":
-	{
-		"TYPE": ["GITHUB", "GITHUB"],
-		
-		"ORIGIN_FILE": [
-      		"plans/Demo_Data-driven.json",
-      		"plans/Demo_Google-search.json"
-    	],
-		"DESTINATION_NAME": [
-      		"Demo_Data-driven.json",
-      		"Demo_Google-search.json"
-    	]
-	}
+
+	"ACTIONS": [
+		{
+			"ACTION": "COMPILE",
+			"TYPE": "POM",
+			"PARAMETERS": [
+				{
+					"NAME": "DEVELOPMENT",
+					"URL": "nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/",
+					"CONFIG": "DefaultBuild"
+				},
+				{
+					"NAME": "PRODUCTION",
+					"URL": "sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2",
+					"CONFIG": "DefaultBuild"
+				}
+			]
+			"ACTIONS": [
+				{
+					"FOLDER": "keywords/java/demo-appium-keyword/"
+				},
+				{
+					"FOLDER": "keywords/java/demo-java-keyword/"
+				},
+				{
+					"FOLDER": "keywords/java/demo-selenium-keyword/"
+				}
+			]
+		},
+		{
+			"ACTION": "PUSH",
+			"TYPE": "GITHUB",
+			"ACTIONS": [
+				{
+					"ORIGIN": "plans/Demo_Data-driven.json",
+					"DESTINATION": "plans/Demo_Google-search.json"
+				},
+				{
+					"ORIGIN": "Demo_Google-search.json",
+					"DESTINATION": "Demo_Data-driven.json",
+				}
+			]
+		}
+	]
 }
