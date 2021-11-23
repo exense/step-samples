@@ -6,6 +6,16 @@
 		{
 			"ACTION": "COMPILE",
 			"TYPE": "POM",
+			"PARAMETERS": [
+				{
+					"NAME": "DEVELOPMENT",
+					"CONFIG": "DefaultBuild"
+				},
+				{
+					"NAME": "PRODUCTION",
+					"CONFIG": "DefaultBuild"
+				}
+			],
 			"ACTIONS": [
 				{
 					"PARAMETERS": [
