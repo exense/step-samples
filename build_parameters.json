@@ -1,4 +1,3 @@
-
 {
 	"NAME": "Step Samples",
 
@@ -17,7 +16,7 @@
 					"URL": "sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2",
 					"CONFIG": "DefaultBuild"
 				}
-			]
+			],
 			"ACTIONS": [
 				{
 					"FOLDER": "keywords/java/demo-appium-keyword/"
@@ -40,7 +39,7 @@
 				},
 				{
 					"ORIGIN": "Demo_Google-search.json",
-					"DESTINATION": "Demo_Data-driven.json",
+					"DESTINATION": "Demo_Data-driven.json"
 				}
 			]
 		}
