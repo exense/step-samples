@@ -1,0 +1,97 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.exense.step.examples</groupId>
+    <artifactId>demo-selenium-multiproject-common-library</artifactId>
+    <version>0.0.0</version>
+
+    <name>Step Samples - Selenium - Multiple projects - Common</name>
+    <description>This project is part of an example of a complex setup with multiple projects
+        where several projects rely on the same common library allowing chaining of Keywords across projects.
+        This project represents the common library on which the project1 and project2 rely on.
+    </description>
+    <url>http://step.exense.ch/</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>exense Team</name>
+            <email>contact@exense.ch</email>
+            <organization>exense GmbH</organization>
+            <organizationUrl>http://www.exense.ch</organizationUrl>
+            <url>http://step.exense.ch</url>
+        </developer>
+    </developers>
+
+    <properties>
+        <step-api.version>1.1.5</step-api.version>
+        <selenium.version>3.141.59</selenium.version>
+        <step-library.version>1.0.12</step-library.version>
+        <junit.version>4.13.1</junit.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-api-keyword</artifactId>
+            <version>${step-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.exense.step.library</groupId>
+            <artifactId>step-library-selenium-3</artifactId>
+            <version>${step-library.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-api</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+            <!-- Create a uber-jar which is the default packaging format for Keyword
+                Packages -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
