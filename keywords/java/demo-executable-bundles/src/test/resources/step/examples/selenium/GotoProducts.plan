@@ -1,0 +1,4 @@
+"Open Chrome"
+"Navigate to" URL="http://exense.ch"
+"Click" Text="Products"
+Sleep Duration=1 Unit="s"
