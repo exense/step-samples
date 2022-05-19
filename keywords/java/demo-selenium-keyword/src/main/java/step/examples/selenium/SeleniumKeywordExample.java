@@ -6,13 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -78,11 +72,13 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 			acceptButton.click();
 		}
 
-		WebElement searchInput = driver.findElement(By.name("q"));
-
-		WebDriverWait wait = new WebDriverWait(driver, 10);
-		wait.until(ExpectedConditions.elementToBeClickable(By.name("q")));
-		searchInput.sendKeys(searchString + Keys.ENTER);
+		do {
+			try {
+				WebElement searchInput = driver.findElement(By.name("q"));
+				searchInput.sendKeys(searchString + Keys.ENTER);
+				break;
+			} catch (ElementNotInteractableException e) {}
+		} while (true);
 
 		driver.findElement(By.xpath("//div/nobr"));
 
