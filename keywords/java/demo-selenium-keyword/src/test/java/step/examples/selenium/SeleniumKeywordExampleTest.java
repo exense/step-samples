@@ -32,7 +32,7 @@ public class SeleniumKeywordExampleTest {
 	@Test
 	public void test() throws Exception {
 		Output<JsonObject> result;
-		ctx.run("Open Chrome","{\"headless\":false}");
+		ctx.run("Open Chrome","{\"headless\":true}");
 		ctx.run("Search in google", "{ \"search\" : \"step exense\" }");
 		result = ctx.run("Search in google", "{ \"search\" : \"exense djigger\" }");
 		Assert.assertNull(result.getError());
