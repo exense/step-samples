@@ -72,7 +72,7 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 			acceptButton.click();
 		}
 
-		Thread.sleep(5000);
+		Thread.sleep(60000);
 
 		WebElement searchInput = driver.findElement(By.name("q"));
 		searchInput.sendKeys(searchString + Keys.ENTER);
