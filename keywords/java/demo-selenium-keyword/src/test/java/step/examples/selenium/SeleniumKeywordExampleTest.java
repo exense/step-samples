@@ -27,17 +27,18 @@ public class SeleniumKeywordExampleTest {
 	@Test
 	public void test() throws Exception {
 		Output<JsonObject> result;
-		result = ctx.run("Open Chrome");
+		result = ctx.run("Open Chrome","{\"headless\":true}");
 		result = ctx.run("Search in google", "{ \"search\" : \"step exense\" }");
 		result = ctx.run("Search in google", "{ \"search\" : \"exense djigger\" }");
 		Assert.assertNull(result.getError());
+		System.out.println(result.getPayload());
 		Assert.assertTrue(result.getPayload().containsKey("exense/djigger: A production-ready monitoring and ... - GitHub"));
 	}
 	
 	@Test
 	public void test2() throws Exception {
 		Output<JsonObject> result;
-		result = ctx.run("Open Chrome");
+		result = ctx.run("Open Chrome","{\"headless\":true}");
 		result = ctx.run("Navigate to", "{ \"URL\" : \"http://www.exense.ch\" }");
 		result = ctx.run("Click", "{ \"Text\" : \"Products\" }");
 		Assert.assertNull(result.getError());

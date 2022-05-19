@@ -70,7 +70,13 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 		WebDriver driver = getDriverFromSession();
 
-		driver.get("http://www.google.com");
+		driver.get("http://www.google.ch");
+
+		setImplicitWait(driver, 0);
+		if (driver.findElements(By.xpath("//div[text()='I agree']")).size()==1) {
+			WebElement acceptButton = driver.findElement(By.xpath("//div[text()='I agree']"));
+			acceptButton.click();
+		}
 
 		WebElement searchInput = driver.findElement(By.name("q"));
 
@@ -78,18 +84,7 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 		driver.findElement(By.xpath("//div/nobr"));
 
-		setImplicitWait(driver, 0);
-		List<WebElement> elements = driver.findElements(By.xpath("//div[@id='cnsw']/iframe"));
-		setImplicitWait(driver, IMPLICIT_WAIT);
-		if (elements.size() > 0) {
-			driver.switchTo().frame(elements.get(0));
-			WebElement button = driver.findElement(By.xpath("//div[@id='introAgreeButton']"));
-			button.click();
-			new WebDriverWait(driver, 10).until(ExpectedConditions.invisibilityOfAllElements(button));
-			driver.switchTo().defaultContent();
-		}
-
-		List<WebElement> resultHeaders = driver.findElements(By.xpath("//div[@class='rc']//h3"));
+		List<WebElement> resultHeaders = driver.findElements(By.xpath("//div/a/h3"));
 		for (WebElement result : resultHeaders) {
 			output.add(result.getText(), result.findElement(By.xpath("..//cite")).getText());
 		}
