@@ -24,6 +24,11 @@ public class SeleniumKeywordExampleTest {
 		ctx = KeywordRunner.getExecutionContext(properties, SeleniumKeywordExample.class);
 	}
 
+	@After
+	public void closeSession() {
+		ctx.close();
+	}
+
 	@Test
 	public void test() throws Exception {
 		Output<JsonObject> result;
