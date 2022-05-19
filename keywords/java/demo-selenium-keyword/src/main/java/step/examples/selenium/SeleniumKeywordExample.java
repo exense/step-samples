@@ -80,6 +80,8 @@ public class SeleniumKeywordExample extends AbstractKeyword {
 
 		WebElement searchInput = driver.findElement(By.name("q"));
 
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(ExpectedConditions.elementToBeClickable(By.name("q")));
 		searchInput.sendKeys(searchString + Keys.ENTER);
 
 		driver.findElement(By.xpath("//div/nobr"));
