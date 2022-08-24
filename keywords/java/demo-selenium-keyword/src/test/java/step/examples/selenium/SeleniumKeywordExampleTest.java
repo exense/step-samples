@@ -23,25 +23,9 @@ public class SeleniumKeywordExampleTest {
 		Map<String, String> properties = new HashMap<>();
 		ctx = KeywordRunner.getExecutionContext(properties, SeleniumKeywordExample.class);
 	}
-
-	@After
-	public void closeSession() {
-		ctx.close();
-	}
-
-	@Test
-	public void test() throws Exception {
-		Output<JsonObject> result;
-		ctx.run("Open Chrome","{\"headless\":true}");
-		ctx.run("Search in google", "{ \"search\" : \"step exense\" }");
-		result = ctx.run("Search in google", "{ \"search\" : \"exense djigger\" }");
-		Assert.assertNull(result.getError());
-		System.out.println(result.getPayload());
-		Assert.assertTrue(result.getPayload().containsKey("exense/djigger: A production-ready monitoring and ... - GitHub"));
-	}
 	
 	@Test
-	public void test2() throws Exception {
+	public void test() throws Exception {
 		Output<JsonObject> result;
 		result = ctx.run("Open Chrome","{\"headless\":true}");
 		result = ctx.run("Navigate to", "{ \"URL\" : \"http://www.exense.ch\" }");
