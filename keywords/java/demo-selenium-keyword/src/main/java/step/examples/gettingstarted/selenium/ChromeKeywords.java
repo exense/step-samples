@@ -11,14 +11,20 @@ import step.handlers.javahandler.Keyword;
 
 public class ChromeKeywords extends AbstractKeyword {
 
+	private ChromeDriver createDriver() {
+		ChromeOptions options = new ChromeOptions();
+		// the following options are used for running the test in headless mode:
+		options.addArguments(Arrays.asList("no-sandbox","headless", "disable-gpu", "disable-sotfware-rasterizer"));
+
+		// Uncomment the following and set the path to the chromedriver.exe if the chromedriver isn't available in your PATH
+		//System.setProperty("webdriver.chrome.driver", "D:\\chromedriver_win32\\chromedriver.exe");
+
+		return new ChromeDriver(options);
+	}
+
 	@Keyword
 	public void createAndNavigate() {
-		ChromeOptions options = new ChromeOptions();
-		options.addArguments(Arrays.asList("no-sandbox","headless", "disable-gpu", "disable-sotfware-rasterizer"));
-		
-		// Uncomment the following and set the path to the chromedriver.exe if the chromedriver isn't available in your PATH 
-		//System.setProperty("webdriver.chrome.driver", "D:\\chromedriver_win32\\chromedriver.exe");
-		ChromeDriver chrome = new ChromeDriver(options);
+		ChromeDriver chrome = createDriver();
 		String homeUrl = "http://www.exense.ch";
 		chrome.navigate().to(homeUrl);
 		chrome.findElement(By.xpath("//a[contains(text(),'Consulting')]")).click();
@@ -32,9 +38,7 @@ public class ChromeKeywords extends AbstractKeyword {
 	
 	@Keyword
 	public void createAndNavigate2() {
-		// Uncomment the following and set the path to the chromedriver.exe if the chromedriver isn't available in your PATH 
-		//System.setProperty("webdriver.chrome.driver", "D:\\chromedriver_win32\\chromedriver.exe");
-	    ChromeDriver chrome = new ChromeDriver();
+		ChromeDriver chrome = createDriver();
 	    
 	    // Get the URL from the keyword input
 	    String homeUrl = input.getString("url");
