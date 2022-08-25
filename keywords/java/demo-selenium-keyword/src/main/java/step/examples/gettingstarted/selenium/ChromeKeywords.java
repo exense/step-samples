@@ -14,7 +14,7 @@ public class ChromeKeywords extends AbstractKeyword {
 	@Keyword
 	public void createAndNavigate() {
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments(Arrays.asList("no-sandbox"));
+		options.addArguments(Arrays.asList("no-sandbox","headless", "disable-gpu", "disable-sotfware-rasterizer"));
 		
 		// Uncomment the following and set the path to the chromedriver.exe if the chromedriver isn't available in your PATH 
 		//System.setProperty("webdriver.chrome.driver", "D:\\chromedriver_win32\\chromedriver.exe");

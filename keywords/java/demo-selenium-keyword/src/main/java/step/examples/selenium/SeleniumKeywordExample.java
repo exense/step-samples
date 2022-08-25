@@ -19,9 +19,9 @@ import java.util.concurrent.TimeUnit;
 public class SeleniumKeywordExample extends AbstractKeyword {
 
     private static final int IMPLICIT_WAIT = 30;
-    final List<String> defaultOptions = Arrays.asList(new String[]{"disable-infobars", "ignore-certificate-errors"});
+    final List<String> defaultOptions = Arrays.asList("disable-infobars", "ignore-certificate-errors");
     final List<String> headlessOptions = Arrays
-            .asList(new String[]{"headless", "disable-gpu", "disable-sotfware-rasterizer"});
+            .asList("headless", "disable-gpu", "disable-sotfware-rasterizer");
 
     @Keyword(name = "Open Chrome")
     public void openChrome() {
