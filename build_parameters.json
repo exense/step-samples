@@ -8,54 +8,18 @@
 			"TYPE": "POM",
 			"PARAMETERS": [
 				{
-					"NAME": "DEVELOPMENT",
-					"CONFIG": "DefaultBuild"
+					"NAME": "ALL",
+					"CONFIG": "DefaultBuild",
+					"URL": "nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/"
 				},
 				{
 					"NAME": "PRODUCTION",
-					"CONFIG": "DefaultBuild"
+					"CONFIG": "DefaultBuild",
+					"URL": "sonatype::default::https://oss.sonatype.org/service/local/staging/deploy/maven2"
 				}
 			],
 			"ACTIONS": [
-				{
-					"PARAMETERS": [
-						{
-							"NAME": "DEVELOPMENT",
-							"URL": "nexus-staging::https://nexus-enterprise.exense.ch/repository/staging-maven/"
-						},
-						{
-							"NAME": "PRODUCTION",
-							"URL": "sonatype::https://oss.sonatype.org/service/local/staging/deploy/maven2"
-						}
-					],
-					"FOLDER": "keywords/java/demo-appium-keyword/"
-				},
-				{
-					"PARAMETERS": [
-						{
-							"NAME": "DEVELOPMENT",
-							"URL": "nexus-staging::default::https://nexus-enterprise.exense.ch/repository/staging-maven/"
-						},
-						{
-							"NAME": "PRODUCTION",
-							"URL": "sonatype::default::https://oss.sonatype.org/service/local/staging/deploy/maven2"
-						}
-					],
-					"FOLDER": "keywords/java/demo-java-keyword/"
-				},
-				{
-					"PARAMETERS": [
-						{
-							"NAME": "DEVELOPMENT",
-							"URL": "nexus-staging::default::https://nexus-enterprise.exense.ch/repository/staging-maven/"
-						},
-						{
-							"NAME": "PRODUCTION",
-							"URL": "sonatype::default::https://oss.sonatype.org/service/local/staging/deploy/maven2"
-						}
-					],
-					"FOLDER": "keywords/java/demo-selenium-keyword/"
-				}
+				{"FOLDER": "keywords/java/demo-appium-keyword/"},{"FOLDER": "keywords/java/demo-java-keyword/"},{"FOLDER": "keywords/java/demo-selenium-keyword/"}
 			]
 		},
 		{
