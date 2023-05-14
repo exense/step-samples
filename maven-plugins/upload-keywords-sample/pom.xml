@@ -107,7 +107,7 @@
         <profile>
             <id>StepOS</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <activeByDefault>false</activeByDefault>
             </activation>
 
             <build>
@@ -183,8 +183,8 @@
                                     <artifactClassifier>jar-with-dependencies</artifactClassifier>
 
                                     <!-- Use you valid authentication token and actual target Step project name -->
-                                    <!--<authToken>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhMjUyYzhhNi1kODgwLTQxOTktOGY3NS05NjYzYmE5YjE4MDkiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwOTAiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwOTAiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTY3OTE1NjI0NCwiaWF0IjoxNjc5MTU2MjQ0LCJleHAiOjE2ODE3NDgyNDQsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.Z6fBvtvs0_yzryzAphhoT44GNszeCRoAZx5SgEEdRRU</authToken>-->
-                                    <!--<stepProjectName>Common</stepProjectName>-->
+                                    <authToken>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzNWNiYzVlYi1lZDdjLTRlYWYtYTZkOS1jNzc2ZGEwNzJjZjQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwOTAiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwOTAiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTY4NDA2NzUzNCwiaWF0IjoxNjg0MDY3NTM0LCJleHAiOjE2OTE4NDM1MzQsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.3XVT8J02M6sMzCDfgO6modS5q6hf-8dCSBtq9aDaVFY</authToken>
+                                    <stepProjectName>Common</stepProjectName>
                                 </configuration>
                                 <goals>
                                     <goal>upload-keywords-package-ee</goal>
