@@ -1,0 +1,223 @@
+<!-- Copyright (C) 2020, exense GmbH This file is part of STEP STEP is free
+	software: you can redistribute it and/or modify it under the terms of the
+	GNU Affero General Public License as published by the Free Software Foundation,
+	either version 3 of the License, or (at your option) any later version. STEP
+	is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+	PURPOSE. See the GNU Affero General Public License for more details. You
+	should have received a copy of the GNU Affero General Public License along
+	with STEP. If not, see <http://www.gnu.org/licenses/>. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.exense.step.examples</groupId>
+    <artifactId>execute-automation-package-sample</artifactId>
+    <version>0.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Step Samples - Execute Automation Package with Maven plugin</name>
+    <description>
+        Step Samples
+    </description>
+    <url>http://exense.ch/</url>
+    <licenses>
+        <license>
+            <name>The GNU Affero General Public License 3.0</name>
+            <url>http://www.gnu.org/licenses/</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>exense Team</name>
+            <email>contact@exense.ch</email>
+            <organization>exense GmbH</organization>
+            <organizationUrl>http://www.exense.ch</organizationUrl>
+            <url>http://step.exense.ch</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/exense/step-samples/</connection>
+        <developerConnection>scm:git:https://github.com/exense/step-samples.git</developerConnection>
+        <url>https://github.com/exense/step-samples/</url>
+    </scm>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- TODO: set valid versions -->
+        <step-maven-plugin.version>0.0.0-SNAPSHOT</step-maven-plugin.version>
+        <step.version>0.0.0-SNAPSHOT</step.version>
+        <step-api.version>2023.5.8-6459000e38cd392fca3917c8</step-api.version>
+
+        <junit.version>4.13.1</junit.version>
+
+        <!-- !!! The URL of your Step server !!! -->
+        <step-server-url>http://localhost:4201</step-server-url>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-api-keyword</artifactId>
+            <version>${step-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-junit</artifactId>
+            <version>${step.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
+            <!-- To demonstrate the execution for test artifact  -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- Configuration for OS version (maven profile) -->
+    <profiles>
+        <profile>
+            <id>StepOS</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>ch.exense.step</groupId>
+                            <artifactId>step-os-maven-plugin</artifactId>
+                            <version>${step-maven-plugin.version}</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+
+                <plugins>
+                    <plugin>
+                        <groupId>ch.exense.step</groupId>
+                        <artifactId>step-os-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>deploy-packaged-to-step</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <url>${step-server-url}</url>
+
+                                    <artifactClassifier>tests</artifactClassifier>
+                                    <description>My test execution</description>
+
+                                    <waitForExecution>true</waitForExecution>
+                                    <ensureExecutionSuccess>true</ensureExecutionSuccess>
+
+                                    <!-- Custom execution parameters -->
+                                    <executionParameters>
+                                        <env>PROD</env>
+                                        <PARAM_EXEC>Value</PARAM_EXEC>
+                                        <PARAM_EXEC2>Value</PARAM_EXEC2>
+                                        <PARAM_EXEC3>Value</PARAM_EXEC3>
+                                    </executionParameters>
+                                </configuration>
+                                <goals>
+                                    <goal>run-packaged-automation-packages-os</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Configuration for EE version (maven profile) -->
+        <profile>
+            <id>StepEE</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>ch.exense.step</groupId>
+                            <artifactId>step-ee-maven-plugin</artifactId>
+                            <version>${step-maven-plugin.version}</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+
+                <plugins>
+                    <plugin>
+                        <groupId>ch.exense.step</groupId>
+                        <artifactId>step-ee-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>deploy-packaged-to-step</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <url>${step-server-url}</url>
+
+                                    <artifactClassifier>tests</artifactClassifier>
+                                    <description>My test execution</description>
+
+                                    <waitForExecution>true</waitForExecution>
+                                    <ensureExecutionSuccess>true</ensureExecutionSuccess>
+
+                                    <authToken>
+                                        eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzNWNiYzVlYi1lZDdjLTRlYWYtYTZkOS1jNzc2ZGEwNzJjZjQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwOTAiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwOTAiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTY4NDA2NzUzNCwiaWF0IjoxNjg0MDY3NTM0LCJleHAiOjE2OTE4NDM1MzQsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.3XVT8J02M6sMzCDfgO6modS5q6hf-8dCSBtq9aDaVFY
+                                    </authToken>
+                                    <stepProjectName>Common</stepProjectName>
+
+                                    <!-- Custom execution parameters -->
+                                    <executionParameters>
+                                        <env>PROD</env>
+                                        <PARAM_EXEC>Value</PARAM_EXEC>
+                                        <PARAM_EXEC2>Value</PARAM_EXEC2>
+                                        <PARAM_EXEC3>Value</PARAM_EXEC3>
+                                    </executionParameters>
+                                </configuration>
+                                <goals>
+                                    <goal>run-packaged-automation-packages-ee</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
