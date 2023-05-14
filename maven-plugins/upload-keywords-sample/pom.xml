@@ -66,21 +66,16 @@
     </dependencies>
 
     <build>
-
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
-                    <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
             <!-- To demonstrate the uploading for jar-with-dependencies artifact  -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -103,6 +98,7 @@
         </plugins>
     </build>
 
+    <!-- Configuration for OS version (maven profile) -->
     <profiles>
         <profile>
             <id>StepOS</id>
@@ -148,6 +144,7 @@
             </build>
         </profile>
 
+        <!-- Configuration for EE version (maven profile) -->
         <profile>
             <id>StepEE</id>
             <activation>
@@ -196,6 +193,5 @@
             </build>
         </profile>
     </profiles>
-
 
 </project>
