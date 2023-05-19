@@ -1,0 +1,4 @@
+ThreadGroup Threads=1 Pacing=0 MaxDuration=0 Iterations=10
+"Buy MacBook in OpenCart"
+End
+PerformanceAssert Measurement="Buy MacBook in OpenCart" Value="10000"

@@ -1,5 +1,0 @@
-Sequence
-Echo "Testing Plan2"
-callExisting
-Echo "${PARAM_EXEC} exists"
-End
