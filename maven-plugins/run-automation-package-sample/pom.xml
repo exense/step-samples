@@ -113,6 +113,24 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/test-jar-with-dependencies.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -146,19 +164,11 @@
                                 <configuration>
                                     <url>${step-server-url}</url>
 
-                                    <artifactClassifier>tests</artifactClassifier>
-                                    <description>My test execution</description>
+                                    <artifactClassifier>test-jar-with-dependencies</artifactClassifier>
+                                    <description>Playwright benchmark example</description>
 
                                     <waitForExecution>true</waitForExecution>
                                     <ensureExecutionSuccess>true</ensureExecutionSuccess>
-
-                                    <!-- Custom execution parameters -->
-                                    <executionParameters>
-                                        <env>PROD</env>
-                                        <PARAM_EXEC>Value</PARAM_EXEC>
-                                        <PARAM_EXEC2>Value</PARAM_EXEC2>
-                                        <PARAM_EXEC3>Value</PARAM_EXEC3>
-                                    </executionParameters>
                                 </configuration>
                                 <goals>
                                     <goal>run-packaged-automation-packages-os</goal>
@@ -199,22 +209,14 @@
                                 <configuration>
                                     <url>${step-server-url}</url>
 
-                                    <artifactClassifier>tests</artifactClassifier>
-                                    <description>My test execution</description>
+                                    <artifactClassifier>test-jar-with-dependencies</artifactClassifier>
+                                    <description>Playwright benchmark example</description>
 
                                     <waitForExecution>true</waitForExecution>
                                     <ensureExecutionSuccess>true</ensureExecutionSuccess>
 
                                     <authToken>${step.auth-token}</authToken>
                                     <stepProjectName>Common</stepProjectName>
-
-                                    <!-- Custom execution parameters -->
-                                    <executionParameters>
-                                        <env>PROD</env>
-                                        <PARAM_EXEC>Value</PARAM_EXEC>
-                                        <PARAM_EXEC2>Value</PARAM_EXEC2>
-                                        <PARAM_EXEC3>Value</PARAM_EXEC3>
-                                    </executionParameters>
                                 </configuration>
                                 <goals>
                                     <goal>run-packaged-automation-packages-ee</goal>
