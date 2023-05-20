@@ -4,7 +4,7 @@ is packaged as `test-jar-with-dependency` artifact and executed remotely on Step
 
 Before you launch this example you have to specify the following maven properties in `pom.xml` (or pass them as -D command line arguments):
 * step.server-url - the url of Step server, where you want to execute the test plan
-* step.auth-token (for EE only) - the auth token of Step user (TODO: link to the guide)
+* step.auth-token (for EE only) - the auth token of Step user (https://step.exense.ch/knowledgebase/userdocs/userpreferences/)
 * step.project-name (for EE only) - the project name in Step
 
 For Step OS:
