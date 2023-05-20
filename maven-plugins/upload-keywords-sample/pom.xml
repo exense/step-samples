@@ -48,12 +48,18 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <playwright.version>1.25.0</playwright.version>
+
         <!-- TODO: set valid versions -->
         <step-maven-plugin.version>0.0.0-SNAPSHOT</step-maven-plugin.version>
         <step-api.version>2023.5.8-6459000e38cd392fca3917c8</step-api.version>
 
         <!-- !!! The URL of your Step server !!! -->
-        <step-server-url>http://localhost:4201</step-server-url>
+        <step.server-url>http://localhost:4201</step.server-url>
+
+        <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGki....</step.auth-token>
+        <step.project-name>Common</step.project-name>
     </properties>
 
     <dependencies>
@@ -63,6 +69,13 @@
             <version>${step-api.version}</version>
             <scope>provided</scope>
         </dependency>
+
+        <!--  For playwright keyword -->
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>${playwright.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -70,10 +83,6 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
             </plugin>
 
             <!-- To demonstrate the uploading for jar-with-dependencies artifact  -->
@@ -123,10 +132,10 @@
                         <artifactId>step-os-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>upload-package-to-step</id>
+                                <id>upload-playwright-keyword-package-to-step</id>
                                 <phase>package</phase>
                                 <configuration>
-                                    <url>${step-server-url}</url>
+                                    <url>${step.server-url}</url>
 
                                     <!-- The identifier or uploaded keyword package  -->
                                     <trackingAttribute>${project.groupId}:${project.artifactId}:${project.version}</trackingAttribute>
@@ -171,7 +180,7 @@
                                 <id>upload-package-to-step</id>
                                 <phase>package</phase>
                                 <configuration>
-                                    <url>${step-server-url}</url>
+                                    <url>${step.server-url}</url>
 
                                     <!-- The identifier or uploaded keyword package  -->
                                     <trackingAttribute>${project.groupId}:${project.artifactId}:${project.version}</trackingAttribute>
@@ -180,8 +189,8 @@
                                     <artifactClassifier>jar-with-dependencies</artifactClassifier>
 
                                     <!-- Use you valid authentication token and actual target Step project name -->
-                                    <authToken>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIzNWNiYzVlYi1lZDdjLTRlYWYtYTZkOS1jNzc2ZGEwNzJjZjQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwOTAiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwOTAiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTY4NDA2NzUzNCwiaWF0IjoxNjg0MDY3NTM0LCJleHAiOjE2OTE4NDM1MzQsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.3XVT8J02M6sMzCDfgO6modS5q6hf-8dCSBtq9aDaVFY</authToken>
-                                    <stepProjectName>Common</stepProjectName>
+                                    <authToken>${step.auth-token}</authToken>
+                                    <stepProjectName>${step.project-name}</stepProjectName>
                                 </configuration>
                                 <goals>
                                     <goal>upload-keywords-package-ee</goal>
