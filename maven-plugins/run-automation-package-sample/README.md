@@ -8,10 +8,10 @@ Before you launch this example you have to specify the following maven propertie
 * step.project-name (for EE only) - the project name in Step
 
 For Step OS:
-`mvn clean package -P StepOS -DskipTests=true "-Dstep.server-url=http://localhost:4201"`
+`mvn clean package -P StepOS -DskipTests=true "-Dstep.url=http://localhost:4201"`
 
 For Step EE:
-`mvn clean package -P StepEE -DskipTests=true "-Dstep.server-url=http://localhost:4201" "-Dstep.project-name=Common" "-Dstep.auth-token=eyJhbGciOiJIUzI1NiJ9.eyJqdGki...."`
+`mvn clean package -P StepEE -DskipTests=true "-Dstep.url=http://localhost:4201" "-Dstep.step-project-name=Common" "-Dstep.auth-token=eyJhbGciOiJIUzI1NiJ9.eyJqdGki...."`
 
 To learn more about maven plugins for Step please follow this link: 
 TODO: add link on maven plugin documentation

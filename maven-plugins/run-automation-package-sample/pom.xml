@@ -57,11 +57,11 @@
         <junit.version>4.13.1</junit.version>
 
         <!-- !!! The URL of your Step server !!! -->
-        <step.server-url>http://localhost:4201</step.server-url>
+        <step.url>http://localhost:4201</step.url>
 
         <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
         <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGki....</step.auth-token>
-        <step.project-name>Common</step.project-name>
+        <step.step-project-name>Common</step.step-project-name>
     </properties>
 
     <dependencies>
@@ -161,7 +161,7 @@
                                 <id>deploy-packaged-to-step</id>
                                 <phase>package</phase>
                                 <configuration>
-                                    <url>${step.server-url}</url>
+                                    <url>${step.url}</url>
 
                                     <artifactClassifier>test-jar-with-dependencies</artifactClassifier>
                                     <description>Playwright benchmark example</description>
@@ -206,7 +206,7 @@
                                 <id>run-automation-package-on-step</id>
                                 <phase>package</phase>
                                 <configuration>
-                                    <url>${step.server-url}</url>
+                                    <url>${step.url}</url>
 
                                     <artifactClassifier>test-jar-with-dependencies</artifactClassifier>
                                     <description>Playwright benchmark example</description>
@@ -215,7 +215,7 @@
                                     <ensureExecutionSuccess>true</ensureExecutionSuccess>
 
                                     <authToken>${step.auth-token}</authToken>
-                                    <stepProjectName>${step.project-name}</stepProjectName>
+                                    <stepProjectName>${step.step-project-name}</stepProjectName>
                                 </configuration>
                                 <goals>
                                     <goal>run-packaged-automation-packages-ee</goal>
