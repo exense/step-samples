@@ -18,12 +18,9 @@
  ******************************************************************************/
 package step.examples.plugins;
 
-import org.junit.runner.RunWith;
 import step.handlers.javahandler.AbstractKeyword;
-import step.junit.runner.Step;
 import step.junit.runners.annotations.Plans;
 
-@RunWith(Step.class)
 @Plans({"benchmark-plan-sample.plan"})
 public class PlaywrightBenchmarkTest extends AbstractKeyword {
 
