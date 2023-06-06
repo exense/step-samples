@@ -13,5 +13,5 @@ For Step OS:
 For Step EE:
 `mvn clean package -P StepEE "-Dstep.url=http://localhost:4201" "-Dstep.step-project-name=Common" "-Dstep.auth-token=eyJhbGciOiJIUzI1NiJ9.eyJqdGki...."`
 
-To learn more about maven plugins for Step please follow this link: 
-TODO: add link on maven plugin documentation
+To learn more about maven plugins for Step please follow this link:
+https://step.exense.ch/knowledgebase/plugins/maven-plugins

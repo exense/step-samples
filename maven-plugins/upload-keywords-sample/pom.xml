@@ -50,9 +50,9 @@
 
         <playwright.version>1.25.0</playwright.version>
 
-        <!-- TODO: set valid versions -->
-        <step.version>0.0.0-SNAPSHOT</step.version>
-        <step-api.version>2023.5.8-6459000e38cd392fca3917c8</step-api.version>
+
+        <step.version>3.22.0</step.version>
+        <step-api.version>1.2.0</step-api.version>
 
         <!-- !!! The URL of your Step server !!! -->
         <step.url>http://localhost:4201</step.url>

@@ -43,14 +43,14 @@
         <url>https://github.com/exense/step-samples/</url>
     </scm>
 
+
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- TODO: set valid versions -->
-        <step.version>0.0.0-SNAPSHOT</step.version>
-        <step-api.version>2023.5.8-6459000e38cd392fca3917c8</step-api.version>
+        <step.version>3.22.0</step.version>
+        <step-api.version>1.2.0</step-api.version>
 
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <playwright.version>1.25.0</playwright.version>
@@ -60,9 +60,22 @@
         <step.url>http://localhost:4201</step.url>
 
         <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGki....</step.auth-token>
-        <step.step-project-name>Common</step.step-project-name>
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjNWM5YjQ3Mi0zYjk5LTRmYjQtYTk4Yy0yMzYzYTIyNWMzMDAiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTY4NTY5Njc2OSwiaWF0IjoxNjg1Njk2NzY5LCJleHAiOjQ4MzkyOTY3NjksImlzTG9jYWxUb2tlbiI6dHJ1ZX0._6zi6VsPQQRCQN0af-CCMG6jUsADDRuIlZuBd1pTMio</step.auth-token>
+        <step.step-project-name>Dev</step.step-project-name>
     </properties>
+
+    <repositories>
+        <!-- staging nexus -->
+        <repository>
+            <id>nexus-staging</id>
+            <url>https://nexus-enterprise.exense.ch/repository/staging-maven/</url>
+        </repository>
+        <!-- private nexus -->
+        <repository>
+            <id>nexus-exense</id>
+            <url>https://nexus-enterprise.exense.ch/repository/exense/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
