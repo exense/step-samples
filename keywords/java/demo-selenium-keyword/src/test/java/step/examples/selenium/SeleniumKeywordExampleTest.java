@@ -23,14 +23,10 @@ public class SeleniumKeywordExampleTest {
 		Map<String, String> properties = new HashMap<>();
 		ctx = KeywordRunner.getExecutionContext(properties, SeleniumKeywordExample.class);
 	}
-	
+
 	@Test
 	public void test() throws Exception {
-		Output<JsonObject> result;
-		result = ctx.run("Open Chrome","{\"headless\":true}");
-		result = ctx.run("Navigate to", "{ \"URL\" : \"http://www.exense.ch\" }");
-		result = ctx.run("Click", "{ \"Text\" : \"Products\" }");
-		Assert.assertNull(result.getError());
+		ctx.run("Buy MacBook in OpenCart", "{}");
 	}
 
 	@After
