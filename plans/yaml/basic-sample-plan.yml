@@ -1,0 +1,30 @@
+version: 1.0.0
+name: "Basic test plan"
+root:
+  Sequence:
+    nodeName: Sequence
+    continueOnError: false
+    children:
+      - If:
+          nodeName: IfBlock
+          condition:
+            expression: "controllerSettings.getSettingByKey('housekeeping_enabled').getValue()=='true'"
+          description: "my description"
+          children:
+            - Assert:
+                nodeName: Assert
+                actual:
+                  expression: "'status'"
+                operator: "EQUALS"
+                doNegate: false
+                expected:
+                  expression: "'ok'"
+                customErrorMessage: "my custom error"
+            - CallKeyword:
+                nodeName: CallKeyword
+                keyword: "callExisting3"
+                remote: true
+                inputs:
+                  - stringInput:
+                      expression: "'abc'"
+                  - intInput: 777
