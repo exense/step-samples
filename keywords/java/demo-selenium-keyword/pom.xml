@@ -57,7 +57,13 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>ch.exense.step.library</groupId>
+            <artifactId>step-library-commons</artifactId>
+            <version>1.0.16</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

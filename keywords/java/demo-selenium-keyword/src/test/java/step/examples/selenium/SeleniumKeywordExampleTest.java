@@ -5,15 +5,18 @@ import java.util.Map;
 
 import javax.json.JsonObject;
 
+import ch.exense.step.library.tests.LocalOnly;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.junit.experimental.categories.Category;
 import step.functions.io.Output;
 import step.handlers.javahandler.KeywordRunner;
 import step.handlers.javahandler.KeywordRunner.ExecutionContext;
 
+@Category(LocalOnly.class)
 public class SeleniumKeywordExampleTest {
 
 	private ExecutionContext ctx;

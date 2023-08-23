@@ -1,8 +1,10 @@
 package step.examples.selenium;
 
+import ch.exense.step.library.tests.LocalOnly;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import step.handlers.javahandler.KeywordRunner;
 import step.handlers.javahandler.KeywordRunner.ExecutionContext;
 
@@ -12,6 +14,7 @@ import java.util.Map;
  * This JUnit test is used to run the Step Keyword locally.
  * This class isn't used when the Keyword is executed in Step.
  */
+@Category(LocalOnly.class)
 public class AdvancedSeleniumKeywordExampleTest {
 
     private ExecutionContext ctx;

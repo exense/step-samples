@@ -1,15 +1,18 @@
 package step.examples.selenium;
 
+import ch.exense.step.library.tests.LocalOnly;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import step.functions.io.Output;
 import step.handlers.javahandler.KeywordRunner;
 
 import javax.json.JsonObject;
 import java.util.Map;
 
+@Category(LocalOnly.class)
 public class StatefulSeleniumKeywordExampleTest {
 
     private KeywordRunner.ExecutionContext ctx;
