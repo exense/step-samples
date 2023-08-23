@@ -1,33 +1,27 @@
 version: 1.0.0
 name: "Dynamic values and inputs sample"
 root:
-  ThreadGroup:
+  threadGroup:
     users: 1
     pacing: 0
     maxDuration: 0
     iterations:
       expression: "someVariable"
     children:
-      - CallKeyword:
-          nodeName: CallKeyword
+      - callKeyword:
           keyword: "myKeyword"
-      - CallKeyword:
-          nodeName: CallKeyword2
+      - callKeyword:
           keyword:
             expression: "'myKeyword2'"
-      - CallKeyword:
-          nodeName: CallKeyword3
+      - callKeyword:
+          keyword: "myKeyword3"
+          routing:
+           - criteria1: "criteriaValue1"
+      - callKeyword:
           keyword:
-            name: "myKeyword3"
-            routing:
-              - criteria1: "criteriaValue1"
-      - CallKeyword:
-          nodeName: CallKeyword4
-          keyword:
-            name:
-              expression: "'myKeyword4'"
-            routing:
-              - criteria1: "criteriaValue1"
+            expression: "'myKeyword4'"
+          routing:
+            - criteria1: "criteriaValue1"
           inputs:
             - stringInput:
                 expression: "'abc'"
