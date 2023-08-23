@@ -3,16 +3,12 @@ package step.examples.selenium;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.json.JsonObject;
-
-import ch.exense.step.library.tests.LocalOnly;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.junit.experimental.categories.Category;
-import step.functions.io.Output;
+import step.examples.LocalOnly;
 import step.handlers.javahandler.KeywordRunner;
 import step.handlers.javahandler.KeywordRunner.ExecutionContext;
 
