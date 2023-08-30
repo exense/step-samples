@@ -50,8 +50,7 @@
 
         <playwright.version>1.25.0</playwright.version>
 
-        <!-- TODO: set valid release version -->
-        <step.version>0.0.0-SNAPSHOT</step.version>
+        <step.version>3.22.3</step.version>
         <step-api.version>1.2.0</step-api.version>
 
         <!-- !!! The URL of your Step server !!! -->
@@ -143,7 +142,7 @@
                                     <!-- Specify classifier to upload the "fat jar" -->
                                     <artifactClassifier>jar-with-dependencies</artifactClassifier>
 
-                                    <!-- You can use the artifact uploaded to Step as keyword library (referenced by 'name' or 'id') -->
+                                    <!-- Starting with Step 3.23.0 you can use the artifact uploaded to Step as keyword library (referenced by 'name' or 'id') -->
                                     <!-- <libStepResourceSearchCriteria>-->
                                     <!--    <name>my-uploaded-artefact.jar</name>-->
                                     <!-- </libStepResourceSearchCriteria>-->
