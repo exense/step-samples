@@ -49,7 +49,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>3.22.0</step.version>
+        <step.version>3.22.3</step.version>
         <step-api.version>1.2.0</step-api.version>
 
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
@@ -57,7 +57,7 @@
         <junit.version>4.13.1</junit.version>
 
         <!-- !!! The URL of your Step server !!! -->
-        <step.url>http://localhost:4201</step.url>
+        <step.url>http://localhost:8080</step.url>
 
         <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
         <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGki....</step.auth-token>
@@ -224,6 +224,18 @@
 
                                     <authToken>${step.auth-token}</authToken>
                                     <stepProjectName>${step.step-project-name}</stepProjectName>
+
+                                    <!-- Starting with Step 3.23.0 you can use the artifact uploaded to Step as keyword library (referenced by 'name' or 'id') -->
+                                    <!-- <libStepResourceSearchCriteria>-->
+                                    <!--    <name>my-uploaded-artefact.jar</name>-->
+                                    <!-- </libStepResourceSearchCriteria>-->
+
+                                    <!-- Or alternatively you can link any maven artifact (deployed to Nexus) as keyword library -->
+                                    <!--<libArtifactGroupId>org.myproject</libArtifactGroupId>-->
+                                    <!--<libArtifactId>myartifact</libArtifactId>-->
+                                    <!--<libArtifactVersion>1.0.0.Final</libArtifactVersion>-->
+                                    <!--<libArtifactClassifier>jar-with-dependencies</libArtifactClassifier>-->
+
                                 </configuration>
                                 <goals>
                                     <goal>run-packaged-automation-packages-ee</goal>
