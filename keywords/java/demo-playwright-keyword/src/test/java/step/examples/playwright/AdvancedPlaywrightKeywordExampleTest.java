@@ -26,7 +26,7 @@ public class AdvancedPlaywrightKeywordExampleTest {
     @Test
     public void test() throws Exception {
         // Call the Keyword with the required Keyword inputs
-        ctx.run("Buy MacBook in OpenCart", "{\"Firstname\":\"Gustav\", \"Lastname\":\"Muster\"}");
+        ctx.run("Buy MacBook in OpenCart - Advanced", "{\"Firstname\":\"Gustav\", \"Lastname\":\"Muster\"}");
     }
 
     @After
