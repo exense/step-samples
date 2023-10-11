@@ -22,7 +22,7 @@ public class AdvancedPlaywrightKeywordExample extends AbstractKeyword {
     private Page page;
     private BrowserContext context;
 
-    @Keyword(name = "Buy MacBook in OpenCart")
+    @Keyword(name = "Buy MacBook in OpenCart - Advanced")
     public void buyMacBookInOpenCart() throws InterruptedException {
         // Read the URL from the keyword properties. These properties can be defined as Parameter in Step
         page.navigate(properties.computeIfAbsent("opencart.url",
