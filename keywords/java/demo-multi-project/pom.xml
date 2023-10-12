@@ -10,18 +10,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
 
-
 	<groupId>ch.exense.step.examples</groupId>
-	<version>0.0.0</version>
-	<artifactId>demo-java-keyword</artifactId>
+	<artifactId>demo-multi-project</artifactId>
+	<version>0.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
-	<name>Step Samples - Java Keyword</name>
-	<url>http://exense.ch/</url>
+	<name>Step java Multi-projects Demo</name>
 	<description>
-		Step Samples - Java keywords
+		This project contains demo for keywords with multiple projects
 	</description>
+	<url>http://exense.ch/</url>
 	<licenses>
 		<license>
 			<name>The GNU Affero General Public License 3.0</name>
@@ -43,23 +44,9 @@
 		<url>https://github.com/exense/step-samples/</url>
 	</scm>
 
-	<build>
-		<plugins>
-			<!-- using shade plugin to create uber JAR -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.1</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
-
+	<modules>
+		<module>./demo-selenium-multiproject-common-library</module>
+		<module>./demo-selenium-multiproject-project1</module>
+		<module>./demo-selenium-multiproject-project2</module>
+	</modules>
 </project>

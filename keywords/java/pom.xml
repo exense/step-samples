@@ -1,0 +1,186 @@
+<!-- Copyright (C) 2020, exense GmbH This file is part of STEP STEP is free
+	software: you can redistribute it and/or modify it under the terms of the
+	GNU Affero General Public License as published by the Free Software Foundation,
+	either version 3 of the License, or (at your option) any later version. STEP
+	is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+	PURPOSE. See the GNU Affero General Public License for more details. You
+	should have received a copy of the GNU Affero General Public License along
+	with STEP. If not, see <http://www.gnu.org/licenses/>. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>ch.exense.step.examples</groupId>
+	<artifactId>java-keywords</artifactId>
+	<version>0.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>Step java Demo Keyword</name>
+	<description>
+		This project contains demo keywords for the step platform
+	</description>
+	<url>http://exense.ch/</url>
+	<licenses>
+		<license>
+			<name>The GNU Affero General Public License 3.0</name>
+			<url>http://www.gnu.org/licenses/</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<name>exense Team</name>
+			<email>contact@exense.ch</email>
+			<organization>exense GmbH</organization>
+			<organizationUrl>http://www.exense.ch</organizationUrl>
+			<url>http://step.exense.ch</url>
+		</developer>
+	</developers>
+	<scm>
+		<connection>scm:git:https://github.com/exense/step-samples/</connection>
+		<developerConnection>scm:git:https://github.com/exense/step-samples.git</developerConnection>
+		<url>https://github.com/exense/step-samples/</url>
+	</scm>
+
+	<properties>
+		<!-- Version of Step: -->
+		<step.version>0.0.0-SNAPSHOT</step.version>
+		<!-- Version of Step api: -->
+		<step-api.version>1.2.1</step-api.version>
+		<!-- Version of Step library: -->
+		<step-library.version>1.0.12</step-library.version>
+		<!-- other dependencies -->
+		<junit.version>4.13.1</junit.version>
+		<!-- for the examples using selenium: -->
+		<selenium.version>4.10.0</selenium.version>
+		<!-- various generic maven options -->
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<modules>
+		<module>demo-appium-keyword</module>
+		<module>demo-executable-bundles</module>
+		<module>demo-java-keyword</module>
+		<module>demo-multi-project</module>
+		<module>demo-opencart-selenium</module>
+		<module>demo-playwright-keyword</module>
+		<module>demo-selenium-keyword</module>
+	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>ch.exense.step</groupId>
+			<artifactId>step-api-keyword</artifactId>
+			<version>${step-api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Source - skipped for non OSS projects -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+			</plugin>
+			<!-- Javadoc -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>11</source>
+					<target>11</target>
+				</configuration>
+			</plugin>
+		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!-- Central maven plugins versions management -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.6</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.1.1</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-deploy-plugin</artifactId>
+					<version>3.0.0-M1</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<profiles>
+		<profile>
+			<!-- Local compilation - no signature -->
+			<id>LocalBuild</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<!-- next profile is only for our internal build/release process -->
+		<profile>
+			<id>DefaultBuild</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<!-- Signature -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<gpgArguments>
+										<arg>--pinentry-mode</arg>
+										<arg>loopback</arg>
+									</gpgArguments>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

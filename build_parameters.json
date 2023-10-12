@@ -19,7 +19,7 @@
 				}
 			],
 			"ACTIONS": [
-				{"FOLDER": "keywords/java/demo-appium-keyword/"},{"FOLDER": "keywords/java/demo-java-keyword/"},{"FOLDER": "keywords/java/demo-selenium-keyword/"}
+				{"FOLDER": "keywords/java/"}
 			]
 		},
 		{
