@@ -24,7 +24,9 @@ public class SiteTest {
 
 	@After
 	public void closeBrowser() {
-		site.getWebDriver().close();
+		if (site.getWebDriver()!=null) {
+			site.getWebDriver().close();
+		}
 	}
 
 	@Test
@@ -35,14 +37,7 @@ public class SiteTest {
 	}
 
 	public static WebDriver webDriver() {
-		try {
-			File file = new File("D:/Apps/WebDriver/chromedriver/chromedriver.exe");
-			System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
-			return new ChromeDriver();
-
-		} catch (Exception e) {
-			return null;
-		}
+		return new ChromeDriver();
 	}
 
 }

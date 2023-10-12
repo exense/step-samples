@@ -2,6 +2,7 @@ package step.examples.selenium;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.time.Duration;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
@@ -50,7 +51,7 @@ public class SeleniumKeywords extends AbstractKeyword {
 
 		String label = input.getString(INPUT_TEXT);
 
-		WebElement element = new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(
+		WebElement element = new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.elementToBeClickable(
 				By.xpath("//*[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='"
 						+ label.toLowerCase() + "']")));
 		element.click();
