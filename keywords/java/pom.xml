@@ -46,7 +46,7 @@
 
 	<properties>
 		<!-- Version of Step: -->
-		<step.version>0.0.0-SNAPSHOT</step.version>
+		<step.version>3.22.3</step.version>
 		<!-- Version of Step api: -->
 		<step-api.version>1.2.1</step-api.version>
 		<!-- Version of Step library: -->
