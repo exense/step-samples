@@ -24,7 +24,7 @@ public class AppiumKeywordExampleTest {
 	@Test
 	public  void testApiDemo() throws Exception {
 		//String apkPath = Paths.get(this.getClass().getClassLoader().getResource("apk/ApiDemos-debug.apk").toURI()).toString().replace("\\", "/");
-		String apkPath = "https://github.com/appium/java-client/raw/master/src/test/java/io/appium/java_client/ApiDemos-debug.apk";
+		String apkPath = "https://github.com/appium/android-apidemos/releases/download/v3.1.0/ApiDemos-debug.apk";
 		String avd = "Nexus_5X_API_28_Demo_1";
 
 		ctx.run("startAppium");
