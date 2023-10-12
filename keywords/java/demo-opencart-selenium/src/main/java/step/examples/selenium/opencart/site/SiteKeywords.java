@@ -39,7 +39,7 @@ public class SiteKeywords extends AbstractKeyword {
 		/*get the site from the session*/
 		Site site = session.get(Site.class);
 		/*Inputs passed dynamically to the keyword at execution (or use default value)*/
-		String email = input.getString("email", "demo");
+		String email = input.getString("email", "demo@demo.com");
 		String pwd = input.getString("pwd", "demo");
 		/*perform login*/
 		site.getLoginPage().setEmail(email).setPassword(pwd).clickSubmit();
@@ -85,21 +85,13 @@ public class SiteKeywords extends AbstractKeyword {
 				"//*[@id=\"content\"]/h2",10);
 	}
 
-
 	private void testLogin() {
 		loginPage();
 		doLogin();
 	}
 
 	public static WebDriver webDriver() {
-		try {
-			File file = new File("D:/Apps/WebDriver/chromedriver/chromedriver.exe");
-			System.setProperty("webdriver.chrome.driver", file.getAbsolutePath());
-			return new ChromeDriver();
-
-		} catch (Exception e) {
-			return null;
-		}
+		return new ChromeDriver();
 	}
 
 	protected void waitForElement(WebDriver driver, String xpath, long timeout) {

@@ -1,3 +1,4 @@
 .idea/
-/keywords/dotnet60/DemoKeywordLibrary/SeleniumKeywords/.vs/
-/keywords/java/demo-appium-keyword/dependency-reduced-pom.xml
+.vs/
+target/
+dependency-reduced-pom.xml

@@ -19,12 +19,12 @@ public class SiteTest {
 		WebDriver webDriver = SiteTest.webDriver();
 		site = new Site(webDriver);
 		LoginPage page = site.gotoLoginPage();
-		page.setEmail("demo").setPassword("demo").clickSubmit();
+		page.setEmail("demo@demo.com").setPassword("demo").clickSubmit();
 	}
 
 	@After
 	public void closeBrowser() {
-		if (site.getWebDriver()!=null) {
+		if (site!= null && site.getWebDriver()!=null) {
 			site.getWebDriver().close();
 		}
 	}
@@ -39,5 +39,4 @@ public class SiteTest {
 	public static WebDriver webDriver() {
 		return new ChromeDriver();
 	}
-
 }

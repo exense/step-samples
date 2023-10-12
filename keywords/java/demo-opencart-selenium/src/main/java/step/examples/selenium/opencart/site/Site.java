@@ -6,20 +6,23 @@ import step.examples.selenium.opencart.object.PageObject;
 import step.examples.selenium.opencart.page.IndexPage;
 import step.examples.selenium.opencart.page.LoginPage;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 @PageObject
-public class Site {
+public class Site implements Closeable {
 
 	private static final String BASE_URL = "http://demo.opencart.com/";
 
-	private WebDriver driver;
+	private final WebDriver driver;
 
-	private LoginPage loginPage;
+	private final LoginPage loginPage;
 
-	private IndexPage indexPage;
+	private final IndexPage indexPage;
 
 	public Site(WebDriver webDriver) {
 		this.driver = webDriver;
-		this.loginPage = new LoginPage();
+		this.loginPage = new LoginPage(driver);
 		this.indexPage = new IndexPage(driver);
 	}
 
@@ -45,5 +48,12 @@ public class Site {
 
 	public WebDriver getWebDriver() {
 		return driver;
+	}
+
+	@Override
+	public void close() throws IOException {
+		if (driver!=null) {
+			driver.close();
+		}
 	}
 }
