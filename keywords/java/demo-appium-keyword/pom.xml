@@ -12,9 +12,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>ch.exense.step.examples</groupId>
-	<version>0.0.0</version>
 	<artifactId>demo-appium-keyword</artifactId>
+
+	<parent>
+		<groupId>ch.exense.step.examples</groupId>
+		<artifactId>java-keywords</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
 	<name>Step Samples - Appium Keyword</name>
 	<description>
@@ -54,4 +59,23 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<plugins>
+			<!-- Create an uber-jar which is the default packaging format for Keyword
+				Packages -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

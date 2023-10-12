@@ -13,12 +13,16 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>ch.exense.step.examples</groupId>
 	<artifactId>demo-multi-project</artifactId>
-	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<parent>
+		<groupId>ch.exense.step.examples</groupId>
+		<artifactId>java-keywords</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-	<name>Step java Multi-projects Demo</name>
+	<name>Step Samples - Selenium - Multiple projects</name>
 	<description>
 		This project contains demo for keywords with multiple projects
 	</description>

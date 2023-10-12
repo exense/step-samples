@@ -18,7 +18,7 @@
 	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Step java Demo Keyword</name>
+	<name>Step Samples - Java Demo Keyword</name>
 	<description>
 		This project contains demo keywords for the step platform
 	</description>
@@ -69,6 +69,7 @@
 		<module>demo-opencart-selenium</module>
 		<module>demo-playwright-keyword</module>
 		<module>demo-selenium-keyword</module>
+		<module>demo-sikulix-keyword</module>
 	</modules>
 
 	<dependencies>

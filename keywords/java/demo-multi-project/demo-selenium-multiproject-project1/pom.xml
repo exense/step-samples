@@ -3,9 +3,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ch.exense.step.examples</groupId>
     <artifactId>demo-selenium-multiproject-project1</artifactId>
-    <version>0.0.0</version>
+
+    <parent>
+        <groupId>ch.exense.step.examples</groupId>
+        <artifactId>demo-multi-project</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
     <name>Step Samples - Selenium - Multiple projects - Project 1</name>
     <description>This project is part of an example of a complex setup with multiple projects
