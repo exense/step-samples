@@ -1,5 +1,7 @@
 # Frontend plugin sample
 
+Go to plugins/example-plugin/frontend
+
 ## Plugin creation
 - Install npm dependencies
 ```
@@ -12,7 +14,7 @@ ng generate @exense/step-core:plugin examplePlugin
 `examplePlugin` name may vary. The name will affect on some folders and commands name.
 Next the `${pluginName}` will be used as replacement.
 
-Command will request to enter the port and choose the style's preprocessor.
+Command will request to enter the port and choose the style's preprocessor (we recommend SCSS).
 
 As the result an angular application with micro-frontend plugin module will be created.
 
@@ -30,9 +32,9 @@ Plugin's entry module assembled sources will be hosted at: http://localhost:5002
 
 Next you will need to make it accessible in the main <b>Step</b> host application.
 
-It can be achieved with `proxy.conf.json` file in `step-frontend/projects/step-app`. 
+It can be achieved with `proxy.conf.json` file in `step-frontend/projects/step-app` for the open source version of Step: https://github.com/exense/step-frontend. 
 
-Modify it in the following way, by adding the plugin section
+Modify it by adding the plugin section:
 ```
 {
   "/rest": {
@@ -70,9 +72,9 @@ const ADDITIONAL_PLUGINS: ReadonlyArray<MicrofrontendPluginDefinition> = [
 - Inside the sample project try to change something in the `projects/${pluginName}/src/app/modules/plugin`. 
 Angular will rebuild the plugin served at `localhost:5002` and changes will be reflected at running main application.
 
-## Plugin build
-After plugin's creation and new command should automatically appear in the package.json.
-It should look like `build:a2:${pluginName}`.
+## Building the Plugin
+After plugin's creation a build command is generated in the package.json.
+It looks like: `build:a2:${pluginName}`.
 
 Invoke it:
 ```
@@ -80,6 +82,5 @@ npm run build:a2:examplePlugin
 ```
 The build's result will be located at `dist/${pluginName}`
 
-- Copy files from this folder to the server, where the main application is hosted.
-- These files should be accessible by the main application and located on the same host.
-- Do the required changes at backend to return the plugin's information (name and path to the remoteEntry.js) by `/rest/app/plugins` endpoint
+- Copy files from `dist/${pluginName}` to the FE folder of the plugin
+- Add the required plugin settings (name and path to the remoteEntry.js) to point to the hosted FE folder
