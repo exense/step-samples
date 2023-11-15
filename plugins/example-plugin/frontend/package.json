@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "build:a2:examplePlugin": "ng build examplePlugin",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
@@ -34,7 +35,7 @@
     "uuid": "8.3.2",
     "angular-split": "14.1.0",
     "luxon": "2.0.0",
-    "@exense/step-core": "./exense-step-core-0.2.0.tgz"
+    "@exense/step-core": "latest"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^14.2.7",

@@ -2,6 +2,26 @@
 
 Go to plugins/example-plugin/frontend
 
+## Preparations
+- Retrieve credentials for Exense's npm registry
+- Authorize to Exense`s registry with the following command
+```
+npm login --registry=https://nexus-enterprise.exense.ch/repository/exense-npm/ --scope=@exense
+```
+Command will prompt credentials, enter it. After successful login, npm will modify `.npmrc` 
+file in the home directory with registry's access token. Similar lines should appear in `.npmrc`:
+```
+//nexus-enterprise.exense.ch/repository/exense-npm/:_authToken=NpmToken.00000000-0000-0000-0000-00000000000
+@exense:registry=https://nexus-enterprise.exense.ch/repository/exense-npm/
+```
+**NOTE:** Token value will be different.
+
+If you want to keep the access to Exense's registry for different projects at the same time, 
+keep this token information in the home folder's `.npmrc`.
+
+If you want to have the access for a single project only, create its own `.npmrc` file,
+cut those two lines from home's `.npmrc` and paste it to the project's one.
+
 ## Plugin creation
 - Install npm dependencies
 ```
