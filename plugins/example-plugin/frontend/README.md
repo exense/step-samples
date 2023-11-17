@@ -1,9 +1,10 @@
 # Frontend plugin sample
 
-Go to plugins/example-plugin/frontend
+This manual explains how to add a FE plugin to your Step Enterprise onPrem.
 
 ## Preparations
-- Retrieve credentials for Exense's npm registry
+- You need your credentials for Exense's npm registry available to all Enterprise customers
+- Go to plugins/example-plugin/frontend in your console
 - Authorize to Exense`s registry with the following command
 ```
 npm login --registry=https://nexus-enterprise.exense.ch/repository/exense-npm/ --scope=@exense
