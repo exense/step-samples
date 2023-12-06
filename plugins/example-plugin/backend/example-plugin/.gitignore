@@ -1,0 +1,9 @@
+bin/
+target/
+.settings/
+*.class
+*.log
+*.bak
+.classpath
+.project
+/src/main/resources/webapp-mycustomplugin/mycustomplugin/*
