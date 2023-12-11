@@ -6,4 +6,4 @@ target/
 *.bak
 .classpath
 .project
-/src/main/resources/webapp-mycustomplugin/mycustomplugin/*
+/src/main/resources/webapp-examplePlugin/examplePlugin/*

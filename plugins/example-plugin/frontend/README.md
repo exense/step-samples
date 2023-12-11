@@ -103,5 +103,5 @@ npm run build:a2:examplePlugin
 ```
 The build's result will be located at `dist/${pluginName}`
 
-- Copy files from `dist/${pluginName}` to the FE folder of the plugin
+- Copy files from `dist/${pluginName}` to the FE folder of the Java plugin (refer to the backend sample)
 - Add the required plugin settings (name and path to the remoteEntry.js) to point to the hosted FE folder
