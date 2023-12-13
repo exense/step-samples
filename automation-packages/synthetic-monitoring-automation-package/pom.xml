@@ -1,0 +1,203 @@
+<!-- Copyright (C) 2020, exense GmbH This file is part of STEP STEP is free
+	software: you can redistribute it and/or modify it under the terms of the
+	GNU Affero General Public License as published by the Free Software Foundation,
+	either version 3 of the License, or (at your option) any later version. STEP
+	is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+	PURPOSE. See the GNU Affero General Public License for more details. You
+	should have received a copy of the GNU Affero General Public License along
+	with STEP. If not, see <http://www.gnu.org/licenses/>. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.exense.step.examples</groupId>
+    <artifactId>synthetic-monitoring-automation-package</artifactId>
+    <version>0.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Step Samples - Step Automation Package for synthetic monitoring</name>
+    <description>
+        Step Samples
+    </description>
+    <url>http://exense.ch/</url>
+    <licenses>
+        <license>
+            <name>The GNU Affero General Public License 3.0</name>
+            <url>http://www.gnu.org/licenses/</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>exense Team</name>
+            <email>contact@exense.ch</email>
+            <organization>exense GmbH</organization>
+            <organizationUrl>http://www.exense.ch</organizationUrl>
+            <url>http://step.exense.ch</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/exense/step-samples/</connection>
+        <developerConnection>scm:git:https://github.com/exense/step-samples.git</developerConnection>
+        <url>https://github.com/exense/step-samples/</url>
+    </scm>
+
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <step.version>2023.12.11-6576c12c2711316fe9bc7892</step.version>
+        <step-api.version>1.2.2</step-api.version>
+
+        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+        <playwright.version>1.40.0</playwright.version>
+        <junit.version>4.13.1</junit.version>
+
+        <!-- !!! The URL of your Step server !!! -->
+        <!--<step.url>https://stepee-sed-2518.stepcloud-test.ch/</step.url>-->
+        <step.url>http://localhost:8080/</step.url>
+
+        <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
+        <!--localhost key-->
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3YTM1Y2IxZC00MGVlLTQ2MzQtYTdkYy0yOGZlNWI5ZWFlYzciLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwMjQ3MjgxNiwiaWF0IjoxNzAyNDcyODE2LCJleHAiOjQ4NTYwNzI4MTYsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.pZnYHZFwA9pF_xHmLZdbpGvCEfUTmgmIf0yqigO-CVI</step.auth-token>
+        <step.step-project-name>automation-packages</step.step-project-name>
+    </properties>
+
+    <repositories>
+        <!-- private nexus -->
+        <repository>
+            <id>nexus-exense</id>
+            <url>https://nexus-enterprise.exense.ch/repository/exense/</url>
+        </repository>
+        <repository>
+            <id>nexus-staging</id>
+            <url>https://nexus-enterprise.exense.ch/repository/staging-maven/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>nexus-staging</id>
+            <url>https://nexus-enterprise.exense.ch/repository/staging-maven/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-api-keyword</artifactId>
+            <version>${step-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-junit</artifactId>
+            <version>${step.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--  For playwright keyword -->
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>${playwright.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+            </plugin>
+            <!-- Create a uber-jar which is the default packaging format for Step Keyword Packages -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+              <!--  <configuration>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>-->
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- Configuration for publishing the automation package to Step (maven profile) -->
+        <profile>
+            <id>Publish automation package</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>ch.exense.step</groupId>
+                            <artifactId>step-ee-maven-plugin</artifactId>
+                            <version>${step.version}</version>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+
+                <plugins>
+                    <plugin>
+                        <groupId>ch.exense.step</groupId>
+                        <artifactId>step-ee-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>deploy-automation-package-on-step</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <url>${step.url}</url>
+
+                                    <description>Playwright benchmark example</description>
+
+                                    <waitForExecution>true</waitForExecution>
+                                    <ensureExecutionSuccess>true</ensureExecutionSuccess>
+
+                                    <authToken>${step.auth-token}</authToken>
+                                    <stepProjectName>${step.step-project-name}</stepProjectName>
+
+                                </configuration>
+                                <goals>
+                                    <goal>deploy-automation-package</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
