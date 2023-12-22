@@ -7,9 +7,13 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.SelectOption;
 import step.handlers.javahandler.AbstractKeyword;
 import step.handlers.javahandler.Keyword;
+import step.junit.runners.annotations.Plan;
+import step.junit.runners.annotations.Plans;
 
+@Plans({"benchmark-plan-sample.plan"})
 public class PlaywrightKeywordExample extends AbstractKeyword {
 
+    @Plan
     @Keyword(name = "Buy MacBook in OpenCart")
     public void buyMacBookInOpenCart() throws InterruptedException {
         try (Playwright playwright = Playwright.create()) {

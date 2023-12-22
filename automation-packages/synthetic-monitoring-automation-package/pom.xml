@@ -49,7 +49,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>2023.12.11-6576c12c2711316fe9bc7892</step.version>
+        <step.version>2023.12.21-65848640ccbcc87c80afa947</step.version>
         <step-api.version>1.2.2</step-api.version>
 
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
@@ -58,12 +58,14 @@
 
         <!-- !!! The URL of your Step server !!! -->
         <!--<step.url>https://stepee-sed-2518.stepcloud-test.ch/</step.url>-->
-        <step.url>http://localhost:8080/</step.url>
+        <!--<step.url>http://localhost:8080/</step.url>-->
+        <step.url>https://stepos-sed-2670.stepcloud-test.ch</step.url>
+        <!--<step.url>https://stepos-sed-2557.stepcloud-test.ch</step.url>-->
 
         <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
         <!--localhost key-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3YTM1Y2IxZC00MGVlLTQ2MzQtYTdkYy0yOGZlNWI5ZWFlYzciLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwMjQ3MjgxNiwiaWF0IjoxNzAyNDcyODE2LCJleHAiOjQ4NTYwNzI4MTYsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.pZnYHZFwA9pF_xHmLZdbpGvCEfUTmgmIf0yqigO-CVI</step.auth-token>
-        <step.step-project-name>automation-packages</step.step-project-name>
+        <!--<step.auth-token>eyJhbGciOiJIUzI1NiJ9...</step.auth-token>
+        <step.step-project-name>automation-packages</step.step-project-name>-->
     </properties>
 
     <repositories>
@@ -97,7 +99,7 @@
             <groupId>ch.exense.step</groupId>
             <artifactId>step-junit</artifactId>
             <version>${step.version}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
 
         <!--  For playwright keyword -->
@@ -134,20 +136,18 @@
                         </goals>
                     </execution>
                 </executions>
-              <!--  <configuration>
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                </configuration>-->
             </plugin>
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>ch.exense.step</groupId>
+                    <artifactId>step-ee-maven-plugin</artifactId>
+                    <version>${step.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
     </build>
 
     <profiles>
@@ -159,16 +159,6 @@
             </activation>
 
             <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>ch.exense.step</groupId>
-                            <artifactId>step-ee-maven-plugin</artifactId>
-                            <version>${step.version}</version>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-
                 <plugins>
                     <plugin>
                         <groupId>ch.exense.step</groupId>
@@ -180,17 +170,55 @@
                                 <configuration>
                                     <url>${step.url}</url>
 
-                                    <description>Playwright benchmark example</description>
-
-                                    <waitForExecution>true</waitForExecution>
-                                    <ensureExecutionSuccess>true</ensureExecutionSuccess>
-
-                                    <authToken>${step.auth-token}</authToken>
-                                    <stepProjectName>${step.step-project-name}</stepProjectName>
+                                    <!--<authToken>${step.auth-token}</authToken>
+                                    <stepProjectName>${step.step-project-name}</stepProjectName>-->
 
                                 </configuration>
                                 <goals>
                                     <goal>deploy-automation-package</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Configuration for isolated execution of the automation package in Step (maven profile) -->
+        <profile>
+            <id>Execute automation package on Step</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>ch.exense.step</groupId>
+                        <artifactId>step-ee-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>execute-automation-package-on-step</id>
+                                <phase>package</phase>
+                                <configuration>
+                                    <url>${step.url}</url>
+                                    <artifactId>synthetic-monitoring-automation-package</artifactId>
+                                    <groupId>ch.exense.step.examples</groupId>
+                                    <artifactVersion>0.0.0</artifactVersion>
+                                    <artifactClassifier></artifactClassifier>
+
+                                    <!--<authToken>${step.auth-token}</authToken>
+                                    <stepProjectName>${step.step-project-name}</stepProjectName>-->
+                                    <includePlans>Opencart synthetic monitoring plan,Test plan with keyword existing on the Step instance</includePlans>
+                                    <ensureExecutionSuccess>true</ensureExecutionSuccess>
+                                    <waitForExecution>true</waitForExecution>
+                                    <executionResultTimeoutS>120</executionResultTimeoutS>
+                                    <executionParameters>
+                                        <env>PROD</env>
+                                    </executionParameters>
+                                </configuration>
+                                <goals>
+                                    <goal>execute-automation-package</goal>
                                 </goals>
                             </execution>
                         </executions>
