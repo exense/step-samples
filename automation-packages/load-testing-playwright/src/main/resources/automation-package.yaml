@@ -1,0 +1,16 @@
+---
+schemaVersion: 1.0.0
+name: "load-testing-okhttp-automation-package"
+plans:
+  - name: "Opencart load test plan"
+    root:
+      threadGroup:
+        users: 5
+        iterations: 10
+        children:
+          - callKeyword:
+              keyword: "Buy MacBook in OpenCart"
+#          - performanceAssert:
+#              measurementName: "OpenCart home"
+#              comparator: "LOWER_THAN"
+#              expectedValue: 100
