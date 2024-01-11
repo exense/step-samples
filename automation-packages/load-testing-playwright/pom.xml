@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2020, exense GmbH This file is part of STEP STEP is free
+<!-- Copyright (C) exense GmbH. This file is part of STEP. STEP is free
 	software: you can redistribute it and/or modify it under the terms of the
 	GNU Affero General Public License as published by the Free Software Foundation,
 	either version 3 of the License, or (at your option) any later version. STEP
@@ -30,8 +30,8 @@
             <name>exense Team</name>
             <email>contact@exense.ch</email>
             <organization>exense GmbH</organization>
-            <organizationUrl>http://www.exense.ch</organizationUrl>
-            <url>http://step.exense.ch</url>
+            <organizationUrl>https://www.exense.ch</organizationUrl>
+            <url>https://step.exense.ch</url>
         </developer>
     </developers>
     <scm>
@@ -51,23 +51,16 @@
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- !!! The URL of your Step server !!! -->
-        <!--<step.url>https://stepee-sed-2518.stepcloud-test.ch/</step.url>-->
-        <!--<step.url>http://localhost:8080/</step.url>-->
+        <!-- !!! The base URL of your Step server !!! -->
         <step.url>http://localhost:8080</step.url>
-        <!--
-        <step.url>https://stepos-sed-2670.stepcloud-test.ch</step.url>
-        -->
-        <!--<step.url>https://stepos-sed-2557.stepcloud-test.ch</step.url>-->
-
-        <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
-        <!--localhost key-->
-        <!--<step.auth-token>eyJhbGciOiJIUzI1NiJ9...</step.auth-token>
-        <step.step-project-name>automation-packages</step.step-project-name>-->
+        <!-- For Step EE, specify your Step token (in text format) and Step project name-->
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI1NmI1MDk5Zi1hM2VlLTQ5NTUtYmY3My1kOGEzYWM0ZjkxYWUiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwNDc4Nzk5MiwiaWF0IjoxNzA0Nzg3OTkyLCJleHAiOjQ4NTgzODc5OTIsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.KMlrIrsA956PUIH1Bo7WcpEagiU4ct3lmqB0VC50Wo0</step.auth-token>
+        <step.step-project-name>automation-packages</step.step-project-name>
     </properties>
 
     <repositories>
         <!-- private nexus -->
+        <!-- FIXME: remove when releasing -->
         <repository>
             <id>nexus-exense</id>
             <url>https://nexus-enterprise.exense.ch/repository/exense/</url>
@@ -144,11 +137,11 @@
                         <phase>package</phase>
                         <configuration>
                             <url>${step.url}</url>
-                            <!--<authToken>${step.auth-token}</authToken>
-                            <stepProjectName>${step.step-project-name}</stepProjectName>-->
+                            <authToken>${step.auth-token}</authToken>
+                            <stepProjectName>${step.step-project-name}</stepProjectName>
                             <ensureExecutionSuccess>true</ensureExecutionSuccess>
                             <waitForExecution>true</waitForExecution>
-                            <executionResultTimeoutS>120</executionResultTimeoutS>
+                            <executionResultTimeoutS>600</executionResultTimeoutS>
                             <executionParameters>
                                 <env>TEST</env>
                             </executionParameters>

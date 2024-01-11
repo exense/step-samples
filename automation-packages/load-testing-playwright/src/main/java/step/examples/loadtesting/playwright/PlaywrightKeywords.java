@@ -4,6 +4,7 @@ import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.SelectOption;
 import step.handlers.javahandler.AbstractKeyword;
 import step.handlers.javahandler.Keyword;
@@ -17,12 +18,15 @@ public class PlaywrightKeywords extends AbstractKeyword {
             Page page = browser.newPage();
             page.navigate("https://opencart-prf.exense.ch/");
             page.locator("text=MacBook").click();
+            // The previous click loads quite a few resources such as jQuery etc.;
+            // If we don't include this wait, the next click may hang forever.
+            page.waitForLoadState(LoadState.DOMCONTENTLOADED);
             page.locator("text=Add to Cart").click();
             page.locator("text=1 item").click();
             page.locator("text=View Cart").click();
             page.locator("//a[text()='Checkout']").click();
             page.locator("text=Guest Checkout").click();
-            Thread.sleep(500);
+            page.waitForLoadState(LoadState.DOMCONTENTLOADED);
             page.locator("#button-account").click();
             page.locator("#input-payment-firstname").type("Gustav");
             page.locator("#input-payment-lastname").type("Muster");
