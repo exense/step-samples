@@ -1,0 +1,165 @@
+<!-- Copyright (C) 2020, exense GmbH This file is part of STEP STEP is free
+	software: you can redistribute it and/or modify it under the terms of the
+	GNU Affero General Public License as published by the Free Software Foundation,
+	either version 3 of the License, or (at your option) any later version. STEP
+	is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+	PURPOSE. See the GNU Affero General Public License for more details. You
+	should have received a copy of the GNU Affero General Public License along
+	with STEP. If not, see <http://www.gnu.org/licenses/>. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.exense.step.examples</groupId>
+    <artifactId>load-testing-k6</artifactId>
+    <version>0.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Step Samples - Load testing with K6</name>
+    <url>http://step.exense.ch/</url>
+    <licenses>
+        <license>
+            <name>The GNU Affero General Public License 3.0</name>
+            <url>http://www.gnu.org/licenses/</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>exense Team</name>
+            <email>contact@exense.ch</email>
+            <organization>exense GmbH</organization>
+            <organizationUrl>http://www.exense.ch</organizationUrl>
+            <url>http://step.exense.ch</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/exense/step-samples/</connection>
+        <developerConnection>scm:git:https://github.com/exense/step-samples.git</developerConnection>
+        <url>https://github.com/exense/step-samples/</url>
+    </scm>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <step.version>2024.1.11-659f8ef1ccbcc87c80a0cea2</step.version>
+        <step-api.version>1.2.2</step-api.version>
+        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+        <junit.version>4.13.1</junit.version>
+
+        <!-- !!! The URL of your Step server !!! -->
+        <step.url>http://localhost:8080</step.url>
+        <!--
+        <step.url>https://stepee-sed-2518.stepcloud-test.ch</step.url>
+        -->
+
+        <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
+        <!--localhost key-->
+        <!--
+        <step.step-project-name>Test2</step.step-project-name>
+        -->
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI2ZjE2ODY2Yy0zZTUwLTQ0YjAtYmJjNC00MTgzOTM2NTY4NDEiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwNTAzOTM4MSwiaWF0IjoxNzA1MDM5MzgxLCJleHAiOjQ4NTg2MzkzODEsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.d7F3VnHY4i6-Gi0Qzg-FKZmTQC8eUN-oZsaB95Qny6o</step.auth-token>
+    </properties>
+
+    <repositories>
+        <!-- private nexus -->
+        <repository>
+            <id>nexus-exense</id>
+            <url>https://nexus-enterprise.exense.ch/repository/exense/</url>
+        </repository>
+        <repository>
+            <id>nexus-staging</id>
+            <url>https://nexus-enterprise.exense.ch/repository/staging-maven/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>nexus-staging</id>
+            <url>https://nexus-enterprise.exense.ch/repository/staging-maven/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-junit</artifactId>
+            <version>${step.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+            </plugin>
+            <!-- Create a uber-jar which is the default packaging format for Step Keyword Packages -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>ch.exense.step</groupId>
+                <artifactId>step-ee-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>execute-automation-package-on-step</id>
+                        <phase>verify</phase>
+                        <configuration>
+                            <url>${step.url}</url>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactVersion>${project.version}</artifactVersion>
+                            <artifactClassifier></artifactClassifier>
+
+                            <!--<authToken>${step.auth-token}</authToken>
+                            <stepProjectName>${step.step-project-name}</stepProjectName>-->
+                            <!--
+
+                            -->
+                            <ensureExecutionSuccess>true</ensureExecutionSuccess>
+                            <waitForExecution>true</waitForExecution>
+                            <executionResultTimeoutS>120</executionResultTimeoutS>
+                            <executionParameters>
+                                <env>PROD</env>
+                            </executionParameters>
+                        </configuration>
+                        <goals>
+                            <goal>execute-automation-package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>ch.exense.step</groupId>
+                    <artifactId>step-ee-maven-plugin</artifactId>
+                    <version>${step.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
