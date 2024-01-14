@@ -8,9 +8,17 @@ plans:
         users: 5
         iterations: 10
         children:
-          - callKeyword:
-              keyword: "OpenCart home"
+          - sequence:
+              children:
+              - callKeyword:
+                 keyword: "okhttp Init"
+              - callKeyword:
+                  keyword: "OpenCart Home"
+              - callKeyword:
+                  keyword: "OpenCart Add MacBook"
+              - callKeyword:
+                  keyword: "OpenCart Checkout"
 #          - performanceAssert:
-#              measurementName: "OpenCart home"
+#              measurementName: "OpenCart Home"
 #              comparator: "LOWER_THAN"
 #              expectedValue: 100

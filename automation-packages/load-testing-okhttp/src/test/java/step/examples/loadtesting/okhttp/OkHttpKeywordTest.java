@@ -20,7 +20,10 @@ public class OkHttpKeywordTest {
 
     @Test
     public void test() throws Exception {
-        ctx.run("OpenCart home", "{}");
+        ctx.run("okhttp Init", "{}");
+        ctx.run("OpenCart Home", "{}");
+        ctx.run("OpenCart Add MacBook", "{}");
+        ctx.run("OpenCart Checkout", "{}");
     }
 
     @After

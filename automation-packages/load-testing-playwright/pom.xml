@@ -18,7 +18,7 @@
     <packaging>jar</packaging>
 
     <name>Step Samples - Load testing with playwright</name>
-    <url>http://step.exense.ch/</url>
+    <url>https://step.exense.ch/</url>
     <licenses>
         <license>
             <name>The GNU Affero General Public License 3.0</name>
