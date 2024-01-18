@@ -2,7 +2,7 @@
 schemaVersion: 1.0.0
 name: "load-testing-okhttp-automation-package"
 plans:
-  - name: "Opencart load test plan"
+  - name: "OpenCart okhttp Load Test"
     root:
       threadGroup:
         users: 5
@@ -10,8 +10,6 @@ plans:
         children:
           - sequence:
               children:
-              - callKeyword:
-                 keyword: "okhttp Init"
               - callKeyword:
                   keyword: "OpenCart Home"
               - callKeyword:

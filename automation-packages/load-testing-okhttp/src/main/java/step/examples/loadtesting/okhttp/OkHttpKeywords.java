@@ -1,10 +1,6 @@
 package step.examples.loadtesting.okhttp;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.*;
-import step.functions.io.AbstractSession;
 import step.handlers.javahandler.AbstractKeyword;
 import step.handlers.javahandler.Keyword;
 
@@ -13,24 +9,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class OkHttpKeywords extends AbstractKeyword {
-    private static final boolean WORKAROUND = true;
-
-    private static final String OKHTTP_CLIENT = "okhttpClient"; // not working, keeps running into the following problems regardless of session etc.:
-    // errorSummary=class okhttp3.OkHttpClient cannot be cast to class okhttp3.OkHttpClient (okhttp3.OkHttpClient is in unnamed module of loader step.grid.contextbuilder.JavaLibrariesClassLoader @514c7ee5; okhttp3.OkHttpClient is in unnamed module of loader step.grid.contextbuilder.JavaLibrariesClassLoader @69636681)
-    private static final String OKHTTP_COOKIES_WORKAROUND = "okhttpClient_Cookies_Workaround";
-
-    @Keyword(name = "okhttp Init")
-    public void okhttpClientInit() {
-        if (WORKAROUND) {
-        } else {
-            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
-            clientBuilder.setCookieJar$okhttp(new TrivialCookieJar());
-            session.put(OKHTTP_CLIENT, new OkHttpClient(clientBuilder));
-        }
-    }
+    private static final String SESSION_OKHTTP_CLIENT = "okhttpClient";
 
     @Keyword(name = "OpenCart Home")
     public void openCartHome() {
@@ -85,28 +66,28 @@ public class OkHttpKeywords extends AbstractKeyword {
     }
 
     private String perform(Request request) {
-        OkHttpClient client;
-        if (WORKAROUND) {
-            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
-            clientBuilder.setCookieJar$okhttp(new TrivialCookieJar(session));
-            client = clientBuilder.build();
-        } else {
-            client = (OkHttpClient) session.get(OKHTTP_CLIENT);
-        }
-
+        OkHttpClient client = getOrCreateClient();
         try (Response response = client.newCall(request).execute()) {
             assert response.body() != null;
-            String body = response.body().string();
-            //System.err.println("BODY SIZE: " + body.length());
-            return body;
+            return response.body().string();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private OkHttpClient getOrCreateClient() {
+        OkHttpClient client = (OkHttpClient) session.get(SESSION_OKHTTP_CLIENT);
+        if (client == null) {
+            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+            clientBuilder.setCookieJar$okhttp(new TrivialCookieJar());
+            client = new OkHttpClient(clientBuilder);
+            session.put(SESSION_OKHTTP_CLIENT, client);
+        }
+        return client;
+    }
+
     private void assertContains(String expected, String body) {
         if (!body.contains(expected)) {
-            //System.err.println(body);
             throw new RuntimeException("Response body did not contain expected String: " + expected);
         }
     }
@@ -114,57 +95,14 @@ public class OkHttpKeywords extends AbstractKeyword {
     private static class TrivialCookieJar implements CookieJar {
         private final Map<String, List<Cookie>> cookieStore = new HashMap<>();
 
-        // FIXME: WORKAROUND
-        private final Map<String, List<String>> cookieStore2 = new HashMap<>();
-        private static final ObjectMapper JSON_OBJECT_MAPPER = (new ObjectMapper()).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        private final AbstractSession session;
-
-        // FIXME: Both contructors are due to the workaround and should be removed.
-        private TrivialCookieJar() {
-            this(null);
-        }
-        private TrivialCookieJar(AbstractSession session) {
-            if (WORKAROUND) {
-                this.session = session;
-                try {
-                    String sCookiesString = (String) session.get(OKHTTP_COOKIES_WORKAROUND);
-                    if (sCookiesString != null) {
-                        cookieStore2.putAll(JSON_OBJECT_MAPPER.readValue(sCookiesString, Map.class));
-                    }
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                this.session = null;
-            }
-        }
-
         @Override
         public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-            if (WORKAROUND) {
-                try {
-                    cookieStore2.put(url.host(), cookies.stream().map(Cookie::toString).collect(Collectors.toList()));
-                    session.put(OKHTTP_COOKIES_WORKAROUND, JSON_OBJECT_MAPPER.writeValueAsString(cookieStore2));
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                cookieStore.put(url.host(), cookies);
-            }
+            cookieStore.put(url.host(), cookies);
         }
 
         @Override
         public List<Cookie> loadForRequest(HttpUrl url) {
-            if (WORKAROUND) {
-                List<String> cookies = cookieStore2.get(url.host());
-                if (cookies != null) {
-                    return cookies.stream().map(s -> Cookie.parse(url, s)).collect(Collectors.toList());
-                }
-                return new ArrayList<>();
-            } else {
-                List<Cookie> cookies = cookieStore.get(url.host());
-                return cookies != null ? cookies : new ArrayList<>();
-            }
+            return cookieStore.getOrDefault(url.host(), new ArrayList<>());
         }
     }
 }

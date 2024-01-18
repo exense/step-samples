@@ -1,8 +1,8 @@
 ---
 schemaVersion: 1.0.0
-name: "load-testing-okhttp-automation-package"
+name: "load-testing-playwright-automation-package"
 plans:
-  - name: "Opencart load test plan"
+  - name: "OpenCart Playwright Load Test"
     root:
       threadGroup:
         users: 5

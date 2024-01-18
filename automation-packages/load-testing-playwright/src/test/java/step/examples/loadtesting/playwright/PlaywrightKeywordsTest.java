@@ -9,19 +9,19 @@ import step.handlers.javahandler.KeywordRunner.ExecutionContext;
 import java.util.HashMap;
 import java.util.Map;
 
+// This uses the "traditional" way to test the Step keyword.
 public class PlaywrightKeywordsTest {
 
     private ExecutionContext ctx;
 
     @Before
     public void setUp() {
-        Map<String, String> properties = new HashMap<>();
-        ctx = KeywordRunner.getExecutionContext(properties, PlaywrightKeywords.class);
+        ctx = KeywordRunner.getExecutionContext(Map.of(), PlaywrightKeywords.class);
     }
 
     @Test
     public void test() throws Exception {
-        ctx.run("Buy MacBook in OpenCart", "{}");
+        ctx.run("Buy MacBook in OpenCart");
     }
 
     @After

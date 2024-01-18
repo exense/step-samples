@@ -14,7 +14,7 @@
 
     <groupId>ch.exense.step.examples</groupId>
     <artifactId>load-testing-okhttp</artifactId>
-    <version>0.0.0</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Step Samples - Load testing with OkHttp</name>
@@ -45,10 +45,11 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>2023.12.27-658c5ffeccbcc87c800fd40d</step.version>
+        <step.version>2024.1.16-65a6b842cd2ce56f47f1e264</step.version>
         <step-api.version>1.2.2</step-api.version>
-        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+        <okhttp.version>4.12.0</okhttp.version>
         <junit.version>4.13.1</junit.version>
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
 
         <!-- !!! The base URL of your Step server !!! -->
         <step.url>http://localhost:8080</step.url>
@@ -79,23 +80,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>ch.exense.step</groupId>
             <artifactId>step-api-keyword</artifactId>
             <version>${step-api.version}</version>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.exense.step</groupId>
-            <artifactId>step-junit</artifactId>
-            <version>${step.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.12.0</version>
         </dependency>
 
         <dependency>
@@ -104,15 +98,32 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-automation-packages-junit</artifactId>
+            <version>${step.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Make the Step maven plugin available -->
+                <plugin>
+                    <groupId>ch.exense.step</groupId>
+                    <artifactId>step-ee-maven-plugin</artifactId>
+                    <version>${step.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
             </plugin>
-            <!-- Create a uber-jar which is the default packaging format for Step Keyword Packages -->
+            <!-- Create an uber-jar which is the default packaging format for Step Keyword Packages -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -126,6 +137,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- Use the Step maven plugin to execute the automation package in Step -->
             <plugin>
                 <groupId>ch.exense.step</groupId>
                 <artifactId>step-ee-maven-plugin</artifactId>
@@ -151,15 +163,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>ch.exense.step</groupId>
-                    <artifactId>step-ee-maven-plugin</artifactId>
-                    <version>${step.version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
     </build>
 
 </project>

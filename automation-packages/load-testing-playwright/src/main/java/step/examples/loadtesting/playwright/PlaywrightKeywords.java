@@ -27,6 +27,8 @@ public class PlaywrightKeywords extends AbstractKeyword {
             page.locator("//a[text()='Checkout']").click();
             page.locator("text=Guest Checkout").click();
             page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+            // Another timing issue potentially hanging the script
+            Thread.sleep(500);
             page.locator("#button-account").click();
             page.locator("#input-payment-firstname").type("Gustav");
             page.locator("#input-payment-lastname").type("Muster");
