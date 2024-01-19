@@ -45,7 +45,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>2024.1.16-65a6b842cd2ce56f47f1e264</step.version>
+        <step.version>2024.1.19-65aa6ccdcd2ce56f47ebd65f</step.version>
         <step-api.version>1.2.2</step-api.version>
         <okhttp.version>4.12.0</okhttp.version>
         <junit.version>4.13.1</junit.version>
@@ -54,7 +54,7 @@
         <!-- !!! The base URL of your Step server !!! -->
         <step.url>http://localhost:8080</step.url>
         <!-- For Step EE, specify your Step token (in text format) and Step project name-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI1NmI1MDk5Zi1hM2VlLTQ5NTUtYmY3My1kOGEzYWM0ZjkxYWUiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwNDc4Nzk5MiwiaWF0IjoxNzA0Nzg3OTkyLCJleHAiOjQ4NTgzODc5OTIsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.KMlrIrsA956PUIH1Bo7WcpEagiU4ct3lmqB0VC50Wo0</step.auth-token>
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdG...</step.auth-token>
         <step.step-project-name>automation-packages</step.step-project-name>
     </properties>
 
@@ -144,7 +144,7 @@
                 <executions>
                     <execution>
                         <id>execute-automation-package</id>
-                        <phase>package</phase>
+                        <phase>verify</phase>
                         <configuration>
                             <url>${step.url}</url>
                             <authToken>${step.auth-token}</authToken>

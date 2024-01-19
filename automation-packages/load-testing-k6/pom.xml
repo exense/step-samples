@@ -45,23 +45,19 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>2024.1.11-659f8ef1ccbcc87c80a0cea2</step.version>
+        <step.version>2024.1.19-65aa6ccdcd2ce56f47ebd65f</step.version>
         <step-api.version>1.2.2</step-api.version>
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <junit.version>4.13.1</junit.version>
 
         <!-- !!! The URL of your Step server !!! -->
         <step.url>http://localhost:8080</step.url>
-        <!--
-        <step.url>https://stepee-sed-2518.stepcloud-test.ch</step.url>
-        -->
+
 
         <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
         <!--localhost key-->
-        <!--
-        <step.step-project-name>Test2</step.step-project-name>
-        -->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI2ZjE2ODY2Yy0zZTUwLTQ0YjAtYmJjNC00MTgzOTM2NTY4NDEiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwNTAzOTM4MSwiaWF0IjoxNzA1MDM5MzgxLCJleHAiOjQ4NTg2MzkzODEsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.d7F3VnHY4i6-Gi0Qzg-FKZmTQC8eUN-oZsaB95Qny6o</step.auth-token>
+        <step.step-project-name>automation-packages</step.step-project-name>
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.ey...</step.auth-token>
     </properties>
 
     <repositories>
@@ -84,12 +80,6 @@
     </pluginRepositories>
 
     <dependencies>
-        <dependency>
-            <groupId>ch.exense.step</groupId>
-            <artifactId>step-junit</artifactId>
-            <version>${step.version}</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -132,8 +122,8 @@
                             <artifactVersion>${project.version}</artifactVersion>
                             <artifactClassifier></artifactClassifier>
 
-                            <!--<authToken>${step.auth-token}</authToken>
-                            <stepProjectName>${step.step-project-name}</stepProjectName>-->
+                            <authToken>${step.auth-token}</authToken>
+                            <stepProjectName>${step.step-project-name}</stepProjectName>
                             <!--
 
                             -->
