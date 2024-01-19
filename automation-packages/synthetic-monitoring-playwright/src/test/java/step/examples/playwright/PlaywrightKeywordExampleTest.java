@@ -3,7 +3,6 @@ package step.examples.playwright;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import step.examples.playwright.PlaywrightKeywordExample;
 import step.handlers.javahandler.KeywordRunner;
 import step.handlers.javahandler.KeywordRunner.ExecutionContext;
 

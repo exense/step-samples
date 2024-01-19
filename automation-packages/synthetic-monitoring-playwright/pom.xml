@@ -56,15 +56,10 @@
         <playwright.version>1.40.0</playwright.version>
         <junit.version>4.13.1</junit.version>
 
-        <!-- !!! The URL of your Step server !!! -->
-        <!--<step.url>https://stepee-sed-2518.stepcloud-test.ch/</step.url>
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjMzNmOWU0YS0yMzBjLTQzYTgtOGU4Yy0wYTA3YTZlMWY0OWYiLCJpc3MiOiJodHRwczovL3N0ZXBlZS1zZWQtMjUxOC5zdGVwY2xvdWQtdGVzdC5jaCIsImF1ZCI6Imh0dHBzOi8vc3RlcGVlLXNlZC0yNTE4LnN0ZXBjbG91ZC10ZXN0LmNoIiwic3ViIjoiYWRtaW4iLCJuYmYiOjE3MDQ4MDE4OTQsImlhdCI6MTcwNDgwMTg5NCwiZXhwIjo0ODU4NDAxODk0LCJpc0xvY2FsVG9rZW4iOnRydWV9.krXMKK2ZOmEps9Bp-hrZPwcQb1DMh_3Ar884pwqThFQ</step.auth-token>
-        -->
-
         <!-- For EE version only, you need to use your Step API key (in text format) and Step project name-->
         <!--localhost-->
         <step.url>http://localhost:8080/</step.url>
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJiZWY4MzcwMC1mMzA5LTRlMmItODk0ZC02YzQ5M2UyYjY4MmEiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwNDcyNjk1NiwiaWF0IjoxNzA0NzI2OTU2LCJleHAiOjQ4NTgzMjY5NTYsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.R_4irdXX-cXwR18cKDROWh-xzPbCrHpbx1ipG6_JHdU</step.auth-token>
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9....</step.auth-token>
         <step.step-project-name>automation-packages</step.step-project-name>
     </properties>
 
