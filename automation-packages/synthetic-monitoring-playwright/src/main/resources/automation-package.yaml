@@ -1,0 +1,61 @@
+---
+schemaVersion: 1.0.0
+name: "synthetic-monitoring-playwright"
+plans:
+  - name: "Opencart synthetic monitoring plan"
+    root:
+      testCase:
+        children:
+          - callKeyword:
+              keyword: "Buy MacBook in OpenCart"
+              children:
+                - check: #this is only to simulate error case for 20% of the executions
+                    expression: "new java.util.Random().nextInt(10) < 8"
+  - name: "Opencart schedule assertion plan"
+    root:
+      assertionPlan:
+        description: "Assert the scheduled execution never fails"
+        children:
+          - assertMetric: #performance assertion
+              comparator: LOWER_THAN
+              slidingWindow: 60000
+              aggregation: MAX
+              expectedValue: 5000
+              metric: "response-time"
+              description: "assert average duration is below threshold (ms) for last minute"
+              errorCode: 11 #custom error code
+              filters:
+                - field: "attributes.name"
+                  filterType: EQUALS
+                  filter: "Buy MacBook in OpenCart"
+          - assertMetric: # functional assertion
+              comparator: LOWER_THAN
+              aggregation: SUM
+              expectedValue: 1
+              metric: "executions/failure-count"
+              slidingWindow: 60000
+              description: "Make sure no execution fails in last 1 minute"
+              errorCode: 10 #custom error code
+schedules:
+  - name: "Opencart synthetic monitoring schedule"
+    cron: "0 0/1 * * * ?"
+    planName: "Opencart synthetic monitoring plan"
+    assertionPlanName: "Opencart schedule assertion plan"
+    executionParameters:
+      env: "PROD"
+alertingRules:
+  - description: "Send email for incident created for Opencart synthetic monitoring"
+    name: "Opencart synthetic monitoring email"
+    eventClass: IncidentOpenedEvent
+    active: true
+    conditions:
+      - BindingCondition:
+          bindingKey: "executionDescription"
+          predicate:
+            BindingValueEqualsPredicate:
+              value: "Opencart synthetic monitoring plan"
+    actions:
+      - NotificationViaGatewayAction:
+          gatewayName: "Email notification gateway"
+          gatewayParameters:
+            - "david.stephan@exense.ch"
