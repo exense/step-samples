@@ -46,6 +46,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <step.version>2024.1.19-65aa6ccdcd2ce56f47ebd65f</step.version>
+        <step-ee.version>2024.1.19-65aa6dafcd2ce56f47ec8faf</step-ee.version>
         <step-api.version>1.2.2</step-api.version>
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <junit.version>4.13.1</junit.version>
@@ -84,6 +85,18 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.exense.step-enterprise</groupId>
+            <artifactId>step-automation-packages-junit-ee</artifactId>
+            <version>${step-ee.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.exense.step-enterprise</groupId>
+            <artifactId>step-functions-plugins-k6-def</artifactId>
+            <version>${step-ee.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
