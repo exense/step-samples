@@ -1,9 +1,9 @@
 image: maven:3-openjdk-11
 
 variables:
-  STEP_URL: "https://stepee-sed-2518.stepcloud-test.ch/"
+  STEP_URL: "https://your-step-instance.url/"
   STEP_PROJECT: "Common"
-  STEP_TOKEN: "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjOThhNDUxMS1lYjM0LTRjMjEtYmJiYy00NmRiZTcwMDhlZWUiLCJpc3MiOiJodHRwczovL3N0ZXBlZS1zZWQtMjUxOC5zdGVwY2xvdWQtdGVzdC5jaCIsImF1ZCI6Imh0dHBzOi8vc3RlcGVlLXNlZC0yNTE4LnN0ZXBjbG91ZC10ZXN0LmNoIiwic3ViIjoiYWRtaW4iLCJuYmYiOjE3MDU2NTU1ODEsImlhdCI6MTcwNTY1NTU4MSwiZXhwIjo0ODU5MjU1NTgxLCJpc0xvY2FsVG9rZW4iOnRydWV9.-LeDlNj7FMw4f2xo2XNUq4mB5fT47wdAaqnT8BkJAGI"
+  STEP_TOKEN: "Your Step API token"
   MVN_ARGS: >-
     --settings gitlab-maven-settings.xml
     -Dmaven.repo.local=.m2/repository

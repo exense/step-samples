@@ -5,8 +5,8 @@
 	<servers>
 		<server>
 			<id>nexus-staging</id>
-			<username>nexus-staging</username>
-			<password>100%STAGINGUser</password>
+			<username>USERNAME</username>
+			<password>PASSWORD</password>
 		</server>
 	</servers>
 </settings>
