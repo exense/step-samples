@@ -1,0 +1,21 @@
+---
+schemaVersion: 1.0.0
+name: "load-testing-k6-automation-package"
+keywords:
+  - K6:
+      name: 'OpenCart home'
+      vus: 1
+      iterations: 1
+      scriptFile: "opencart-test.js"
+plans:
+  - name: "Opencart load test plan"
+    root:
+      testScenario:
+        children:
+          # 1st thread group with 5 VUs and 10 iterations per VU calling the Keyword 'OpenCart home'
+          - threadGroup:
+              users: 1
+              iterations: 11
+              children:
+                - callKeyword:
+                    keyword: "OpenCart home"
