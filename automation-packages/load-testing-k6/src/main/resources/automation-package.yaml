@@ -1,6 +1,6 @@
 ---
 schemaVersion: 1.0.0
-name: "load-testing-okhttp-automation-package"
+name: "load-testing-k6-automation-package"
 keywords:
   - K6:
       name: 'OpenCart home'
