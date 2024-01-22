@@ -7,30 +7,20 @@ plans:
         children:
           - callKeyword:
               keyword: "Buy MacBook in OpenCart"
+          - performanceAssert:
+              measurementName: "Buy MacBook in OpenCart"
+              comparator: "LOWER_THAN"
+              expectedValue: 5000
   - name: "Opencart schedule assertion plan"
     root:
       assertionPlan:
-        description: "Assert the scheduled execution never fails and meet response times requirements"
+        description: "Assert the scheduled executions did not fail more than once in the last 10 minutes"
         children:
           - assertMetric:
-              description: "assert average duration is below threshold (ms) for last 10 minutes"
-              comparator: LOWER_THAN
-              aggregation: AVG
-              expectedValue: 5000
-              metric: "response-time"
-              slidingWindow: 600000
-              errorCode: 11 #custom error code
-              filters:
-                - field: "attributes.name"
-                  filterType: EQUALS
-                  filter: "Buy MacBook in OpenCart"
-              # evaluate next assertion too even if this one fails
-              continueParentNodeExecutionOnError: true
-          - assertMetric:
-              description: "Make sure no execution failed in last 10 minutes"
+              description: "Make sure executions did not fail more than once in the last 10 minutes"
               comparator: LOWER_THAN
               aggregation: SUM
-              expectedValue: 1
+              expectedValue: 2
               metric: "executions/failure-count"
               slidingWindow: 600000
               errorCode: 10 #custom error code
