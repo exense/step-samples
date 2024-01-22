@@ -12,10 +12,9 @@ plans:
     root:
       testScenario:
         children:
-          # 1st thread group with 5 VUs and 10 iterations per VU calling the Keyword 'OpenCart home'
           - threadGroup:
-              users: 1
-              iterations: 11
+              users: 5
+              iterations: 10
               children:
                 - callKeyword:
                     keyword: "OpenCart home"
