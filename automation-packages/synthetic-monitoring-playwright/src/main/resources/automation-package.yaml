@@ -1,5 +1,4 @@
 ---
-schemaVersion: 1.0.0
 name: "synthetic-monitoring-playwright"
 plans:
   - name: "Opencart synthetic monitoring plan"
@@ -8,46 +7,44 @@ plans:
         children:
           - callKeyword:
               keyword: "Buy MacBook in OpenCart"
-              children:
-                - check: #this is only to simulate error case for 20% of the executions
-                    expression: "new java.util.Random().nextInt(10) < 8"
   - name: "Opencart schedule assertion plan"
     root:
       assertionPlan:
-        description: "Assert the scheduled execution never fails"
+        description: "Assert the scheduled execution never fails and meet response times requirements"
         children:
-          - assertMetric: #performance assertion
+          - assertMetric:
+              description: "assert average duration is below threshold (ms) for last 10 minutes"
               comparator: LOWER_THAN
-              slidingWindow: 60000
-              aggregation: MAX
+              aggregation: AVG
               expectedValue: 5000
               metric: "response-time"
-              description: "assert average duration is below threshold (ms) for last minute"
+              slidingWindow: 600000
               errorCode: 11 #custom error code
               filters:
                 - field: "attributes.name"
                   filterType: EQUALS
                   filter: "Buy MacBook in OpenCart"
-          - assertMetric: # functional assertion
+              # evaluate next assertion too even if this one fails
+              continueParentNodeExecutionOnError: true
+          - assertMetric:
+              description: "Make sure no execution failed in last 10 minutes"
               comparator: LOWER_THAN
               aggregation: SUM
               expectedValue: 1
               metric: "executions/failure-count"
-              slidingWindow: 60000
-              description: "Make sure no execution fails in last 1 minute"
+              slidingWindow: 600000
               errorCode: 10 #custom error code
 schedules:
   - name: "Opencart synthetic monitoring schedule"
+    #CRON expression for one execution per minute
     cron: "0 0/1 * * * ?"
     planName: "Opencart synthetic monitoring plan"
     assertionPlanName: "Opencart schedule assertion plan"
-    executionParameters:
-      env: "PROD"
 alertingRules:
   - description: "Send email for incident created for Opencart synthetic monitoring"
     name: "Opencart synthetic monitoring email"
-    eventClass: IncidentOpenedEvent
     active: true
+    eventClass: IncidentOpenedEvent
     conditions:
       - BindingCondition:
           bindingKey: "executionDescription"
@@ -58,4 +55,4 @@ alertingRules:
       - NotificationViaGatewayAction:
           gatewayName: "Email notification gateway"
           gatewayParameters:
-            - "david.stephan@exense.ch"
+            - "changeme@changeme.changeme"
