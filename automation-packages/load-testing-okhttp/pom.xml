@@ -45,7 +45,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>2024.1.19-65aa6ccdcd2ce56f47ebd65f</step.version>
+        <step.version>0.0.0-SNAPSHOT</step.version>
         <step-api.version>1.2.2</step-api.version>
         <okhttp.version>4.12.0</okhttp.version>
         <junit.version>4.13.1</junit.version>
@@ -54,7 +54,7 @@
         <!-- !!! The base URL of your Step server !!! -->
         <step.url>http://localhost:8080</step.url>
         <!-- For Step EE, specify your Step token (in text format) and Step project name-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdG...</step.auth-token>
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJiZWY4MzcwMC1mMzA5LTRlMmItODk0ZC02YzQ5M2UyYjY4MmEiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwNDcyNjk1NiwiaWF0IjoxNzA0NzI2OTU2LCJleHAiOjQ4NTgzMjY5NTYsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.R_4irdXX-cXwR18cKDROWh-xzPbCrHpbx1ipG6_JHdU</step.auth-token>
         <step.step-project-name>automation-packages</step.step-project-name>
     </properties>
 
@@ -113,7 +113,7 @@
                 <!-- Make the Step maven plugin available -->
                 <plugin>
                     <groupId>ch.exense.step</groupId>
-                    <artifactId>step-ee-maven-plugin</artifactId>
+                    <artifactId>step-maven-plugin</artifactId>
                     <version>${step.version}</version>
                 </plugin>
             </plugins>
@@ -140,7 +140,7 @@
             <!-- Use the Step maven plugin to execute the automation package in Step -->
             <plugin>
                 <groupId>ch.exense.step</groupId>
-                <artifactId>step-ee-maven-plugin</artifactId>
+                <artifactId>step-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>execute-automation-package</id>

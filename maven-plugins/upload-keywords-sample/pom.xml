@@ -50,14 +50,14 @@
 
         <playwright.version>1.25.0</playwright.version>
 
-        <step.version>3.22.3</step.version>
+        <step.version>0.0.0-SNAPSHOT</step.version>
         <step-api.version>1.2.0</step-api.version>
 
         <!-- !!! The URL of your Step server !!! -->
         <step.url>http://localhost:8080</step.url>
 
         <!-- For EE version only you need to use your Step token (in text format) and Step project name-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGki....</step.auth-token>
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJiZWY4MzcwMC1mMzA5LTRlMmItODk0ZC02YzQ5M2UyYjY4MmEiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwNDcyNjk1NiwiaWF0IjoxNzA0NzI2OTU2LCJleHAiOjQ4NTgzMjY5NTYsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.R_4irdXX-cXwR18cKDROWh-xzPbCrHpbx1ipG6_JHdU</step.auth-token>
         <step.step-project-name>Common</step.step-project-name>
     </properties>
 
@@ -78,6 +78,16 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>ch.exense.step</groupId>
+                    <artifactId>step-maven-plugin</artifactId>
+                    <version>${step.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -103,115 +113,45 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>ch.exense.step</groupId>
+                <artifactId>step-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>upload-playwright-keyword-package-to-step</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>upload-keywords-package</goal>
+                        </goals>
+                        <configuration>
+                            <url>${step.url}</url>
+                            <!-- For EE, define the target project and the API key for authentication -->
+                            <authToken>${step.auth-token}</authToken>
+                            <stepProjectName>${step.step-project-name}</stepProjectName>
+
+                            <!-- The identifier or uploaded keyword package  -->
+                            <trackingAttribute>${project.groupId}:${project.artifactId}:${project.version}</trackingAttribute>
+
+                            <!-- Specify classifier to upload the "fat jar" -->
+                            <artifactClassifier>jar-with-dependencies</artifactClassifier>
+
+                            <!-- Starting with Step 3.23.0 you can use the artifact uploaded to Step as keyword library (referenced by 'name' or 'id') -->
+                            <!-- <libStepResourceSearchCriteria>-->
+                            <!--    <name>my-uploaded-artefact.jar</name>-->
+                            <!-- </libStepResourceSearchCriteria>-->
+
+                            <!-- Or alternatively you can link any maven artifact (deployed to Nexus) as keyword library -->
+                            <!--<libArtifactGroupId>org.myproject</libArtifactGroupId>-->
+                            <!--<libArtifactId>myartifact</libArtifactId>-->
+                            <!--<libArtifactVersion>1.0.0.Final</libArtifactVersion>-->
+                            <!--<libArtifactClassifier>jar-with-dependencies</libArtifactClassifier>-->
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
-    <!-- Configuration for OS version (maven profile) -->
-    <profiles>
-        <profile>
-            <id>StepOS</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>ch.exense.step</groupId>
-                            <artifactId>step-os-maven-plugin</artifactId>
-                            <version>${step.version}</version>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-
-                <plugins>
-                    <plugin>
-                        <groupId>ch.exense.step</groupId>
-                        <artifactId>step-os-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>upload-playwright-keyword-package-to-step</id>
-                                <phase>package</phase>
-                                <configuration>
-                                    <url>${step.url}</url>
-
-                                    <!-- The identifier or uploaded keyword package  -->
-                                    <trackingAttribute>${project.groupId}:${project.artifactId}:${project.version}</trackingAttribute>
-
-                                    <!-- Specify classifier to upload the "fat jar" -->
-                                    <artifactClassifier>jar-with-dependencies</artifactClassifier>
-
-                                    <!-- Starting with Step 3.23.0 you can use the artifact uploaded to Step as keyword library (referenced by 'name' or 'id') -->
-                                    <!-- <libStepResourceSearchCriteria>-->
-                                    <!--    <name>my-uploaded-artefact.jar</name>-->
-                                    <!-- </libStepResourceSearchCriteria>-->
-
-                                    <!-- Or alternatively you can link any maven artifact (deployed to Nexus) as keyword library -->
-                                    <!--<libArtifactGroupId>org.myproject</libArtifactGroupId>-->
-                                    <!--<libArtifactId>myartifact</libArtifactId>-->
-                                    <!--<libArtifactVersion>1.0.0.Final</libArtifactVersion>-->
-                                    <!--<libArtifactClassifier>jar-with-dependencies</libArtifactClassifier>-->
-
-                                </configuration>
-                                <goals>
-                                    <goal>upload-keywords-package-os</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <!-- Configuration for EE version (maven profile) -->
-        <profile>
-            <id>StepEE</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>ch.exense.step</groupId>
-                             <artifactId>step-ee-maven-plugin</artifactId>
-                            <version>${step.version}</version>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-
-                <plugins>
-                    <plugin>
-                        <groupId>ch.exense.step</groupId>
-                        <artifactId>step-ee-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>upload-package-to-step</id>
-                                <phase>package</phase>
-                                <configuration>
-                                    <url>${step.url}</url>
-
-                                    <!-- The identifier or uploaded keyword package  -->
-                                    <trackingAttribute>${project.groupId}:${project.artifactId}:${project.version}</trackingAttribute>
-
-                                    <!-- Specify classifier to upload the "fat jar" -->
-                                    <artifactClassifier>jar-with-dependencies</artifactClassifier>
-
-                                    <!-- Use you valid authentication token and actual target Step project name -->
-                                    <authToken>${step.auth-token}</authToken>
-                                    <stepProjectName>${step.step-project-name}</stepProjectName>
-                                </configuration>
-                                <goals>
-                                    <goal>upload-keywords-package-ee</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
 </project>

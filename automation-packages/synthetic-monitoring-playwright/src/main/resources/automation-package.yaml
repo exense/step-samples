@@ -11,38 +11,39 @@ plans:
               measurementName: "Buy MacBook in OpenCart"
               comparator: "LOWER_THAN"
               expectedValue: 5000
-  - name: "Opencart schedule assertion plan"
-    root:
-      assertionPlan:
-        description: "Assert the scheduled executions did not fail more than once in the last 10 minutes"
-        children:
-          - assertMetric:
-              description: "Make sure executions did not fail more than once in the last 10 minutes"
-              comparator: LOWER_THAN
-              aggregation: SUM
-              expectedValue: 2
-              metric: "executions/failure-count"
-              slidingWindow: 600000
-              errorCode: 10 #custom error code
+    # Assertion plan is only supported for Enterprise customers
+#  - name: "Opencart schedule assertion plan"
+#    root:
+#      assertionPlan:
+#        description: "Assert the scheduled executions did not fail more than once in the last 10 minutes"
+#        children:
+#          - assertMetric:
+#              description: "Make sure executions did not fail more than once in the last 10 minutes"
+#              comparator: LOWER_THAN
+#              aggregation: SUM
+#              expectedValue: 2
+#              metric: "executions/failure-count"
 schedules:
   - name: "Opencart synthetic monitoring schedule"
     #CRON expression for one execution per minute
     cron: "0 0/1 * * * ?"
     planName: "Opencart synthetic monitoring plan"
-    assertionPlanName: "Opencart schedule assertion plan"
-alertingRules:
-  - description: "Send email for incident created for Opencart synthetic monitoring"
-    name: "Opencart synthetic monitoring email"
-    active: true
-    eventClass: IncidentOpenedEvent
-    conditions:
-      - BindingCondition:
-          bindingKey: "executionDescription"
-          predicate:
-            BindingValueEqualsPredicate:
-              value: "Opencart synthetic monitoring plan"
-    actions:
-      - NotificationViaGatewayAction:
-          gatewayName: "Email notification gateway"
-          gatewayParameters:
-            - "changeme@changeme.changeme"
+    # Assertion plan is only supported for Enterprise customers
+#    assertionPlanName: "Opencart schedule assertion plan"
+# Alerting rules are only supported for enterprise customers
+#alertingRules:
+#  - description: "Send email for incident created for Opencart synthetic monitoring"
+#    name: "Opencart synthetic monitoring email"
+#    active: true
+#    eventClass: IncidentOpenedEvent
+#    conditions:
+#      - BindingCondition:
+#          bindingKey: "executionDescription"
+#          predicate:
+#            BindingValueEqualsPredicate:
+#              value: "Opencart synthetic monitoring plan"
+#    actions:
+#      - NotificationViaGatewayAction:
+#          gatewayName: "Email notification gateway"
+#          gatewayParameters:
+#            - "changeme@changeme.changeme"
