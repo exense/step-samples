@@ -13,11 +13,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ch.exense.step.examples</groupId>
-    <artifactId>synthetic-monitoring-playwright</artifactId>
+    <artifactId>synthetic-monitoring-playwright-advanced</artifactId>
     <version>0.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Step Samples - Synthetic monitoring with playwright</name>
+    <name>Step Samples - Synthetic monitoring with playwright - Advanced</name>
     <description>
         Step Samples
     </description>
@@ -98,8 +98,9 @@
         <!-- dependency for local execution with the Step runner supporting EE artefacts -->
         <dependency>
             <!-- use the junit-ee dependency to enable enterprise artefact (i.e. assertion plans, alerting rules) -->
-            <groupId>ch.exense.step</groupId>
-            <artifactId>step-automation-packages-junit</artifactId>
+            <!-- require access to exense nexus repostiroy -->
+            <groupId>ch.exense.step-enterprise</groupId>
+            <artifactId>step-automation-packages-junit-ee</artifactId>
             <version>${step.version}</version>
             <scope>test</scope>
         </dependency>
@@ -113,6 +114,15 @@
                     <groupId>ch.exense.step</groupId>
                     <artifactId>step-maven-plugin</artifactId>
                     <version>${step.version}</version>
+                    <!-- adding dependencies to reports nodes for enterprise artefacts, only required to read errors that may occur during isolated executions -->
+                    <!-- require access to exense nexus repostiroy -->
+                    <dependencies>
+                        <dependency>
+                            <groupId>ch.exense.step-enterprise</groupId>
+                            <artifactId>step-maven-plugin-ee-extensions</artifactId>
+                            <version>${step.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>

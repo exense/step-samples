@@ -54,8 +54,8 @@
         <!-- !!! The base URL of your Step server !!! -->
         <step.url>http://localhost:8080</step.url>
         <!-- For Step EE, specify your Step token (in text format) and Step project name-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJiZWY4MzcwMC1mMzA5LTRlMmItODk0ZC02YzQ5M2UyYjY4MmEiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjQyMDEiLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcwNDcyNjk1NiwiaWF0IjoxNzA0NzI2OTU2LCJleHAiOjQ4NTgzMjY5NTYsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.R_4irdXX-cXwR18cKDROWh-xzPbCrHpbx1ipG6_JHdU</step.auth-token>
-        <step.step-project-name>automation-packages</step.step-project-name>
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJq...</step.auth-token>
+        <step.step-project-name>Common</step.step-project-name>
     </properties>
 
     <repositories>

@@ -1,0 +1,23 @@
+image: maven:3-openjdk-11
+
+variables:
+  STEP_URL: "https://your-step-instance.url/"
+  STEP_PROJECT: "Common"
+  STEP_TOKEN: "Your Step API token"
+  MVN_ARGS: >-
+    --settings gitlab-maven-settings.xml
+    -Dmaven.repo.local=.m2/repository
+    --batch-mode
+    --no-transfer-progress
+
+cache:
+  paths:
+    - .m2/repository
+
+stages:
+  - verify
+
+maven-verify-job:
+  stage: verify
+  script:
+    - mvn ${MVN_ARGS} verify -DskipTests -Dstep.url=${STEP_URL} -Dstep.step-project-name=${STEP_PROJECT} -Dstep.auth-token=${STEP_TOKEN}
