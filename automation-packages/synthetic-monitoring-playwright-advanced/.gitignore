@@ -1,3 +1,4 @@
+.idea/
 bin/
 target/
 .settings/
@@ -6,3 +7,5 @@ target/
 *.bak
 .classpath
 .project
+*.iml
+dependency-reduced-pom.xml

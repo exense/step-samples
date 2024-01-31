@@ -1,4 +1,4 @@
-package step.examples.plugins;
+package step.examples.playwright;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
