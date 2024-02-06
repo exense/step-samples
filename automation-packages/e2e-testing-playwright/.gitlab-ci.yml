@@ -1,0 +1,21 @@
+image: maven:3-openjdk-11
+
+variables:
+  STEP_URL: "https://stepee-master.stepcloud-test.ch"
+  STEP_PROJECT: "Common"
+  STEP_TOKEN: ""
+  MVN_ARGS: >-
+    --settings gitlab-maven-settings.xml
+    -Dmaven.repo.local=.m2/repository
+
+cache:
+  paths:
+    - .m2/repository
+
+stages:
+  - e2e-tests
+
+maven-verify-job:
+  stage: e2e-tests
+  script:
+    - mvn ${MVN_ARGS} verify -DskipTests -Dstep.url=${STEP_URL} -Dstep.step-project-name=${STEP_PROJECT} -Dstep.auth-token=${STEP_TOKEN}
