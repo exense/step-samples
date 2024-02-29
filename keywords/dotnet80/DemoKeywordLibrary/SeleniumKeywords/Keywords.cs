@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using log4net;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -55,7 +56,10 @@ namespace SeleniumTest
                 options.AddAdditionalOption("headless", "true");
             }
 
-            SafariDriver driver = new SafariDriver(options);
+            // the safari driver should always be at the same location:
+            SafariDriverService service = SafariDriverService.CreateDefaultService("/usr/bin/safaridriver");
+            
+            SafariDriver driver = new SafariDriver(service, options);
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
@@ -71,7 +75,11 @@ namespace SeleniumTest
                 options.AddArguments(new string[] { "headless", "disable-infobars", "disable-gpu", "no-sandbox" });
             }
 
-            ChromeDriver driver = new ChromeDriver(options);
+            string driverPath = (string) (input.ContainsKey("driver") ? input["driver"] : "/usr/bin/chromedriver");
+
+            ChromeDriverService service = ChromeDriverService.CreateDefaultService(driverPath);
+
+            ChromeDriver driver = new ChromeDriver(service,options);
 
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
