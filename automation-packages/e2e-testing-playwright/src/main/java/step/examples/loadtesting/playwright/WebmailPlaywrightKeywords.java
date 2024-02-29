@@ -14,10 +14,10 @@ public class WebmailPlaywrightKeywords extends AbstractKeyword {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
             Page page = browser.newPage();
-            page.navigate("https://webmail.exense.ch/");
+            page.navigate("https://demo-webmail.exense.ch/");
             page.waitForLoadState(LoadState.DOMCONTENTLOADED);
-            page.locator("#rcmloginuser").fill("opencart-demo-customer1@stepcloud-test.ch");
-            page.locator("#rcmloginpwd").fill("fzDwcQy6JcJb5EA");
+            page.locator("#rcmloginuser").fill("customer@opencart.demo");
+            page.locator("#rcmloginpwd").fill("8Fm#%GzdSocv3o");
             page.locator("#rcmloginsubmit").click();
 
             page.locator("#messagelist").isVisible();

@@ -32,7 +32,7 @@ public class OpenCartPlaywrightKeywords extends AbstractKeyword {
             page.locator("#button-account").click();
             page.locator("#input-payment-firstname").type("Gustav");
             page.locator("#input-payment-lastname").type("Muster");
-            page.locator("#input-payment-email").type("opencart-demo-customer1@stepcloud-test.ch");
+            page.locator("#input-payment-email").type("customer@opencart.demo");
             page.locator("#input-payment-telephone").type("+41777777777");
             page.locator("#input-payment-address-1").type("Bahnhofstrasse 1");
             page.locator("#input-payment-city").type("Zurich");
