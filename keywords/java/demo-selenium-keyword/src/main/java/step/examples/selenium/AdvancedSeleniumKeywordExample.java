@@ -42,7 +42,7 @@ public class AdvancedSeleniumKeywordExample extends AbstractKeyword {
         // Read the Firstname and Lastname from the Keyword Inputs
         driver.findElement(By.id("input-payment-firstname")).sendKeys(input.getString("Firstname"));
         driver.findElement(By.id("input-payment-lastname")).sendKeys(input.getString("Lastname"));
-        driver.findElement(By.id("input-payment-email")).sendKeys("gustav@muster.ch");
+        driver.findElement(By.id("input-payment-email")).sendKeys("customer@opencart.demo");
         driver.findElement(By.id("input-payment-telephone")).sendKeys("+41777777777");
         driver.findElement(By.id("input-payment-address-1")).sendKeys("Bahnhofstrasse 1");
         driver.findElement(By.id("input-payment-city")).sendKeys("Zurich");

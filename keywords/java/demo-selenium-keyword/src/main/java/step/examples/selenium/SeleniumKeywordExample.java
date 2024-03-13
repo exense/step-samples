@@ -32,7 +32,7 @@ public class SeleniumKeywordExample extends AbstractKeyword {
             driver.findElement(By.id("button-account")).click();
             driver.findElement(By.id("input-payment-firstname")).sendKeys("Gustav");
             driver.findElement(By.id("input-payment-lastname")).sendKeys("Muster");
-            driver.findElement(By.id("input-payment-email")).sendKeys("gustav@muster.ch");
+            driver.findElement(By.id("input-payment-email")).sendKeys("customer@opencart.demo");
             driver.findElement(By.id("input-payment-telephone")).sendKeys("+41777777777");
             driver.findElement(By.id("input-payment-address-1")).sendKeys("Bahnhofstrasse 1");
             driver.findElement(By.id("input-payment-city")).sendKeys("Zurich");

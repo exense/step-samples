@@ -38,7 +38,7 @@ public class AdvancedPlaywrightKeywordExample extends AbstractKeyword {
         // Read the Firstname and Lastname from the Keyword Inputs
         page.locator("#input-payment-firstname").type(input.getString("Firstname"));
         page.locator("#input-payment-lastname").type(input.getString("Lastname"));
-        page.locator("#input-payment-email").type("gustav@muster.ch");
+        page.locator("#input-payment-email").type("customer@opencart.demo");
         page.locator("#input-payment-telephone").type("+41777777777");
         page.locator("#input-payment-address-1").type("Bahnhofstrasse 1");
         page.locator("#input-payment-city").type("Zurich");
