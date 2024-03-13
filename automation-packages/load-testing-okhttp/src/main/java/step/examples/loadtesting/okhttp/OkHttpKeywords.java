@@ -40,7 +40,7 @@ public class OkHttpKeywords extends AbstractKeyword {
                 "customer_group_id", "1",
                 "firstname", "Gustav",
                 "lastname", "Muster",
-                "email", "gustav@muster.ch",
+                "email", "customer@opencart.demo",
                 "telephone", "+41777777777",
                 "address_1", "Bahnhofstrasse 1",
                 "city", "Zurich",
