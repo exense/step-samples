@@ -1,0 +1,31 @@
+---
+schemaVersion: 1.0.0
+name: "end-to-end-testing-playwright"
+plans:
+  - name: "OpenCart Test Set 01"
+    root:
+      testSet:
+        children:
+          - forEach:
+              dataSource:
+                csv:
+                  file: "testdata/customers.csv"
+              children:
+                - testCase:
+                    nodeName: "OpenCart Test Case 01"
+                    children:
+                      - callKeyword:
+                          keyword: "Buy MacBook in OpenCart"
+                          inputs:
+                            - firstname:
+                                expression: "row.firstname"
+                            - lastname:
+                                expression: "row.lastname"
+                      - callKeyword:
+                          keyword: "Read order confirmation in Webmail"
+                          children:
+                            - assert:
+                                actual: "EmailTitle"
+                                operator: CONTAINS
+                                expected: "Your Store - Order "
+        threads: 1
