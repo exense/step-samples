@@ -83,7 +83,13 @@ public class AdvancedPlaywrightKeywordExample extends AbstractKeyword {
                 throw new RuntimeException(ex);
             }
         }
-        return super.onError(e);
+        if (e.getCause() != null && (e.getCause() instanceof com.microsoft.playwright.PlaywrightException ||
+                e.getCause() instanceof org.opentest4j.AssertionFailedError)) {
+            output.setBusinessError(e.getCause().getMessage());
+            return false;
+        } else {
+            return super.onError(e);
+        }
     }
 
     @Override
