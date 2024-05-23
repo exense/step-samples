@@ -74,12 +74,20 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Dependency for Enterprise Customer: enable local executions with JUnit -->
         <dependency>
             <groupId>ch.exense.step-enterprise</groupId>
             <artifactId>step-automation-packages-junit-ee</artifactId>
             <version>${stepee.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Dependency for other users: Local executions with JUnit is not possible -->
+<!--                <dependency>-->
+<!--                    <groupId>ch.exense.step</groupId>-->
+<!--                    <artifactId>step-automation-packages-junit</artifactId>-->
+<!--                    <version>${stepee.version}</version>-->
+<!--                    <scope>test</scope>-->
+<!--                </dependency>-->
     </dependencies>
 
     <build>
@@ -102,7 +110,7 @@
                             <stepProjectName>${step.step-project-name}</stepProjectName>
                             <ensureExecutionSuccess>true</ensureExecutionSuccess>
                             <waitForExecution>true</waitForExecution>
-                            <executionResultTimeoutS>120</executionResultTimeoutS>
+                            <executionResultTimeoutS>600</executionResultTimeoutS>
                             <executionParameters>
                                 <env>PROD</env>
                             </executionParameters>
