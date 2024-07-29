@@ -1,0 +1,19 @@
+---
+schemaVersion: 1.0.0
+name: "load-testing-cypress-automation-package"
+keywords:
+  - Cypress:
+      name: 'OpenCart Cypress'
+      cypressProject: "cypress/opencart.zip"
+      spec: "opencart.cy.js"
+plans:
+  - name: "Opencart load test plan with Cypress"
+    root:
+      testScenario:
+        children:
+          - threadGroup:
+              users: 5
+              iterations: 5
+              children:
+                - callKeyword:
+                    keyword: "OpenCart Cypress"

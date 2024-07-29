@@ -4,11 +4,13 @@ import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.SelectOption;
 import step.grid.io.AttachmentHelper;
 import step.handlers.javahandler.AbstractKeyword;
+import step.handlers.javahandler.Input;
 import step.handlers.javahandler.Keyword;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * This advanced example shows how to use Step Keyword hooks in order to automatically generate screenshots
@@ -21,9 +23,11 @@ public class AdvancedPlaywrightKeywordExample extends AbstractKeyword {
     private Browser browser;
     private Page page;
     private BrowserContext context;
+    private Video video;
 
     @Keyword(name = "Buy MacBook in OpenCart - Advanced")
-    public void buyMacBookInOpenCart() throws InterruptedException {
+    public void buyMacBookInOpenCart(@Input(name="Firstname", required = true) String firstname,
+                                     @Input(name="Lastname", required = true) String lastname) throws InterruptedException {
         // Read the URL from the keyword properties. These properties can be defined as Parameter in Step
         page.navigate(properties.computeIfAbsent("opencart.url",
                 k -> {throw new RuntimeException("Missing property 'opencart.url'");}));
@@ -36,8 +40,8 @@ public class AdvancedPlaywrightKeywordExample extends AbstractKeyword {
         Thread.sleep(500);
         page.locator("#button-account").click();
         // Read the Firstname and Lastname from the Keyword Inputs
-        page.locator("#input-payment-firstname").type(input.getString("Firstname"));
-        page.locator("#input-payment-lastname").type(input.getString("Lastname"));
+        page.locator("#input-payment-firstname").type(firstname);
+        page.locator("#input-payment-lastname").type(lastname);
         page.locator("#input-payment-email").type("customer@opencart.demo");
         page.locator("#input-payment-telephone").type("+41777777777");
         page.locator("#input-payment-address-1").type("Bahnhofstrasse 1");
@@ -52,9 +56,9 @@ public class AdvancedPlaywrightKeywordExample extends AbstractKeyword {
     public void beforeKeyword(String keywordName, Keyword annotation) {
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-        context = browser.newContext();
+        context = browser.newContext(new Browser.NewContextOptions().setRecordVideoDir(Paths.get("videos/")).setRecordVideoSize(640,480));
         page = context.newPage();
-
+        video = page.video();
         Tracing.StartOptions startOptions = new Tracing.StartOptions()
                 .setScreenshots(true)
                 .setSnapshots(true);
@@ -97,5 +101,18 @@ public class AdvancedPlaywrightKeywordExample extends AbstractKeyword {
         // Ensure Playwright is properly closed after each keyword execution
         // to avoid process leaks on the agent
         playwright.close();
+        //Write video as attachment
+        if (video != null) {
+            Path path = video.path();
+            try {
+                output.addAttachment(AttachmentHelper.generateAttachmentFromByteArray(Files.readAllBytes(path), "video.webm"));
+                video.delete();
+                if (path.toFile().exists()) {
+                    path.toFile().delete();
+                }
+            } catch (IOException e) {
+                logger.error("Unable to attach playwright video from file " + path.getFileName().toString() , e);
+            }
+        }
     }
 }

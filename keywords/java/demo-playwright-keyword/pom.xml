@@ -28,8 +28,8 @@
 	</developers>
 
 	<properties>
-		<step-api.version>1.1.10</step-api.version>
-		<playwright.version>1.34.0</playwright.version>
+		<step-api.version>1.2.5</step-api.version>
+		<playwright.version>1.44.0</playwright.version>
 		<junit.version>4.13.2</junit.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
