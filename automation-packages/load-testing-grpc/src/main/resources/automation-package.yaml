@@ -1,0 +1,22 @@
+---
+schemaVersion: 1.0.0
+name: "load-testing-grpc-automation-package"
+plans:
+  - name: "Demo gRPC Load Test"
+    root:
+      threadGroup:
+        # Run the sequence with 10 VUs
+        users: 10
+        # Perform 10 iterations per user
+        iterations: 10
+        children:
+          # Call the keyword HelloWorld defined in the class gRPCHelloWorldKeywords
+          - sequence:
+              children:
+              - callKeyword:
+                  keyword: "HelloWorld"
+          # Assert that the response time of the measure 'gRPC_SayHello' is below 500m
+          - performanceAssert:
+              measurementName: "gRPC_SayHello"
+              comparator: "LOWER_THAN"
+              expectedValue: 500
