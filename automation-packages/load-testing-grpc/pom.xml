@@ -45,7 +45,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>3.24.1</step.version>
+        <step.version>3.25.3</step.version>
         <step-api.version>1.2.4</step-api.version>
         <grpc.version>1.65.0</grpc.version><!-- CURRENT_GRPC_VERSION -->
         <protobuf.version>3.25.1</protobuf.version>
@@ -183,6 +183,11 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
