@@ -1,0 +1,118 @@
+---
+schemaVersion: 1.0.0
+name: "load-testing-http-automation-package"
+plans:
+  - name: "OpenCart okhttp Load Test"
+    root:
+      threadGroup:
+        # 10 parallel VUs
+        users: 10
+        # 10 iterations per VU
+        iterations: 10
+        children:
+          # Add MacBook to cart sequence
+          - sequence:
+              # Instrument the sequence to measure its duration
+              instrumentNode: true
+              nodeName: Add MacBook to cart
+              children:
+                - callKeyword:
+                    keyword: "HttpRequest"
+                    inputs:
+                      - URL: "https://opencart-prf.exense.ch/macbook"
+                      - Method: "GET"
+                - callKeyword:
+                    keyword: "HttpRequest"
+                    inputs:
+                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout%2Fcart%2Fadd"
+                      - Method: "POST"
+                      - FormData_quantity: "1"
+                      - FormData_product_id: "43"
+                    children:
+                      - assert:
+                          actual: "Response"
+                          operator: CONTAINS
+                          expected: "Success: You have added"
+          # Checkout cart
+          - sequence:
+              # Instrument the sequence to measure its duration
+              instrumentNode: true
+              # Name of the sequence and its measurement
+              nodeName: Checkout cart
+              children:
+                - callKeyword:
+                    keyword: "HttpRequest"
+                    inputs:
+                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/checkout"
+                      - Method: "GET"
+                    children:
+                      - assert:
+                          actual: "Response"
+                          operator: CONTAINS
+                          expected: "Guest Shipping"
+                - callKeyword:
+                    keyword: "HttpRequest"
+                    inputs:
+                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/guest"
+                      - Method: "GET"
+                    children:
+                      - assert:
+                          actual: "Response"
+                          operator: CONTAINS
+                          expected: "First Name"
+                - callKeyword:
+                    keyword: "HttpRequest"
+                    inputs:
+                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/checkout/country&country_id=204"
+                      - Method: "GET"
+                    children:
+                      - assert:
+                          actual: "Response"
+                          operator: CONTAINS
+                          expected: "Ticino"
+                - callKeyword:
+                    keyword: "HttpRequest"
+                    inputs:
+                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/guest/save"
+                      - Method: "POST"
+                      - FormData_customer_group_id: "1"
+                      - FormData_firstname: "Gustav"
+                      - FormData_lastname: "Muster"
+                      - FormData_company: ""
+                      - FormData_email: "customer@opencart.demo"
+                      - FormData_telephone: "+41777777777"
+                      - FormData_address_1: "Bahnhofstrasse 1"
+                      - FormData_address_2: ""
+                      - FormData_city: "Zurich"
+                      - FormData_postcode: "8001"
+                      - FormData_country_id: "204"
+                      - FormData_zone_id: "3120"
+                    children:
+                      - assert:
+                          actual: "Response"
+                          operator: EQUALS
+                          expected: "[]"
+                - callKeyword:
+                    keyword: "HttpRequest"
+                    inputs:
+                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/payment_method/save"
+                      - Method: "POST"
+                      - FormData_agree: "1"
+                      - FormData_comment: ""
+                    children:
+                      - assert:
+                          actual: "Response"
+                          operator: CONTAINS
+                          expected: "Payment method required"
+          # Assert that the average response time of the request "https://opencart-prf.exense.ch/macbook" is below 400ms
+          - performanceAssert:
+              measurementName: "https://opencart-prf.exense.ch/macbook"
+              comparator: "LOWER_THAN"
+              aggregator: AVG
+              expectedValue: 400
+          # Assert that the average response time of the request "https://opencart-prf.exense.ch/index.php?route=checkout%2Fcart%2Fadd" is below 150ms
+          - performanceAssert:
+              measurementName: "https://opencart-prf.exense.ch/index.php?route=checkout%2Fcart%2Fadd"
+              comparator: "LOWER_THAN"
+              aggregator: AVG
+              expectedValue: 150
