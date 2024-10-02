@@ -23,5 +23,5 @@ keywords:
       name: OpenCart - Typical visit
       # Relative path to the Cypress test
       cypressProject: cypress-test/
-      # The name of the Spec file to be executed
+      # The name of the Spec file to be executed (found in the cypress/e2e subdirectory)
       spec: "opencart.cy.js"

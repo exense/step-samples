@@ -26,6 +26,7 @@ Cypress.Commands.add('Opencart_PlaceOrder', () => {
   cy.wait(200)
   cy.get('#button-shipping-method').click()
   cy.get('.pull-right > [type="checkbox"]').click()
+  cy.wait(200)
   cy.get('#button-payment-method').click()
   cy.wait(200)
   cy.get('#button-confirm').click()
