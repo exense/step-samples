@@ -1,0 +1,27 @@
+---
+schemaVersion: 1.0.0
+name: "OpenCart Test Plans"
+plans:
+  - name: "Load Testing OpenCart"
+    agents: auto_detect
+    root:
+      testScenario:
+        children:
+          # Declare a thread group with 10 concurrent users
+          - threadGroup:
+              users: 10
+              # Perform 100 iterations per user
+              iterations: 100
+              children:
+                - callKeyword:
+                    # Each iteration executes the Cypress test defined as Keyword
+                    keyword: "OpenCart - Typical visit"
+keywords:
+  # Declare a Keyword referencing the Cypress test
+  - Cypress:
+      # An arbitrary name for our Keyword
+      name: OpenCart - Typical visit
+      # Relative path to the Cypress test
+      cypressProject: cypress-test/
+      # The name of the Spec file to be executed (found in the cypress/e2e subdirectory)
+      spec: "opencart.cy.js"
