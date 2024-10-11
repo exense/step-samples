@@ -1,0 +1,17 @@
+---
+schemaVersion: 1.0.0
+name: "load-testing-serenity"
+plans:
+  - name: "Demo Serenity Load Test"
+    root:
+      threadGroup:
+        # Run the sequence with 10 VUs
+        users: 10
+        # Perform 10 iterations per user
+        iterations: 1000
+        children:
+          # Call the keyword executeAllFeatures defined in the class SerenityKeywords
+          - sequence:
+              children:
+              - callKeyword:
+                  keyword: "executeAllFeatures"
