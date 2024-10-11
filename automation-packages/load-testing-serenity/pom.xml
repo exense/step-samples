@@ -39,9 +39,9 @@
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
 
         <!-- !!! The base URL of your Step server !!! -->
-        <step.url>https://stepee-nhy.stepcloud-test.ch/</step.url>
+        <step.url>https://your-cluster.stepcloud.ch/</step.url>
         <!-- For Step EE, specify your Step token (in text format) and Step project name-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI1ZDRiM2U1MS04NGI3LTRiMjQtYjdkMS00NjJlOGQ0ZWFkZmYiLCJpc3MiOiJodHRwczovL3N0ZXBlZS1uaHkuc3RlcGNsb3VkLXRlc3QuY2giLCJhdWQiOiJodHRwczovL3N0ZXBlZS1uaHkuc3RlcGNsb3VkLXRlc3QuY2giLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcyODYyNjI4MSwiaWF0IjoxNzI4NjI2MjgxLCJleHAiOjQ4ODIyMjYyODEsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.zCOMocg29QmmEPcRTNv05XKjTkoct3xEDcr8VJllhSw</step.auth-token>
+        <step.auth-token>...</step.auth-token>
         <step.step-project-name>Common</step.step-project-name>
     </properties>
 
