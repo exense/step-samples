@@ -1,5 +1,5 @@
 # step-samples
-Sample projects for *[step](https://step.exense.ch)*
+Sample projects for *[step](https://step.dev)*
 
 ## Overview
 
@@ -12,9 +12,9 @@ The repository is structured as follow:<br><br>
 
 ## Goal
 
-The purpose of this repo, once you've familiarized yourself with the project's contents, is to help you package and deploy the keywords onto a *step* platform. For a local installation of *step*, just download the latest [release](https://github.com/exense/step/releases) and follow our [installation guidelines](https://step.exense.ch/knowledgebase/3.17/getting-started/quick-setup/).
+The purpose of this repo, once you've familiarized yourself with the project's contents, is to help you package and deploy the keywords onto a *step* platform. For a local installation of *step*, just download the latest [release](https://github.com/exense/step/releases) and follow our [installation guidelines](https://step.dev/knowledgebase/setup/installation/binaries/quick-setup/).
 
-Alternatively, if you're not interested in experimenting with a local instance and are not planing on running step on premise, you could skip this step and just contact us through our company [contact form](https://step.exense.ch/contact/) to request a cloud cluster directly. In that scenario, step is offered as a SaaS application and you don't have to worry about any operational aspects such as infrastructure, installation, upgrades or housekeeping.
+Alternatively, if you're not interested in experimenting with a local instance and are not planing on running step on premise, you could skip this step and just contact us through our company [contact form](https://step.dev/contact/) to request a cloud cluster directly. In that scenario, step is offered as a SaaS application and you don't have to worry about any operational aspects such as infrastructure, installation, upgrades or housekeeping.
 
 ## Setup
 
@@ -47,4 +47,4 @@ Enterprise samples require *step* Enterprise and rely on dependencies hosted on 
 
 ## Help
 
-For support, please check out our official [support page](https://step.exense.ch/support/) or [contact form](https://step.exense.ch/contact/).
+For support, please check out our [contact form](https://step.dev/contact/).
