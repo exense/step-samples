@@ -1,0 +1,146 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.exense.step.examples</groupId>
+    <artifactId>load-testing-junit</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Step Samples - Load testing with JUnit</name>
+    <url>https://step.exense.ch/</url>
+
+    <developers>
+        <developer>
+            <name>exense Team</name>
+            <email>contact@exense.ch</email>
+            <organization>exense GmbH</organization>
+            <organizationUrl>https://www.exense.ch</organizationUrl>
+            <url>https://step.exense.ch</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/exense/step-samples/</connection>
+        <developerConnection>scm:git:https://github.com/exense/step-samples.git</developerConnection>
+        <url>https://github.com/exense/step-samples/</url>
+    </scm>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <step.version>3.26.0</step.version>
+        <step-api.version>1.2.4</step-api.version>
+        <junit.version>4.13.2</junit.version>
+        <serenity.version>4.1.6</serenity.version>
+        <cucumber.version>7.20.1</cucumber.version>
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+
+        <!-- !!! The base URL of your Step server !!! -->
+        <step.url>https://stepee-nhy.stepcloud-test.ch/</step.url>
+        <!-- For Step EE, specify your Step token (in text format) and Step project name-->
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI1ZDRiM2U1MS04NGI3LTRiMjQtYjdkMS00NjJlOGQ0ZWFkZmYiLCJpc3MiOiJodHRwczovL3N0ZXBlZS1uaHkuc3RlcGNsb3VkLXRlc3QuY2giLCJhdWQiOiJodHRwczovL3N0ZXBlZS1uaHkuc3RlcGNsb3VkLXRlc3QuY2giLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTcyODYyNjI4MSwiaWF0IjoxNzI4NjI2MjgxLCJleHAiOjQ4ODIyMjYyODEsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.zCOMocg29QmmEPcRTNv05XKjTkoct3xEDcr8VJllhSw</step.auth-token>
+        <step.step-project-name>Common</step.step-project-name>
+    </properties>
+
+    <dependencies>
+        <!-- Step dependencies -->
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-api-keyword</artifactId>
+            <version>${step-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-automation-packages-junit</artifactId>
+            <version>${step.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.exense.commons</groupId>
+            <artifactId>exense-basic-commons</artifactId>
+            <version>2.0.9</version>
+        </dependency>
+
+        <!-- JUnit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.9.0</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Make the Step maven plugin available -->
+                <plugin>
+                    <groupId>ch.exense.step</groupId>
+                    <artifactId>step-maven-plugin</artifactId>
+                    <version>${step.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+            </plugin>
+            <!-- Create an uber-jar which is the default packaging format for Step Automation Packages -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Use the Step maven plugin to execute the automation package in Step -->
+            <plugin>
+                <groupId>ch.exense.step</groupId>
+                <artifactId>step-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>execute-automation-package</id>
+                        <!-- Execute the automation package in Step during the verify phase -->
+                        <phase>verify</phase>
+                        <configuration>
+                            <url>${step.url}</url>
+                            <authToken>${step.auth-token}</authToken>
+                            <stepProjectName>${step.step-project-name}</stepProjectName>
+                            <ensureExecutionSuccess>true</ensureExecutionSuccess>
+                            <waitForExecution>true</waitForExecution>
+                            <executionResultTimeoutS>600</executionResultTimeoutS>
+                            <executionParameters>
+                                <env>TEST</env>
+                            </executionParameters>
+                        </configuration>
+                        <goals>
+                            <goal>execute-automation-package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

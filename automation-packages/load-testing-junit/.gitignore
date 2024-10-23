@@ -1,0 +1,13 @@
+.idea/
+bin/
+target/
+.settings/
+*.class
+*.log
+*.bak
+.classpath
+.project
+*.iml
+dependency-reduced-pom.xml
+reports/
+/test/lib/

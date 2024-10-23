@@ -1,0 +1,26 @@
+---
+schemaVersion: 1.0.0
+name: "load-testing-junit"
+plans:
+  - name: "Demo Load Test"
+    root:
+      threadGroup:
+        # Run the sequence with 10 VUs
+        users: 1
+        # Perform 1000 iterations per user
+        iterations: 1000
+        children:
+          # Call the keyword executeAllJUnitTests defined in the class MyKeywords
+          - callKeyword:
+              keyword: "executeTestNGTest"
+              routing:
+                - type: ui-automation
+              inputs:
+                - TestClassname: "com.consol.citrus.samples.todolist.TodoListIT"
+keywords:
+  - GeneralScript:
+      name: executeTestNGTest
+      scriptLanguage: java
+      scriptFile: load-testing-junit-1.0.0.jar
+      librariesFile: lib
+      #librariesFile: C:/Users/jecom/Git/citrus-samples/samples-http/sample-http/target/lib

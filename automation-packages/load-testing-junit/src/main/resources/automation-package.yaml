@@ -1,0 +1,18 @@
+---
+schemaVersion: 1.0.0
+name: "load-testing-junit"
+plans:
+  - name: "Demo Load Test"
+    root:
+      threadGroup:
+        # Run the sequence with 10 VUs
+        users: 1
+        # Perform 1000 iterations per user
+        iterations: 1
+        children:
+          # Call the keyword executeAllJUnitTests defined in the class MyKeywords
+          - callKeyword:
+              #keyword: "executeJUnitTest"
+              keyword: "test"
+              inputs:
+                - JUnitClassname: "step.examples.serenity.test.MyJUnitTest"
