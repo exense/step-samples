@@ -16,11 +16,19 @@ public class PlaywrightKeywords extends AbstractKeyword {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
             Page page = browser.newPage();
+
+            // Measure the loading time of the homepage using the Keyword API
+            output.startMeasure("Load homepage");
             page.navigate("https://opencart-prf.exense.ch/");
+            output.stopMeasure();
+
+            output.startMeasure("Search article");
             page.locator("text=MacBook").click();
             // The previous click loads quite a few resources such as jQuery etc.;
             // If we don't include this wait, the next click may hang forever.
             page.waitForLoadState(LoadState.DOMCONTENTLOADED);
+            output.stopMeasure();
+
             page.locator("text=Add to Cart").click();
             page.locator("text=1 item").click();
             page.locator("text=View Cart").click();
