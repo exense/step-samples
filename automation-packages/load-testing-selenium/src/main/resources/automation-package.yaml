@@ -1,8 +1,8 @@
 ---
 schemaVersion: 1.0.0
-name: "load-testing-playwright-automation-package"
+name: "load-testing-selenium-automation-package"
 plans:
-  - name: "OpenCart Playwright Load Test"
+  - name: "OpenCart Selenium Load Test"
     # Automatically determine and provision the agents (workers)
     agents: auto_detect
     root:
