@@ -13,18 +13,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ch.exense.step.examples</groupId>
-    <artifactId>load-testing-playwright</artifactId>
+    <artifactId>load-testing-selenium</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>Step Samples - Load testing with playwright</name>
+    <name>Step Samples - Load testing with Selenium</name>
     <url>https://step.exense.ch/</url>
+
     <licenses>
         <license>
-            <name>The GNU Affero General Public License 3.0</name>
-            <url>http://www.gnu.org/licenses/</url>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
+
     <developers>
         <developer>
             <name>exense Team</name>
@@ -34,16 +36,11 @@
             <url>https://step.exense.ch</url>
         </developer>
     </developers>
-    <scm>
-        <connection>scm:git:https://github.com/exense/step-samples/</connection>
-        <developerConnection>scm:git:https://github.com/exense/step-samples.git</developerConnection>
-        <url>https://github.com/exense/step-samples/</url>
-    </scm>
 
     <properties>
         <step.version>3.26.1</step.version>
         <step-api.version>1.2.4</step-api.version>
-        <playwright.version>1.40.0</playwright.version>
+        <selenium.version>4.10.0</selenium.version>
         <junit.version>4.13.1</junit.version>
 
         <maven.compiler.source>11</maven.compiler.source>
@@ -52,18 +49,24 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- !!! The base URL of your Step server !!! -->
-        <step.url>http://localhost:8080</step.url>
-        <!-- For Step EE, specify your Step token (in text format) and Step project name-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJq...</step.auth-token>
+        <step.url>https://your-cluster.stepcloud.ch/</step.url>
+        <!-- For Step EE and SaaS, specify your Step token (in text format) and Step project name-->
+        <step.auth-token>...</step.auth-token>
         <step.step-project-name>Common</step.step-project-name>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.microsoft.playwright</groupId>
-            <artifactId>playwright</artifactId>
-            <version>${playwright.version}</version>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-api</artifactId>
+            <version>${selenium.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>ch.exense.step</groupId>
             <artifactId>step-api-keyword</artifactId>

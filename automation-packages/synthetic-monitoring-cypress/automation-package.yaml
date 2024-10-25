@@ -1,0 +1,30 @@
+---
+schemaVersion: 1.0.0
+name: "synthetic-monitoring-cypress"
+plans:
+  - name: "Opencart synthetic monitoring plan"
+    root:
+      testCase:
+        children:
+          # Execute the cypress test once
+          - callKeyword:
+              keyword: "OpenCart - Typical visit"
+          # Assert the execution time of this cypress test is under 1 minute
+          - performanceAssert:
+              measurementName: "OpenCart - Typical visit"
+              comparator: "LOWER_THAN"
+              expectedValue: 60000
+schedules:
+  - name: "Opencart synthetic monitoring schedule"
+    #CRON expression for one execution per minute
+    cron: "0 0/1 * * * ?"
+    planName: "Opencart synthetic monitoring plan"
+keywords:
+  # Declare a Keyword referencing the Cypress test
+  - Cypress:
+      # An arbitrary name for our Keyword
+      name: OpenCart - Typical visit
+      # Relative path to the Cypress test
+      cypressProject: cypress-test/
+      # The name of the Spec file to be executed (found in the cypress/e2e subdirectory)
+      spec: "opencart.cy.js"
