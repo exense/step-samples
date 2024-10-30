@@ -1,0 +1,27 @@
+---
+schemaVersion: 1.0.0
+name: "load-testing-k6-automation-package"
+keywords:
+  # Declare a Keyword which runs the K6 test 'opencart-test.js' with 1 VU and 10 iterations
+  - K6:
+      name: 'OpenCart Journey 10x'
+      vus: 1
+      iterations: 10
+      scriptFile: "k6-tests/opencart-test.js"
+plans:
+  - name: "Load Testing OpenCart"
+    # The agents (workers) are automatically determined and provisioned upon execution
+    agents: auto_detect
+    root:
+      testScenario:
+        children:
+          # Declare a ThreadGroup that distributes the execution of the Keyword (and thus the K6 test)
+          - threadGroup:
+              # Distributes across 5 workers
+              users: 5
+              # Each worker executes the Keyword 100 times (which leads to 10 x 100 = 1000 executions of the script 'opencart-test.js' per worker)
+              iterations: 100
+              children:
+                - callKeyword:
+                    # Call the defined Keyword
+                    keyword: "OpenCart Journey 10x"
