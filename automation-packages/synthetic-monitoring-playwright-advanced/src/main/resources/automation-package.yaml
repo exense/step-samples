@@ -18,7 +18,7 @@ plans:
         description: "Assert the scheduled executions did not fail more than once in the last 10 minutes"
         children:
           - assertMetric:
-              description: "Make sure executions did not fail more than once in the last 10 minutes"
+              description: "Make sure executions did not fail more than twice in the last hour (default rolling window)"
               comparator: LOWER_THAN
               aggregation: SUM
               expectedValue: 2
@@ -38,12 +38,22 @@ alertingRules:
     eventClass: IncidentOpenedEvent
     conditions:
       - BindingCondition:
-          bindingKey: "executionDescription"
+          bindingKey: "scheduleName"
           predicate:
             BindingValueEqualsPredicate:
-              value: "Opencart synthetic monitoring plan"
+              value: "Opencart synthetic monitoring schedule"
     actions:
-      - NotificationViaGatewayAction:
-          gatewayName: "Email notification gateway"
-          gatewayParameters:
-            - "changeme@changeme.changeme"
+      - NotificationAction:
+          active: true
+          notification:
+            EmailNotification:
+              upstreamPreset: "Send E-mail"
+              to:
+                data:
+                  - "changeme@changeme.changeme"
+              bodyHtml:
+                data: "IncidentOpenedEvent for 'Opencart synthetic monitoring plan'. 
+                <br/> Error summary: ${errorSummary}
+                <br/> Link: ${incidentUrl}"
+              subject:
+                data: "IncidentOpenedEvent for 'Opencart synthetic monitoring plan'"
