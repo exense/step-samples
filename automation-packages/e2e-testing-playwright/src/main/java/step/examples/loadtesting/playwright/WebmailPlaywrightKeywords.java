@@ -5,14 +5,12 @@ import com.microsoft.playwright.options.LoadState;
 import step.handlers.javahandler.AbstractKeyword;
 import step.handlers.javahandler.Keyword;
 
-import java.text.ParseException;
-
 public class WebmailPlaywrightKeywords extends AbstractKeyword {
 
     @Keyword(name = "Read order confirmation in Webmail")
-    public void readOrderConfirmationInWebmail() throws ParseException {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+    public void readOrderConfirmationInWebmail() {
+        try (PlaywrightWrapper playwrightWrapper = PlaywrightWrapper.create()){
+            Browser browser = playwrightWrapper.playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
             Page page = browser.newPage();
             page.navigate("https://demo-webmail.exense.ch/");
             page.waitForLoadState(LoadState.DOMCONTENTLOADED);

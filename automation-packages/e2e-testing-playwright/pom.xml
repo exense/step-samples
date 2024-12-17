@@ -41,9 +41,9 @@
     </scm>
 
     <properties>
-        <step.version>3.24.1</step.version>
+        <step.version>3.26.1</step.version>
         <step-api.version>1.2.2</step-api.version>
-        <playwright.version>1.40.0</playwright.version>
+        <playwright.version>1.49.0</playwright.version>
         <junit.version>4.13.1</junit.version>
 
         <maven.compiler.source>11</maven.compiler.source>
@@ -52,7 +52,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- The base URL of your Step server -->
-        <step.url>https://exense-gmbh-int.stepcloud-test.ch/</step.url>
+        <step.url>http://your-cluster.stepcloud.ch/</step.url>
         <!-- For Step EE, specify your Step token (in text format) and Step project name-->
         <step.auth-token></step.auth-token>
         <step.step-project-name>Common</step.step-project-name>
@@ -63,6 +63,11 @@
             <groupId>com.microsoft.playwright</groupId>
             <artifactId>playwright</artifactId>
             <version>${playwright.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.18.0</version>
         </dependency>
         <dependency>
             <groupId>ch.exense.step</groupId>
@@ -125,8 +130,8 @@
                         <phase>integration-test</phase>
                         <configuration>
                             <url>${step.url}</url>
-                            <authToken>${step.auth-token}</authToken>
-                            <stepProjectName>${step.step-project-name}</stepProjectName>
+                            <!--<authToken>${step.auth-token}</authToken>
+                            <stepProjectName>${step.step-project-name}</stepProjectName> -->
                             <ensureExecutionSuccess>true</ensureExecutionSuccess>
                             <waitForExecution>true</waitForExecution>
                             <executionResultTimeoutS>600</executionResultTimeoutS>
