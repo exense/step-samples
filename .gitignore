@@ -2,3 +2,4 @@
 /keywords/dotnet60/DemoKeywordLibrary/SeleniumKeywords/.vs/
 .npmrc
 .vs/
+.DS_Store
