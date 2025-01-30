@@ -3,7 +3,6 @@ package step.examples.loadtesting.playwright;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.SelectOption;
 import step.handlers.javahandler.AbstractKeyword;
@@ -13,8 +12,8 @@ public class OpenCartPlaywrightKeywords extends AbstractKeyword {
 
     @Keyword(name = "Buy MacBook in OpenCart")
     public void buyMacBookInOpenCart() throws InterruptedException {
-        try (Playwright playwright = Playwright.create()) {
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+        try (PlaywrightWrapper playwrightWrapper = PlaywrightWrapper.create()){
+            Browser browser = playwrightWrapper.playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
             Page page = browser.newPage();
             page.navigate("https://opencart-prf.exense.ch/");
             page.locator("text=MacBook").click();
