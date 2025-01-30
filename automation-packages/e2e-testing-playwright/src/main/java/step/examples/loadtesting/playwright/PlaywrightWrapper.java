@@ -27,20 +27,27 @@ public class PlaywrightWrapper implements AutoCloseable {
             throw new RuntimeException("Unexpected error while creating alternative temp dir for Playwright", e);
         }
         synchronized (System.out) {
-            // Playwright allows setting the alternative temporary directory only via System property.
-            // To prevent conflicts with other keywords running in parallel, Playwright initialization is performed
-            // within a synchronized block to ensure thread safety.
-            System.setProperty("playwright.driver.tmpdir", alternativeTempDir.toAbsolutePath().toString());
-            // We call PlaywrightImpl.createImpl directly in order to force the new driver instance creation and thus
-            // the use of the alternative temp dir
-            playwright = PlaywrightImpl.createImpl(null, true);
+            try {
+                // Playwright allows setting the alternative temporary directory only via System property.
+                // To prevent conflicts with other keywords running in parallel, Playwright initialization is performed
+                // within a synchronized block to ensure thread safety.
+                System.setProperty("playwright.driver.tmpdir", alternativeTempDir.toAbsolutePath().toString());
+                // We call PlaywrightImpl.createImpl directly in order to force the new driver instance creation and thus
+                // the use of the alternative temp dir
+                playwright = PlaywrightImpl.createImpl(null, true);
+            } catch (Throwable e) {
+                close();
+                throw e;
+            }
         }
     }
 
     @Override
     public void close() {
         try {
-            playwright.close();
+            if (playwright != null) {
+                playwright.close();
+            }
         } catch (Exception e) {
             throw e;
         } finally {

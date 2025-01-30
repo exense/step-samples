@@ -130,8 +130,8 @@
                         <phase>integration-test</phase>
                         <configuration>
                             <url>${step.url}</url>
-                            <!--<authToken>${step.auth-token}</authToken>
-                            <stepProjectName>${step.step-project-name}</stepProjectName> -->
+                            <authToken>${step.auth-token}</authToken>
+                            <stepProjectName>${step.step-project-name}</stepProjectName>
                             <ensureExecutionSuccess>true</ensureExecutionSuccess>
                             <waitForExecution>true</waitForExecution>
                             <executionResultTimeoutS>600</executionResultTimeoutS>
