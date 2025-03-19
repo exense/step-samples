@@ -1,5 +1,6 @@
 ---
 name: "synthetic-monitoring-playwright"
+version: 1.0.0
 plans:
   - name: "Opencart synthetic monitoring plan"
     root:

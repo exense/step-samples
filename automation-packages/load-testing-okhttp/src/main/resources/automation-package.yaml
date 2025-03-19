@@ -1,6 +1,7 @@
 ---
 schemaVersion: 1.0.0
 name: "load-testing-okhttp-automation-package"
+version: 1.0.0
 plans:
   - name: "OpenCart okhttp Load Test"
     root:
