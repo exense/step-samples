@@ -52,7 +52,7 @@ alertingRules:
               to:
                 data:
                   - "changeme@changeme.changeme"
-              bodyHtml:
+              bodyPlaintext:
                 data: "IncidentOpenedEvent for 'Opencart synthetic monitoring plan'. 
                 <br/> Error summary: ${errorSummary}
                 <br/> Link: ${incidentUrl}"
