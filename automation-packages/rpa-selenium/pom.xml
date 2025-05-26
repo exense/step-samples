@@ -38,7 +38,7 @@
     </developers>
 
     <properties>
-        <step.version>3.26.3</step.version>
+        <step.version>3.27.2</step.version>
         <step-api.version>1.2.6</step-api.version>
         <selenium.version>4.10.0</selenium.version>
         <junit.version>4.13.1</junit.version>

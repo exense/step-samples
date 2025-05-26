@@ -41,7 +41,7 @@
     </scm>
 
     <properties>
-        <step.version>3.24.1</step.version>
+        <step.version>3.27.2</step.version>
         <step-api.version>1.2.2</step-api.version>
         <playwright.version>1.40.0</playwright.version>
         <junit.version>4.13.1</junit.version>

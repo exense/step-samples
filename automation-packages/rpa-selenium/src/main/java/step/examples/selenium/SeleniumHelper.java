@@ -1,9 +1,6 @@
 package step.examples.selenium;
 
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import step.functions.io.OutputBuilder;
@@ -13,15 +10,12 @@ import step.grid.io.AttachmentHelper;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class SeleniumHelper {
 
 	public static final int IMPLICIT_WAIT = 10;
-	final static List<String> defaultOptions = Arrays.asList(new String[] { "disable-infobars", "ignore-certificate-errors" });
+	final static List<String> defaultOptions = Arrays.asList(new String[] { "disable-infobars", "ignore-certificate-errors", "reduce-security-for-testing", "password-store=basic" });
 	final static List<String> headlessOptions = Arrays
 			.asList(new String[] { "headless", "disable-gpu", "disable-sotfware-rasterizer" });
 
@@ -32,10 +26,17 @@ public class SeleniumHelper {
 		if (isHeadless) {
 			options.addArguments(headlessOptions);
 		}
+		final Map<String, Object> chromePrefs = new HashMap<>();
+		chromePrefs.put("credentials_enable_service", false);
+		chromePrefs.put("profile.password_manager_enabled", false);
+		chromePrefs.put("profile.password_manager_leak_detection", false); // <======== This is the important one
+
+		options.setExperimentalOption("prefs", chromePrefs);
 		final WebDriver driver = new ChromeDriver(options);
 		driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(IMPLICIT_WAIT));
 		driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(IMPLICIT_WAIT));
-		driver.manage().window().maximize();
+		//driver.manage().window().maximize();
+		driver.manage().window().setSize(new Dimension(1920, 1080));
 		return driver;
 	}
 

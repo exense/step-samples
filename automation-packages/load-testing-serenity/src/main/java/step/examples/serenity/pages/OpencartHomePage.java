@@ -5,6 +5,7 @@ import net.serenitybdd.annotations.Step;
 import net.serenitybdd.core.annotations.findby.FindBy;
 import net.serenitybdd.core.pages.PageObject;
 import net.serenitybdd.core.pages.WebElementFacade;
+import org.openqa.selenium.Dimension;
 
 public class OpencartHomePage extends PageObject {
 
@@ -20,7 +21,7 @@ public class OpencartHomePage extends PageObject {
     @Step
     public void launchApplication() {
         open();
-        getDriver().manage().window().maximize();
+        getDriver().manage().window().setSize(new Dimension(1920, 1080));
     }
 
     @Step
