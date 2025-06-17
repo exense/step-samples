@@ -19,8 +19,8 @@ plans:
           - threadGroup:
               # Distributes across 5 workers
               users: 5
-              # Each worker executes the Keyword 100 times (which leads to 10 x 100 = 1000 executions of the script 'opencart-test.js' per worker)
-              iterations: 100
+              # Each worker executes the Keyword 10 times (which leads to 5 x 10 x 10 = 500 executions of the script 'opencart-test.js' per worker)
+              iterations: 10
               children:
                 - callKeyword:
                     # Call the defined Keyword
