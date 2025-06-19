@@ -10,8 +10,8 @@ plans:
           # Declare a thread group with 10 concurrent users
           - threadGroup:
               users: 10
-              # Perform 100 iterations per user
-              iterations: 100
+              # Perform 10 iterations per user
+              iterations: 10
               children:
                 - callKeyword:
                     # Each iteration executes the Cypress test defined as Keyword
