@@ -9,7 +9,7 @@ keywords:
       iterations: 10
       scriptFile: "k6-tests/opencart-test.js"
 plans:
-  - name: "Load Testing OpenCart"
+  - name: "K6 - Load Testing OpenCart"
     # The agents (workers) are automatically determined and provisioned upon execution
     agents: auto_detect
     root:

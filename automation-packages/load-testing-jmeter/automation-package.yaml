@@ -7,7 +7,7 @@ keywords:
       name: 'JMeter test'
       jmeterTestplan: Demo_JMeter.jmx
 plans:
-  - name: "Load Testing plan"
+  - name: "JMeter - Load Testing plan"
     # The agents (workers) are automatically determined and provisioned upon execution
     agents: auto_detect
     root:

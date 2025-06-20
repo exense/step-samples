@@ -2,7 +2,7 @@
 schemaVersion: 1.0.0
 name: "OpenCart Test Plans"
 plans:
-  - name: "Load Testing OpenCart"
+  - name: "Cypress - Load Testing OpenCart"
     agents: auto_detect
     root:
       testScenario:
