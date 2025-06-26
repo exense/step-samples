@@ -19,7 +19,7 @@ public class PlaywrightKeywords extends AbstractKeyword {
 
             // Measure the loading time of the homepage using the Keyword API
             output.startMeasure("Load homepage");
-            page.navigate("https://opencart-prf.exense.ch/");
+            page.navigate("https://opencart-prf.stepcloud.ch/");
             output.stopMeasure();
 
             output.startMeasure("Search article");

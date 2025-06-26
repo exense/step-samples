@@ -25,4 +25,4 @@ plans:
                     keyword: "JMeter test"
                     inputs:
                       # Pass the variable 'URL' to JMeter via Keyword Input
-                      - url: "opencart-prf.exense.ch"
+                      - url: "opencart-prf.stepcloud.ch"

@@ -15,7 +15,7 @@ public class PlaywrightKeywordExample extends AbstractKeyword {
         try (Playwright playwright = Playwright.create()) {
             Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
             Page page = browser.newPage();
-            page.navigate("https://opencart-prf.exense.ch/");
+            page.navigate("https://opencart-prf.stepcloud.ch/");
             page.locator("text=MacBook").click();
             page.locator("text=Add to Cart").click();
             page.locator("text=1 item").click();

@@ -15,7 +15,7 @@ public class OpenCartPlaywrightKeywords extends AbstractKeyword {
         try (PlaywrightWrapper playwrightWrapper = PlaywrightWrapper.create()){
             Browser browser = playwrightWrapper.playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
             Page page = browser.newPage();
-            page.navigate("https://opencart-prf.exense.ch/");
+            page.navigate("https://opencart-prf.stepcloud.ch/");
             page.locator("text=MacBook").click();
             // The previous click loads quite a few resources such as jQuery etc.;
             // If we don't include this wait, the next click may hang forever.

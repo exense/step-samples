@@ -22,7 +22,7 @@ public class SeleniumKeywords extends AbstractKeyword {
         try {
             // Measure the loading time of the homepage using the Keyword API
             output.startMeasure("Load homepage");
-            driver.navigate().to("https://opencart-prf.exense.ch/");
+            driver.navigate().to("https://opencart-prf.stepcloud.ch/");
             output.stopMeasure();
 
             output.startMeasure("Search article");

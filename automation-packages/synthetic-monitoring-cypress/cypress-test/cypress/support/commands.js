@@ -1,7 +1,7 @@
 Cypress.config('defaultCommandTimeout', 10000);
 
 Cypress.Commands.add('Opencart_PlaceOrder', () => {
-  cy.visit("https://opencart-prf.exense.ch/")
+  cy.visit("https://opencart-prf.stepcloud.ch/")
   cy.contains('Desktops').click()
   cy.contains('Mac').click()
   cy.contains('iMac').click()

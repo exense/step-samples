@@ -3,20 +3,20 @@ import { check } from 'k6';
 
 export default function () {
     // Home page
-    var r = http.get('https://opencart-prf.exense.ch/',
+    var r = http.get('https://opencart-prf.stepcloud.ch/',
         { tags: { name: "OpenCart Home" } });
     check(r, {
         'response is status 200': (r) => r.status === 200,
     });
 
     // Adding a Macbook
-    r = http.get('https://opencart-prf.exense.ch/macbook',
+    r = http.get('https://opencart-prf.stepcloud.ch/macbook',
         { tags: { name: "OpenCart Add MacBook - Step 1" } });
     check(r, {
         'response is status 200': (r) => r.status === 200,
     });
 
-    r = http.post('https://opencart-prf.exense.ch/index.php?route=checkout%2Fcart%2Fadd',
+    r = http.post('https://opencart-prf.stepcloud.ch/index.php?route=checkout%2Fcart%2Fadd',
         {"quantity":1,"product_id":43},
         { tags: { name: "OpenCart Add MacBook - Step 2" } });
 
@@ -25,7 +25,7 @@ export default function () {
         'response contains "success"': (r) => r.body.includes("success")
     });
 
-    r = http.get('https://opencart-prf.exense.ch/index.php?route=common%2Fcart%2Finfo',
+    r = http.get('https://opencart-prf.stepcloud.ch/index.php?route=common%2Fcart%2Finfo',
         { tags: { name: "OpenCart Add MacBook - Step 3" } });
 
     check(r, {
@@ -34,7 +34,7 @@ export default function () {
     });
 
     // Checkout
-    r = http.get('https://opencart-prf.exense.ch/index.php?route=checkout/checkout',
+    r = http.get('https://opencart-prf.stepcloud.ch/index.php?route=checkout/checkout',
         { tags: { name: "OpenCart Checkout - Step 1" } });
 
     check(r, {
@@ -42,7 +42,7 @@ export default function () {
         'response contains "Guest Shipping"': (r) => r.body.includes("Guest Shipping")
     });
 
-    r = http.get('https://opencart-prf.exense.ch/index.php?route=checkout/guest',
+    r = http.get('https://opencart-prf.stepcloud.ch/index.php?route=checkout/guest',
         { tags: { name: "OpenCart Checkout - Step 2" } });
 
     check(r, {
@@ -50,7 +50,7 @@ export default function () {
         'response contains "First Name"': (r) => r.body.includes("First Name")
     });
 
-    r = http.get('https://opencart-prf.exense.ch/index.php?route=checkout/checkout/country&country_id=204',
+    r = http.get('https://opencart-prf.stepcloud.ch/index.php?route=checkout/checkout/country&country_id=204',
         { tags: { name: "OpenCart Checkout - Step 3" } });
 
     check(r, {
@@ -58,7 +58,7 @@ export default function () {
         'response contains "Ticino"': (r) => r.body.includes("Ticino")
     });
 
-    r = http.post('https://opencart-prf.exense.ch/index.php?route=checkout/guest/save',
+    r = http.post('https://opencart-prf.stepcloud.ch/index.php?route=checkout/guest/save',
         {
             "customer_group_id": 1,
             "firstname": "Gustav",
@@ -80,7 +80,7 @@ export default function () {
         'response contains "[]"': (r) => r.body.includes("[]")
     });
 
-    r = http.post('https://opencart-prf.exense.ch/index.php?route=checkout/payment_method/save',
+    r = http.post('https://opencart-prf.stepcloud.ch/index.php?route=checkout/payment_method/save',
         {
             "comment": "",
             "agree": "1"

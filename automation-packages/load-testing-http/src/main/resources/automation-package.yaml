@@ -19,12 +19,12 @@ plans:
                 - callKeyword:
                     keyword: "HttpRequest"
                     inputs:
-                      - URL: "https://opencart-prf.exense.ch/macbook"
+                      - URL: "https://opencart-prf.stepcloud.ch/macbook"
                       - Method: "GET"
                 - callKeyword:
                     keyword: "HttpRequest"
                     inputs:
-                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout%2Fcart%2Fadd"
+                      - URL: "https://opencart-prf.stepcloud.ch/index.php?route=checkout%2Fcart%2Fadd"
                       - Method: "POST"
                       - FormData_quantity: "1"
                       - FormData_product_id: "43"
@@ -43,7 +43,7 @@ plans:
                 - callKeyword:
                     keyword: "HttpRequest"
                     inputs:
-                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/checkout"
+                      - URL: "https://opencart-prf.stepcloud.ch/index.php?route=checkout/checkout"
                       - Method: "GET"
                     children:
                       - assert:
@@ -53,7 +53,7 @@ plans:
                 - callKeyword:
                     keyword: "HttpRequest"
                     inputs:
-                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/guest"
+                      - URL: "https://opencart-prf.stepcloud.ch/index.php?route=checkout/guest"
                       - Method: "GET"
                     children:
                       - assert:
@@ -63,7 +63,7 @@ plans:
                 - callKeyword:
                     keyword: "HttpRequest"
                     inputs:
-                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/checkout/country&country_id=204"
+                      - URL: "https://opencart-prf.stepcloud.ch/index.php?route=checkout/checkout/country&country_id=204"
                       - Method: "GET"
                     children:
                       - assert:
@@ -73,7 +73,7 @@ plans:
                 - callKeyword:
                     keyword: "HttpRequest"
                     inputs:
-                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/guest/save"
+                      - URL: "https://opencart-prf.stepcloud.ch/index.php?route=checkout/guest/save"
                       - Method: "POST"
                       - FormData_customer_group_id: "1"
                       - FormData_firstname: "Gustav"
@@ -95,7 +95,7 @@ plans:
                 - callKeyword:
                     keyword: "HttpRequest"
                     inputs:
-                      - URL: "https://opencart-prf.exense.ch/index.php?route=checkout/payment_method/save"
+                      - URL: "https://opencart-prf.stepcloud.ch/index.php?route=checkout/payment_method/save"
                       - Method: "POST"
                       - FormData_agree: "1"
                       - FormData_comment: ""
@@ -104,15 +104,15 @@ plans:
                           actual: "Response"
                           operator: CONTAINS
                           expected: "Payment method required"
-          # Assert that the average response time of the request "https://opencart-prf.exense.ch/macbook" is below 400ms
+          # Assert that the average response time of the request "https://opencart-prf.stepcloud.ch/macbook" is below 400ms
           - performanceAssert:
-              measurementName: "https://opencart-prf.exense.ch/macbook"
+              measurementName: "https://opencart-prf.stepcloud.ch/macbook"
               comparator: "LOWER_THAN"
               aggregator: AVG
               expectedValue: 400
-          # Assert that the average response time of the request "https://opencart-prf.exense.ch/index.php?route=checkout%2Fcart%2Fadd" is below 150ms
+          # Assert that the average response time of the request "https://opencart-prf.stepcloud.ch/index.php?route=checkout%2Fcart%2Fadd" is below 150ms
           - performanceAssert:
-              measurementName: "https://opencart-prf.exense.ch/index.php?route=checkout%2Fcart%2Fadd"
+              measurementName: "https://opencart-prf.stepcloud.ch/index.php?route=checkout%2Fcart%2Fadd"
               comparator: "LOWER_THAN"
               aggregator: AVG
               expectedValue: 150

@@ -22,7 +22,7 @@ public class SeleniumOpencartAdminKeywords extends AbstractKeyword {
 		WebDriver driver = createDriver(input.getBoolean("headless", true));
 		this.session.put(new SeleniumHelper.DriverWrapper(driver));
 		//Navigate to opencart website
-		driver.get("https://opencart-prf.exense.ch/admin/");
+		driver.get("https://opencart-prf.stepcloud.ch/admin/");
 		//Login
 		driver.findElement(By.id("input-username")).sendKeys(input.getString("username", "demo"));
 		driver.findElement(By.id("input-password")).sendKeys(input.getString("password", "demo"));
