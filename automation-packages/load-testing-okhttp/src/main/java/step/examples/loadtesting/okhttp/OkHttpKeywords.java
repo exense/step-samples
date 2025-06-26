@@ -15,27 +15,27 @@ public class OkHttpKeywords extends AbstractKeyword {
 
     @Keyword(name = "OpenCart Home")
     public void openCartHome() {
-        get("https://opencart-prf.exense.ch/");
+        get("https://opencart-prf.stepcloud.ch/");
     }
 
     @Keyword(name = "OpenCart Add MacBook")
     public void openCartAddMacBook() {
-        get("https://opencart-prf.exense.ch/macbook");
+        get("https://opencart-prf.stepcloud.ch/macbook");
         // add to cart
-        assertContains("success", post("https://opencart-prf.exense.ch/index.php?route=checkout%2Fcart%2Fadd",
+        assertContains("success", post("https://opencart-prf.stepcloud.ch/index.php?route=checkout%2Fcart%2Fadd",
                 Map.of("quantity", "1", "product_id", "43")
         ));
         // verify cart contents
-        assertContains("MacBook", get("https://opencart-prf.exense.ch/index.php?route=common%2Fcart%2Finfo"));
+        assertContains("MacBook", get("https://opencart-prf.stepcloud.ch/index.php?route=common%2Fcart%2Finfo"));
     }
 
     @Keyword(name = "OpenCart Checkout")
     public void openCartCheckout() {
         // Step 1
-        assertContains("Guest Shipping", get("https://opencart-prf.exense.ch/index.php?route=checkout/checkout"));
+        assertContains("Guest Shipping", get("https://opencart-prf.stepcloud.ch/index.php?route=checkout/checkout"));
         // Step 2
-        assertContains("First Name", get("https://opencart-prf.exense.ch/index.php?route=checkout/guest"));
-        assertContains("Ticino", get("https://opencart-prf.exense.ch/index.php?route=checkout/checkout/country&country_id=204"));
+        assertContains("First Name", get("https://opencart-prf.stepcloud.ch/index.php?route=checkout/guest"));
+        assertContains("Ticino", get("https://opencart-prf.stepcloud.ch/index.php?route=checkout/checkout/country&country_id=204"));
         Map<String, String> data = new HashMap<>(Map.of(
                 "customer_group_id", "1",
                 "firstname", "Gustav",
@@ -49,9 +49,9 @@ public class OkHttpKeywords extends AbstractKeyword {
                 "zone_id", "3120"
         ));
         data.putAll(Map.of("company", "", "address_2", ""));
-        assertContains("[]", post("https://opencart-prf.exense.ch/index.php?route=checkout/guest/save", data));
+        assertContains("[]", post("https://opencart-prf.stepcloud.ch/index.php?route=checkout/guest/save", data));
         // Step 3
-        assertContains("Payment method required", post("https://opencart-prf.exense.ch/index.php?route=checkout/payment_method/save", Map.of("comment", "", "agree", "1")));
+        assertContains("Payment method required", post("https://opencart-prf.stepcloud.ch/index.php?route=checkout/payment_method/save", Map.of("comment", "", "agree", "1")));
     }
 
     private String get(String url) {
