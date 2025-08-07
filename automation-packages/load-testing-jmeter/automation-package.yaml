@@ -8,6 +8,8 @@ keywords:
       jmeterTestplan: Demo_JMeter.jmx
 plans:
   - name: "JMeter - Load Testing plan"
+    categories:
+      - "Load Testing"
     # The agents (workers) are automatically determined and provisioned upon execution
     agents: auto_detect
     root:
@@ -17,8 +19,8 @@ plans:
           - threadGroup:
               # Distributes across 10 workers
               users: 10
-              # Each worker executes the Keyword 100 times
-              iterations: 100
+              # Each worker executes the Keyword 50 times
+              iterations: 50
               children:
                 - callKeyword:
                     # Call the defined Keyword
