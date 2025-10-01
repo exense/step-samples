@@ -8,6 +8,8 @@ keywords:
       vus: 1
       iterations: 10
       scriptFile: "k6-tests/opencart-test.js"
+      # The example below illustrates a more advanced k6 test with modules and custom configuration
+      #scriptFile: "k6-tests-with-modules/opencart-test.js"
 plans:
   - name: "K6 - Load Testing OpenCart"
     # The agents (workers) are automatically determined and provisioned upon execution
