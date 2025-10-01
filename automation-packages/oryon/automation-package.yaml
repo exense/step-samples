@@ -1,0 +1,10 @@
+---
+schemaVersion: 1.0.0
+name: "Demo Oryon"
+keywords:
+  - Oryon:
+      name: Demo_Keyword
+      scriptFile: oryon-keywords/oryon-script-1.groovy
+
+
+
