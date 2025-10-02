@@ -1,0 +1,26 @@
+{
+  "name": "my-keyword-library",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "eslint": "node_modules/.bin/eslint .",
+    "test": "npm run build && jest",
+    "build": "tsc --build",
+    "clean": "tsc --build --clean"
+  },
+  "author": "exense GmbH",
+  "license": "ISC",
+  "dependencies": {
+    "npm": "11.6.1",
+    "playwright": "1.55",
+    "step-node-agent": "3.28.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "24.6.2",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.4",
+    "typescript": "5.9.3"
+  }
+}

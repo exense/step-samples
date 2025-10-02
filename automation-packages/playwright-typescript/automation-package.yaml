@@ -1,0 +1,20 @@
+---
+schemaVersion: 1.0.0
+name: "eCommerce Plans"
+plans:
+  - name: "Demo with Playwright Keywords written in TypeScript"
+    agents: auto_detect
+    root:
+      testSet:
+        children:
+          - testCase:
+              nodeName: "OpenCart Test Case 01"
+              children:
+                - callKeyword:
+                    keyword: "buyMacBookInOpenCart"
+                    inputs:
+                      - url: "https://opencart-prf.stepcloud.ch/"
+keywords:
+  - Node:
+      name: buyMacBookInOpenCart
+      jsfile: nodejs-keywords/
