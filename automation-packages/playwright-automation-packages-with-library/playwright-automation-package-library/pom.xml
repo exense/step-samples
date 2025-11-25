@@ -1,0 +1,78 @@
+<!-- Copyright (C) exense GmbH. This file is part of STEP. STEP is free
+	software: you can redistribute it and/or modify it under the terms of the
+	GNU Affero General Public License as published by the Free Software Foundation,
+	either version 3 of the License, or (at your option) any later version. STEP
+	is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+	PURPOSE. See the GNU Affero General Public License for more details. You
+	should have received a copy of the GNU Affero General Public License along
+	with STEP. If not, see <http://www.gnu.org/licenses/>. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ch.exense.step.examples</groupId>
+        <artifactId>playwright-automation-packages-with-library</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>playwright-automation-package-library</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Step Samples - Playwright Automation Package Library</name>
+
+    <dependencies>
+        <!-- Playwright dependency -->
+        <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+        </dependency>
+
+        <!-- Step API dependency -->
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-api-keyword</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <!-- Create an uber-jar (fatJar) which is the default packaging format for Step automation packages -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
+            <!-- the Step maven plugin is used to deploy the library as a managed library allowing easy use and central management of the library-->
+            <plugin>
+                <groupId>ch.exense.step</groupId>
+                <artifactId>step-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>deploy-library</id>
+                        <phase>integration-test</phase>
+                        <configuration>
+                            <url>${step.url}</url>
+                            <authToken>${step.auth-token}</authToken>
+                            <stepProjectName>${step.step-project-name}</stepProjectName>
+                            <managedLibraryName>PlaywrightLibrary</managedLibraryName>
+                        </configuration>
+                        <goals>
+                            <goal>deploy-library</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

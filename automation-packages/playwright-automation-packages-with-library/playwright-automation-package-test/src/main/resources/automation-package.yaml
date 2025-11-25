@@ -1,0 +1,20 @@
+---
+version: 1.0.0
+name: "playwright-automation-packages-test"
+plans:
+  - name: "Playwright Multi-App Test"
+    # Automatically determine and provision the agents (workers)
+    agents: auto_detect
+    root:
+      # Declare a thread group with concurrent users
+      threadGroup:
+        users: 1
+        # Perform iterations per user
+        iterations: 1
+        children:
+          - callKeyword:
+              # Execute keyword from opencart module
+              keyword: "OpenCart - Buy MacBook in OpenCart"
+          - callKeyword:
+              # Execute keyword from exense-website module
+              keyword: "Exense Website - Simple navigation"
