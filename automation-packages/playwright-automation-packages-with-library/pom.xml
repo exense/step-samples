@@ -60,15 +60,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- !!! The base URL of your Step server !!! -->
-<!--        <step.url>http://localhost:8080</step.url>-->
-<!--        &lt;!&ndash; For Step EE, specify your Step token (in text format) and Step project name&ndash;&gt;-->
-<!--        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJq...</step.auth-token>-->
-<!--        <step.step-project-name>Common</step.step-project-name>-->
-
-        <step.url>https://stepee-master.stepcloud-test.ch/</step.url>
+        <step.url>http://localhost:8080</step.url>
         <!-- For Step EE, specify your Step token (in text format) and Step project name-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIxMDhlYTg2Yi0zYmJjLTQ3MjYtYmE0OS00MTcwNzk0MjZmYWYiLCJpc3MiOiJodHRwczovL3N0ZXBlZS1tYXN0ZXIuc3RlcGNsb3VkLXRlc3QuY2giLCJhdWQiOiJodHRwczovL3N0ZXBlZS1tYXN0ZXIuc3RlcGNsb3VkLXRlc3QuY2giLCJzdWIiOiJhZG1pbiIsIm5iZiI6MTc2NDA4Mjk4NywiaWF0IjoxNzY0MDgyOTg3LCJleHAiOjQ5MTc2ODI5ODcsImlzTG9jYWxUb2tlbiI6dHJ1ZX0.oHetu6jVZcuxMhD0xDB7Fo5LX7a-dluy7jK51cSeA1E</step.auth-token>
-        <step.step-project-name>Automatation-Packages</step.step-project-name>
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJq...</step.auth-token>
+        <step.step-project-name>Common</step.step-project-name>
     </properties>
 
     <dependencyManagement>
