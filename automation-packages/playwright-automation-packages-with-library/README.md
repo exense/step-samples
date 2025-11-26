@@ -25,7 +25,7 @@ The **OpenCart** module is a concrete Automation Package that:
 - Depends on the shared library module
 - Contains Keywords declared in Java code for testing the OpenCart demo application
 - Extends `AbstractPlaywrightKeyword` to leverage shared driver functionality
-- **NOT** building as an uber-jar (regular jar packaging)
+- Is built as an **uber-jar** (fat jar) excluding the library (scope "provided")
 
 Example keyword: `"OpenCart - Buy MacBook in OpenCart"`
 
@@ -36,7 +36,7 @@ The **Exense Website** module is another concrete Automation Package that:
 - Depends on the same shared library module
 - Contains Keywords declared in Java code for testing the Exense website
 - Extends `AbstractPlaywrightKeyword` to leverage shared driver functionality
-- **NOT** building as an uber-jar (regular jar packaging)
+- Is built as an **uber-jar** (fat jar) excluding the library (scope "provided")
 
 Example keyword: `"Exense Website - Simple navigation"`
 
@@ -60,13 +60,13 @@ playwright-automation-packages-with-library/
 ├── playwright-automation-package-library/            # Shared library (uber-jar)
 │   ├── pom.xml
 │   └── src/main/java/.../AbstractPlaywrightKeyword.java
-├── playwright-automation-package-opencart/           # OpenCart keywords (no uber-jar)
+├── playwright-automation-package-opencart/           # OpenCart keywords (uber-jar excluding the library)
 │   ├── pom.xml
 │   └── src/main/java/.../PlaywrightKeywordOpenCart.java
-├── playwright-automation-package-exense-website/     # Exense Website keywords (no uber-jar)
+├── playwright-automation-package-exense-website/     # Exense Website keywords (uber-jar excluding the library)
 │   ├── pom.xml
 │   └── src/main/java/.../PlaywrightKeywordExenseWebsite.java
-└── playwright-automation-package-test/               # Integration test (no uber-jar)
+└── playwright-automation-package-test/               # Integration test (regular jar)
     ├── pom.xml
     ├── src/main/resources/automation-package.yaml
     └── src/test/java/.../RunAutomationPackageTest.java
@@ -123,9 +123,9 @@ mvn clean package
 
 This will create:
 - `playwright-automation-package-library/target/playwright-automation-package-library-1.0.0.jar` (uber-jar)
-- `playwright-automation-package-opencart/target/playwright-automation-package-opencart-1.0.0.jar` (no uber-jar)
-- `playwright-automation-package-exense-website/target/playwright-automation-package-exense-website-1.0.0.jar` (no uber-jar)
-- `playwright-automation-package-test/target/playwright-automation-package-test-1.0.0.jar` (no regular jar)
+- `playwright-automation-package-opencart/target/playwright-automation-package-opencart-1.0.0.jar` (uber-jar excluding the library)
+- `playwright-automation-package-exense-website/target/playwright-automation-package-exense-website-1.0.0.jar` (uber-jar excluding the library)
+- `playwright-automation-package-test/target/playwright-automation-package-test-1.0.0.jar` (regular jar)
 
 ### Build specific modules
 
@@ -158,13 +158,19 @@ This executes the automation package defined in `automation-package.yaml` using 
    - Upload `playwright-automation-package-library-1.0.0.jar`
    - Upload `playwright-automation-package-opencart-1.0.0.jar`
    - Upload `playwright-automation-package-exense-website-1.0.0.jar`
+   - Upload `playwright-automation-package-test-1.0.0.jar`
 
 Using the Step maven plugin:
 
 ```bash
+# Deploy the library
 mvn install -pl playwright-automation-package-library
+# Deploy the Automation Package for Opencart
 mvn install -pl playwright-automation-package-opencart
+# Deploy the Automation Package for the Exense Website
 mvn install -pl playwright-automation-package-exense-website
+# Deploy the Automation Package containing the Step plan
+mvn install -pl playwright-automation-package-test
 ```
 
 **Note**: Before using the maven plugin for deployments, configure Step connection in the parent POM:
@@ -180,14 +186,10 @@ mvn install -pl playwright-automation-package-exense-website
    - The plan defined in `playwright-automation-package-test/src/main/resources/automation-package.yaml` can be executed once deployed to Step
    - Keywords from both OpenCart and Exense Website packages will share the same Playwright driver
 
-
-
-
-
 ## Key Benefits of This Architecture
 
 1. **Code Reusability**: Common functionality is centralized in the library module
-2. **Version Management**: Library can be versioned independently and shared across projects
+2. **Version Management**: The Library can be versioned independently and shared across projects
 3. **Resource Efficiency**: Playwright driver is shared across keywords, reducing overhead
 4. **Modularity**: Each application package is independent and can be deployed separately
 5. **Testability**: Integration testing is possible both locally and on Step instances
@@ -209,6 +211,6 @@ This project is licensed under the GNU Affero General Public License v3.0. See t
 
 ## Additional Resources
 
-- [Step Documentation](https://step.exense.ch/)
+- [Step Documentation](https://step.dev/)
 - [Playwright Java Documentation](https://playwright.dev/java/)
 - [Maven Multi-Module Projects](https://maven.apache.org/guides/mini/guide-multiple-modules.html)

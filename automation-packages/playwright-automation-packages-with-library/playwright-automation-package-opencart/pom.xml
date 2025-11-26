@@ -28,6 +28,8 @@
         <dependency>
             <groupId>ch.exense.step.examples</groupId>
             <artifactId>playwright-automation-package-library</artifactId>
+            <!-- do not include the library in the uber-jar -->
+            <scope>provided</scope>
         </dependency>
 
         <!-- Test dependencies -->
@@ -45,6 +47,11 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <!-- Create an uber-jar (fatJar) which is the default packaging format for Step automation packages -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
             </plugin>
             <!-- Use the Step maven plugin to deploy the automation package in Step -->
             <plugin>

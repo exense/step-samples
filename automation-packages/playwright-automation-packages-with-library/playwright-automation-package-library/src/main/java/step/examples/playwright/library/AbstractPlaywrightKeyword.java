@@ -58,6 +58,10 @@ public abstract class AbstractPlaywrightKeyword extends AbstractKeyword {
         }
     }
 
+    /**
+     * AutoCloseable implementation stored in the Step Keyword session are closed automatically when the session is terminated
+     * We use a wrapper here to ensure that all Playwright resources are closed in the proper order
+     */
     private static class PlaywrightWrapper implements AutoCloseable {
         public final Playwright playwright;
         public final Browser browser;
