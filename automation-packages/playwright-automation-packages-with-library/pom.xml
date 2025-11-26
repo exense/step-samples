@@ -1,0 +1,162 @@
+<!-- Copyright (C) exense GmbH. This file is part of STEP. STEP is free
+	software: you can redistribute it and/or modify it under the terms of the
+	GNU Affero General Public License as published by the Free Software Foundation,
+	either version 3 of the License, or (at your option) any later version. STEP
+	is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+	PURPOSE. See the GNU Affero General Public License for more details. You
+	should have received a copy of the GNU Affero General Public License along
+	with STEP. If not, see <http://www.gnu.org/licenses/>. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.exense.step.examples</groupId>
+    <artifactId>playwright-automation-packages-with-library</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>Step Samples - Playwright Automation Packages with Library</name>
+    <url>https://step.exense.ch/</url>
+    <licenses>
+        <license>
+            <name>The GNU Affero General Public License 3.0</name>
+            <url>http://www.gnu.org/licenses/</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>exense Team</name>
+            <email>contact@exense.ch</email>
+            <organization>exense GmbH</organization>
+            <organizationUrl>https://www.exense.ch</organizationUrl>
+            <url>https://step.exense.ch</url>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:https://github.com/exense/step-samples/</connection>
+        <developerConnection>scm:git:https://github.com/exense/step-samples.git</developerConnection>
+        <url>https://github.com/exense/step-samples/</url>
+    </scm>
+
+    <modules>
+        <module>playwright-automation-package-library</module>
+        <module>playwright-automation-package-opencart</module>
+        <module>playwright-automation-package-exense-website</module>
+        <module>playwright-automation-package-test</module>
+    </modules>
+
+    <properties>
+        <step.version>3.29.0</step.version>
+        <step-api.version>1.5.0</step-api.version>
+        <playwright.version>1.56.0</playwright.version>
+        <junit.version>4.13.1</junit.version>
+
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+        <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- !!! The base URL of your Step server !!! -->
+        <step.url>http://localhost:8080</step.url>
+        <!-- For Step EE, specify your Step token (in text format) and Step project name-->
+        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJq...</step.auth-token>
+        <step.step-project-name>Common</step.step-project-name>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Playwright dependency -->
+            <dependency>
+                <groupId>com.microsoft.playwright</groupId>
+                <artifactId>playwright</artifactId>
+                <version>${playwright.version}</version>
+            </dependency>
+
+            <!-- Step API dependencies -->
+            <dependency>
+                <groupId>ch.exense.step</groupId>
+                <artifactId>step-api-keyword</artifactId>
+                <version>${step-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Test dependencies -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.exense.step</groupId>
+                <artifactId>step-automation-packages-junit</artifactId>
+                <version>${step.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- Internal library dependency -->
+            <dependency>
+                <groupId>ch.exense.step.examples</groupId>
+                <artifactId>playwright-automation-package-library</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- Application module dependencies -->
+            <dependency>
+                <groupId>ch.exense.step.examples</groupId>
+                <artifactId>playwright-automation-package-opencart</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>ch.exense.step.examples</groupId>
+                <artifactId>playwright-automation-package-exense-website</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Compiler plugin -->
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+
+                <!-- Shade plugin for creating uber-jars -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- Step maven plugin -->
+                <plugin>
+                    <groupId>ch.exense.step</groupId>
+                    <artifactId>step-maven-plugin</artifactId>
+                    <version>${step.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
