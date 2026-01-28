@@ -1,0 +1,205 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ch.exense.step.examples</groupId>
+    <artifactId>ap2</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Step AP Sample (with common library)</name>
+    <description>Sample Step automation package depending on a common library</description>
+    <url>https://step.exense.ch/</url>
+
+    <properties>
+        <!-- Java & encoding -->
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Dependency versions -->
+        <step.version>3.29.1</step.version>
+        <step-api.version>1.5.0</step-api.version>
+
+        <!-- Maven plugins -->
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+        <maven-shade-plugin.version>3.5.3</maven-shade-plugin.version>
+        <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
+    </properties>
+
+    <profiles>
+        <!-- Execute the automation package on Step -->
+        <profile>
+            <id>execute-on-step</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>ch.exense.step</groupId>
+                        <artifactId>step-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>execute-automation-package</goal>
+                                </goals>
+                                <phase>verify</phase>
+                                <configuration>
+                                    <!-- Define the following settings in your settings.xml -->
+                                    <url>${step.url}</url>
+                                    <authToken>${step.auth-token}</authToken>
+                                    <stepProjectName>${step.step-project-name}</stepProjectName>
+
+                                    <waitForExecution>true</waitForExecution>
+                                    <ensureExecutionSuccess>true</ensureExecutionSuccess>
+                                    <executionResultTimeoutS>600</executionResultTimeoutS>
+                                    <executionParameters>
+                                        <env>TEST</env>
+                                    </executionParameters>
+                                    <!-- Reference to the automation package library via Maven coordinates -->
+                                    <library>
+                                        <groupId>ch.exense.step.examples</groupId>
+                                        <artifactId>library</artifactId>
+                                        <version>1.0.0</version>
+                                    </library>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Deploy the automation package to Step -->
+        <profile>
+            <id>deploy-to-step</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>ch.exense.step</groupId>
+                        <artifactId>step-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>install</phase>
+                                <configuration>
+                                    <url>${step.url}</url>
+                                    <authToken>${step.auth-token}</authToken>
+                                    <stepProjectName>${step.step-project-name}</stepProjectName>
+                                    <!-- Reference to the automation package library via Maven coordinates -->
+                                    <library>
+                                        <groupId>ch.exense.step.examples</groupId>
+                                        <artifactId>library</artifactId>
+                                        <version>1.0.0</version>
+                                    </library>
+                                </configuration>
+                                <goals>
+                                    <goal>deploy-automation-package</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <!-- Step dependencies -->
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-api-keyword</artifactId>
+            <version>${step-api.version}</version>
+            <!-- The Keyword API is provided by the Step platform at runtime and doesn't have to be
+             added to the package. -->
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Common library -->
+        <dependency>
+            <groupId>ch.exense.step.examples</groupId>
+            <artifactId>library</artifactId>
+            <version>1.0.0</version>
+            <!-- The automation package library will be provided by the Step platform at runtime.
+            We therefore set it to provided so that it is not added to the uberjar -->
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- JUnit runner for LOCAL automation package execution. -->
+        <dependency>
+            <groupId>ch.exense.step</groupId>
+            <artifactId>step-automation-packages-junit5</artifactId>
+            <version>${step.version}</version>
+            <!-- This dependency is only required for the local execution of the automation package
+             and shouldn't be packaged in the automation package. Keep the scope on test. -->
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>ch.exense.step</groupId>
+                    <artifactId>step-maven-plugin</artifactId>
+                    <version>${step.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                </configuration>
+            </plugin>
+
+            <!-- Package the automation package as Uber-jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
