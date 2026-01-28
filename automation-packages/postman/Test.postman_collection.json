@@ -1,0 +1,26 @@
+{
+	"info": {
+		"_postman_id": "90d29ee1-2de8-44bf-8c68-a00e966dfc4a",
+		"name": "Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19713124"
+	},
+	"item": [
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://step.dev",
+					"protocol": "https",
+					"host": [
+						"step",
+						"dev"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

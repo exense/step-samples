@@ -1,0 +1,22 @@
+schemaVersion: 1.0.0
+name: "Generic process execution package"
+plans:
+  - name: "Generic process execution - Plan 1"
+    root:
+      testCase:
+        children:
+          - callKeyword:
+              keyword: ExecuteBash
+              inputs:
+                - Command: npm install -g newman
+          - callKeyword:
+              keyword: ExecuteBash
+              inputs:
+                - Command: newman run Test.postman_collection.json
+keywords:
+  # Import the ExecuteBash Keyword from the system library (https://mvnrepository.com/artifact/ch.exense.step.library/step-library-kw-system)
+  - GeneralScript:
+      name: ExecuteBash
+      scriptLanguage: java
+      scriptFile: step-library-kw-system-1.0.30.jar
+      callTimeout: 600000
