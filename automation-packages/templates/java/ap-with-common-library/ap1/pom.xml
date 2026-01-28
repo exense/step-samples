@@ -18,30 +18,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Dependency versions -->
-        <step.version>2025.10.24-68fb9841965ede24cfcc065b</step.version>
-        <step-api.version>2025.10.15-68ef62ad2c8af16504f37e13</step-api.version>
+        <step.version>3.29.1</step.version>
+        <step-api.version>1.5.0</step-api.version>
 
         <!-- Maven plugins -->
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.5.3</maven-shade-plugin.version>
         <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
     </properties>
-
-    <repositories>
-        <!-- TODO: remove this repository after release of Step 29 -->
-        <repository>
-            <id>nexus-staging</id>
-            <url>https://nexus-enterprise-staging.exense.ch/repository/staging-maven/</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <!-- TODO: remove this repository after release of Step 29 -->
-        <pluginRepository>
-            <id>nexus-staging</id>
-            <url>https://nexus-enterprise-staging.exense.ch/repository/staging-maven/</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <profiles>
         <!-- Execute the automation package on Step -->
@@ -70,9 +54,12 @@
                                     <executionParameters>
                                         <env>TEST</env>
                                     </executionParameters>
-                                    <libArtifactGroupId>ch.exense.step.examples</libArtifactGroupId>
-                                    <libArtifactId>library</libArtifactId>
-                                    <libArtifactVersion>1.0.0</libArtifactVersion>
+                                    <!-- Reference to the automation package library via Maven coordinates -->
+                                    <library>
+                                        <groupId>ch.exense.step.examples</groupId>
+                                        <artifactId>library</artifactId>
+                                        <artifactVersion>1.0.0</artifactVersion>
+                                    </library>
                                 </configuration>
                             </execution>
                         </executions>
@@ -93,12 +80,15 @@
                             <execution>
                                 <phase>install</phase>
                                 <configuration>
-                                    <libArtifactGroupId>ch.exense.step.examples</libArtifactGroupId>
-                                    <libArtifactId>library</libArtifactId>
-                                    <libArtifactVersion>1.0.0</libArtifactVersion>
                                     <url>${step.url}</url>
                                     <authToken>${step.auth-token}</authToken>
                                     <stepProjectName>${step.step-project-name}</stepProjectName>
+                                    <!-- Reference to the automation package library via Maven coordinates -->
+                                    <library>
+                                        <groupId>ch.exense.step.examples</groupId>
+                                        <artifactId>library</artifactId>
+                                        <artifactVersion>1.0.0</artifactVersion>
+                                    </library>
                                 </configuration>
                                 <goals>
                                     <goal>deploy-automation-package</goal>
@@ -200,7 +190,6 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <reproducibleFileOrder>true</reproducibleFileOrder>
                         </configuration>
                     </execution>
                 </executions>

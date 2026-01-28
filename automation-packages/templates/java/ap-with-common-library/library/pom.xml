@@ -112,7 +112,6 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <reproducibleFileOrder>true</reproducibleFileOrder>
                         </configuration>
                     </execution>
                 </executions>
