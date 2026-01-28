@@ -58,7 +58,7 @@
                                     <library>
                                         <groupId>ch.exense.step.examples</groupId>
                                         <artifactId>library</artifactId>
-                                        <artifactVersion>1.0.0</artifactVersion>
+                                        <version>1.0.0</version>
                                     </library>
                                 </configuration>
                             </execution>
@@ -87,7 +87,7 @@
                                     <library>
                                         <groupId>ch.exense.step.examples</groupId>
                                         <artifactId>library</artifactId>
-                                        <artifactVersion>1.0.0</artifactVersion>
+                                        <version>1.0.0</version>
                                     </library>
                                 </configuration>
                                 <goals>

@@ -18,30 +18,14 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Dependency versions -->
-        <step.version>2025.10.24-68fb9841965ede24cfcc065b</step.version>
-        <step-api.version>2025.10.15-68ef62ad2c8af16504f37e13</step-api.version>
+        <step.version>3.29.1</step.version>
+        <step-api.version>1.5.0</step-api.version>
 
         <!-- Maven plugins -->
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.5.3</maven-shade-plugin.version>
         <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
     </properties>
-
-    <repositories>
-        <!-- TODO: remove this repository after release of Step 29 -->
-        <repository>
-            <id>nexus-staging</id>
-            <url>https://nexus-enterprise-staging.exense.ch/repository/staging-maven/</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <!-- TODO: remove this repository after release of Step 29 -->
-        <pluginRepository>
-            <id>nexus-staging</id>
-            <url>https://nexus-enterprise-staging.exense.ch/repository/staging-maven/</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <dependencies>
         <!-- Step dependencies -->
