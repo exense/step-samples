@@ -1,0 +1,11 @@
+---
+schemaVersion: 1.0.0
+name: "Automation Package 2"
+plans:
+  - name: "Plan 2"
+    agents: auto_detect
+    root:
+      testCase:
+        children:
+          - callKeyword:
+              keyword: MyKeywordFromAp2
