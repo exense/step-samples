@@ -45,18 +45,44 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>3.27.2</step.version>
-        <step-api.version>1.2.4</step-api.version>
+        <step.version>3.28.1</step.version>
+        <step-api.version>1.4.0</step-api.version>
         <okhttp.version>4.12.0</okhttp.version>
         <junit.version>4.13.1</junit.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
 
         <!-- !!! The base URL of your Step server !!! -->
-        <step.url>http://localhost:8080</step.url>
+        <step.url>https://stepos-28.stepcloud-test.ch/</step.url>
         <!-- For Step EE, specify your Step token (in text format) and Step project name-->
-        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJ...</step.auth-token>
-        <step.step-project-name>Common</step.step-project-name>
+<!--        <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJ...</step.auth-token>-->
+<!--        <step.step-project-name>Common</step.step-project-name>-->
     </properties>
+
+    <repositories>
+        <!-- staging nexus -->
+        <repository>
+            <id>nexus-staging</id>
+            <url>https://nexus-enterprise-staging.exense.ch/repository/staging-maven/</url>
+        </repository>
+        <!-- private nexus -->
+        <repository>
+            <id>nexus-exense</id>
+            <url>https://nexus-enterprise.exense.ch/repository/exense/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <!-- staging nexus -->
+        <pluginRepository>
+            <id>nexus-staging</id>
+            <url>https://nexus-enterprise-staging.exense.ch/repository/staging-maven/</url>
+        </pluginRepository>
+        <!-- private nexus -->
+        <pluginRepository>
+            <id>nexus-exense</id>
+            <url>https://nexus-enterprise.exense.ch/repository/exense/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -69,7 +95,7 @@
             <groupId>ch.exense.step</groupId>
             <artifactId>step-api-keyword</artifactId>
             <version>${step-api.version}</version>
-            <scope>provided</scope>
+<!--            <scope>provided</scope>-->
         </dependency>
 
         <dependency>
