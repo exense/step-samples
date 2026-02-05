@@ -10,7 +10,7 @@
 				{
 					"NAME": "ALL",
 					"CONFIG": "DefaultBuild",
-					"URL": "nexus-staging::https://nexus-enterprise-staging.exense.ch/repository/staging-maven/"
+					"URL": "nexus-staging::https://nexus-enterprise-staging.stepcloud-test.ch/repository/staging-maven/"
 				},
 				{
 					"NAME": "PRODUCTION",
