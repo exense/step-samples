@@ -1,0 +1,17 @@
+---
+version: 1.0.0
+name: "load-testing-appium-package"
+plans:
+  - name: "Appium Load Test Demo"
+    # Use available agents (workers) without auto-provisioning
+    agents: []
+    root:
+      # Declare a thread group with 10 concurrent users
+      threadGroup:
+        users: 1
+        # Perform 100 iterations per user
+        iterations: 1
+        children:
+          - callKeyword:
+              # Each iteration executes the test defined as Keyword
+              keyword: "AppiumDemoAppKeyword"
