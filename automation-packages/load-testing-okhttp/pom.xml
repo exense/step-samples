@@ -45,10 +45,10 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>3.28.1</step.version>
-        <step-api.version>1.4.0</step-api.version>
+        <step.version>0.0.0-MASTER-SNAPSHOT</step.version>
+        <step-api.version>0.0.0-MASTER-SNAPSHOT</step-api.version>
         <okhttp.version>4.12.0</okhttp.version>
-        <junit.version>4.13.1</junit.version>
+        <junit.version>4.13.2</junit.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
 
         <!-- !!! The base URL of your Step server !!! -->
@@ -84,6 +84,25 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- This is important! Take defined dependency library versions from the respective Step version -->
+            <dependency>
+                <groupId>ch.exense.step</groupId>
+                <artifactId>step</artifactId>
+                <version>${step.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- okhttp itself has inconsistent dependencies to kotlin, force the higher version -->
+            <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib-jdk8</artifactId>
+                <version>1.9.10</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
@@ -95,7 +114,6 @@
             <groupId>ch.exense.step</groupId>
             <artifactId>step-api-keyword</artifactId>
             <version>${step-api.version}</version>
-<!--            <scope>provided</scope>-->
         </dependency>
 
         <dependency>
@@ -128,6 +146,37 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <!-- Highly recommended: use enforcer plugins to check for dependency
+                version mismatches/conflicts using the 'requireUpperBoundDeps' rule -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.2</version>
+                <executions>
+                    <execution>
+                        <id>enforce-policies</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireUpperBoundDeps>
+                                    <excludedScopes>
+                                        <!-- only exclude "provided", but not "test" (also excluded by default) -->
+                                        <excludedScope>provided</excludedScope>
+                                    </excludedScopes>
+                                    <excludes>
+                                        <!-- known mix in Step between v3 and v4, harmless -->
+                                        <exclude>jakarta.xml.bind:jakarta.xml.bind-api</exclude>
+                                    </excludes>
+                                </requireUpperBoundDeps>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Create an uber-jar which is the default packaging format for Step Keyword Packages -->
             <plugin>
