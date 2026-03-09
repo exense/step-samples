@@ -1,0 +1,32 @@
+---
+schemaVersion: 1.0.0
+name: "Playwright Test Runner Sample"
+plans:
+  - name: "Playwright Test Runner Sample - Plan 1"
+    agents: auto_detect
+    root:
+      testCase:
+        children:
+          - callKeyword:
+              keyword: ExecuteBash
+              inputs:
+                - Command: npm ci
+          - callKeyword:
+              keyword: ExecuteBash
+              inputs:
+                - Command: npx playwright install
+                  Timeout_ms: "200000"
+          - callKeyword:
+              keyword: ExecuteBash
+              inputs:
+                - Command: npx playwright test
+                  Timeout_ms: "120000"
+                  Artifacts:
+                    - playwright-report
+keywords:
+  # Import the ExecuteBash Keyword from the system library (https://mvnrepository.com/artifact/ch.exense.step.library/step-library-kw-system)
+  # Execute download-dependencies.sh first to download this file
+  - GeneralScript:
+      name: ExecuteBash
+      scriptLanguage: java
+      scriptFile: step-library-kw-system-1.0.30.jar

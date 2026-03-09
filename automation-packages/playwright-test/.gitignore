@@ -1,0 +1,8 @@
+
+# Step dependencies (download via download-dependencies.sh)
+step-library-kw-system-*.jar
+
+# Playwright
+node_modules/
+test-results/
+playwright-report/
