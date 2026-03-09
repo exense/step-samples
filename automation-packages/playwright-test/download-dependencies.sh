@@ -1,4 +1,4 @@
-b#!/usr/bin/env bash
+#!/usr/bin/env bash
 # Downloads the Step system keyword library required to build and execute the automation package.
 
 set -euo pipefail
