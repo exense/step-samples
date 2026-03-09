@@ -45,11 +45,11 @@ The plan defined in `automation-package.yaml` executes three steps on the Step a
 
 The `ExecuteBash` keyword (provided by `step-library-kw-system-1.0.30.jar`) is used to run each shell command on the agent.
 
-## Uploading to Step
+## Executing on Step
 
-Once the JAR is present, upload the package through the Step UI or CLI:
+Once the JAR is present, execute the package through the Step CLI:
 
 ```bash
 # Example using the Step CLI (adjust flags for your environment)
-step ap execute --stepUrl=https://<yourCluster>.stepcloud.ch --token=<your API key>
+step ap execute --stepUrl=https://<yourCluster>.stepcloud.ch --token=<your API key> --projectName=Common
 ```
