@@ -2,7 +2,10 @@
 schemaVersion: 1.0.0
 name: "eCommerce Plans"
 plans:
-  - name: "Demo with Playwright Keywords written in TypeScript"
+  # Functional test plan: runs the two OpenCart keywords sequentially.
+  # searchProductAndOpenIt opens the browser and verifies the product price;
+  # addProductToCartAndCompletePurchase reuses the same session to finish checkout.
+  - name: "Functional Test Case - OpenCart purchase flow"
     agents: auto_detect
     root:
       testSet:
@@ -11,10 +14,39 @@ plans:
               nodeName: "OpenCart Test Case 01"
               children:
                 - callKeyword:
-                    keyword: "buyMacBookInOpenCart"
+                    keyword: "findProduct"
                     inputs:
                       - url: "https://opencart-prf.stepcloud.ch/"
+                      - productName: "iMac"
+                - callKeyword:
+                    keyword: "checkout"
+
+  # Load test plan: runs the full purchase flow (search + purchase) in a
+  # thread group to simulate concurrent users hitting the OpenCart store.
+  - name: "Load Test - OpenCart purchase flow"
+    agents: auto_detect
+    root:
+      threadGroup:
+        users: 5
+        iterations: 10
+        children:
+          - session:
+              children:
+                - callKeyword:
+                    keyword: "findProduct"
+                    inputs:
+                      - url: "https://opencart-prf.stepcloud.ch/"
+                      - productName: "iMac"
+                - callKeyword:
+                    keyword: "checkout"
+
+# Keyword definitions — both resolve to the same nodejs-keywords/ package.
+# findProduct : opens browser, searches for the product, returns its price
+# checkout    : adds the product to cart and completes guest checkout
 keywords:
   - Node:
-      name: buyMacBookInOpenCart
+      name: findProduct
+      jsfile: nodejs-keywords/
+  - Node:
+      name: checkout
       jsfile: nodejs-keywords/
