@@ -3,19 +3,27 @@ schemaVersion: 1.0.0
 name: "Playwright Test Runner Sample"
 plans:
   - name: "Playwright Test Runner Sample - Plan 1"
+    # Let Step automatically determine and provision the required agents for this plan
     agents: auto_detect
     root:
       testCase:
         children:
+          # Step 1: Install Node.js dependencies declared in package-lock.json.
+          # Using "npm ci" (instead of "npm install") ensures a clean, reproducible install.
           - callKeyword:
               keyword: ExecuteBash
               inputs:
                 - Command: npm ci
+          # Step 2: Install the Playwright browsers required by the tests.
+          # This step can be slow depending on network speed, hence the extended timeout.
           - callKeyword:
               keyword: ExecuteBash
               inputs:
                 - Command: npx playwright install
                   Timeout_ms: "200000"
+          # Step 3: Run the Playwright test suite.
+          # The "playwright-report" folder produced by Playwright is declared as an artifact
+          # so Step collects and exposes it in the execution report.
           - callKeyword:
               keyword: ExecuteBash
               inputs:
