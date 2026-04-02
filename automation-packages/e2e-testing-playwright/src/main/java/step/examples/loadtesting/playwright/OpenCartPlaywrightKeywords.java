@@ -1,22 +1,32 @@
 package step.examples.loadtesting.playwright;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.Page;
+import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.SelectOption;
+import step.grid.io.AttachmentHelper;
 import step.handlers.javahandler.AbstractKeyword;
+import step.handlers.javahandler.Input;
 import step.handlers.javahandler.Keyword;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class OpenCartPlaywrightKeywords extends AbstractKeyword {
 
-    @Keyword(name = "Buy MacBook in OpenCart")
-    public void buyMacBookInOpenCart() throws InterruptedException {
-        try (PlaywrightWrapper playwrightWrapper = PlaywrightWrapper.create()){
-            Browser browser = playwrightWrapper.playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-            Page page = browser.newPage();
+    @Keyword(name = "Purchase product in OpenCart")
+    public void purchaseProductInOpenCart(@Input(name = "Product", defaultValue = "MacBook") String product) throws InterruptedException, IOException {
+        try (Playwright playwright = Playwright.create()){
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            BrowserContext context = browser.newContext();
+            context.tracing().start(new Tracing.StartOptions()
+                    .setScreenshots(true)
+                    .setSnapshots(true));
+
+            Page page = context.newPage();
             page.navigate("https://opencart-prf.stepcloud.ch/");
-            page.locator("text=MacBook").click();
+            page.locator("text=" + product).click();
             // The previous click loads quite a few resources such as jQuery etc.;
             // If we don't include this wait, the next click may hang forever.
             page.waitForLoadState(LoadState.DOMCONTENTLOADED);
@@ -44,6 +54,11 @@ public class OpenCartPlaywrightKeywords extends AbstractKeyword {
             page.locator("#button-payment-method").click();
             page.locator("#button-confirm").click();
             page.locator("text=Your order has been placed!").isVisible();
+
+            Path path = Paths.get("trace.zip");
+            context.tracing().stop(new Tracing.StopOptions().setPath(path));
+            // Attachment uploaded as classical attachment
+            output.addAttachment(AttachmentHelper.generateAttachmentFromByteArray(Files.readAllBytes(path), "Playwright Trace", "application/vnd.step.playwright-trace+zip"));
         }
     }
 }

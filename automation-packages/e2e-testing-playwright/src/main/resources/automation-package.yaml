@@ -10,7 +10,9 @@ plans:
               nodeName: "OpenCart Test Case 01"
               children:
                 - callKeyword:
-                    keyword: "Buy MacBook in OpenCart"
+                    keyword: "Purchase product in OpenCart"
+                    inputs:
+                      - Product: "MacBook"
                 - callKeyword:
                     keyword: "Read order confirmation in Webmail"
         threads: 1
