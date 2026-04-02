@@ -1,50 +1,87 @@
 # step-samples
-Sample projects for *[step](https://step.dev)*
 
-## Overview
+Sample projects for [Step](https://step.dev) — the open-source open-source automation platform that unifies software automation across the entire DevOps lifecycle.
 
-This repository contains various examples and templates of *step* artifacts (Keywords, Plans and *step* Client).
+---
 
-The repository is structured as follow:<br><br>
-&nbsp;**/keywords**: contains various examples and templates of *step* Keywords for the different plugins (Java, .NET, Selenium, Cypress, etc)<br>
-&nbsp;**/plans**: contains examples of *step* Plans<br>
-&nbsp;**/step-client**: contains sample projects showcasing the use of the *step* Client relying on the *step* Controller API<br>
+## Start here: Automation Packages
 
-## Goal
+The **[automation-packages](automation-packages/)** directory is the primary entry point for this repository. It contains ready-to-run samples covering the most common automation use cases, each structured as a self-contained Step Automation Package.
 
-The purpose of this repo, once you've familiarized yourself with the project's contents, is to help you package and deploy the keywords onto a *step* platform. For a local installation of *step*, just download the latest [release](https://github.com/exense/step/releases) and follow our [installation guidelines](https://step.dev/knowledgebase/setup/installation/binaries/quick-setup/).
+> **What is an Automation Package?**  
+> An Automation Package is a single deployable artifact (JAR, zip, or folder) that bundles keywords, plans, schedules, and parameters together. It is the recommended way to organize and deploy automation with Step.
 
-Alternatively, if you're not interested in experimenting with a local instance and are not planing on running step on premise, you could skip this step and just contact us through our company [contact form](https://step.dev/contact/) to request a cloud cluster directly. In that scenario, step is offered as a SaaS application and you don't have to worry about any operational aspects such as infrastructure, installation, upgrades or housekeeping.
+Browse the **[automation-packages/README.md](automation-packages/README.md)** for a full index of samples with filtering by use-case, framework, language, and complexity level.
+
+### Quick overview of available samples
+
+| Use case | Examples |
+|----------|---------|
+| **Load testing** | Playwright, Selenium, Cypress, JMeter, k6, OkHttp, gRPC, Appium, Serenity BDD |
+| **E2E testing** | Playwright (Java, TypeScript, JavaScript), data-driven, shared library |
+| **Monitoring** | Synthetic monitoring with Playwright and Cypress, advanced alerting |
+| **RPA** | Selenium-based back-office automation with CSV data sources |
+
+---
+
+## Other directories
+
+These directories contain older, lower-level samples that predate Automation Packages. They remain useful as reference material for individual keywords or Step client usage.
+
+| Directory | Contents |
+|-----------|----------|
+| [keywords](keywords/) | Standalone keyword examples by technology (Java, .NET, Cypress, TypeScript/Playwright, JMeter, k6, Oryon, gRPC, SoapUI, …) |
+| [plans](plans/) | Example Step plan files (JSON and YAML) |
+| [step-client](step-client/) | Sample projects using the Step Controller API (Java and REST) |
+| [plugins](plugins/) | Example Step plugin |
+| [maven-plugins](maven-plugins/) | Sample for the Step Maven upload plugin |
+
+---
 
 ## Setup
 
-This project contains samples of open-source and enterprise features of *step*.
+### Open-source samples
 
-Samples of open-source features exclusively rely on public dependencies and should build without any specific prerequisite.
+Samples of open-source features rely exclusively on public dependencies and build without any specific prerequisites.
 
-Enterprise samples require *step* Enterprise and rely on dependencies hosted on exense's private nexus. In order to use the enterprise samples, you'll have to add following lines to your maven settings.xml:
+### Enterprise samples
+
+Enterprise samples require a Step Enterprise license and depend on artifacts hosted on the exense private Nexus. Add the following to your `~/.m2/settings.xml`:
 
 ```xml
 <servers>
-	<server>
-		<id>nexus-exense</id>
-		<username>your_step_enterprise_username</username>
-		<password>password</password>
-	</server>
+  <server>
+    <id>nexus-exense</id>
+    <username>your_step_enterprise_username</username>
+    <password>your_password</password>
+  </server>
 </servers>
-<!-- if your compagny uses a proxy, add these lines: -->
+```
+
+If your environment uses an HTTP proxy:
+
+```xml
 <proxies>
-	<proxy>
-		<id>step-proxy</id>
-		<active>true</active>
-		<protocol>http</protocol>
-		<host>your_proxy</host>
-		<port>your_proxy_port</port>
-		<nonProxyHosts>*.yourdomain</nonProxyHosts>
-	</proxy>
+  <proxy>
+    <id>step-proxy</id>
+    <active>true</active>
+    <protocol>http</protocol>
+    <host>your_proxy</host>
+    <port>your_proxy_port</port>
+    <nonProxyHosts>*.yourdomain</nonProxyHosts>
+  </proxy>
 </proxies>
 ```
 
+### Running Step
+
+The quickest way to get started is **[stepcloud.ch](https://www.stepcloud.ch/)** — create a free account, get evaluation credits, and have a fully managed Step instance running in minutes with no infrastructure to set up. This is the recommended approach for trying out these samples.
+
+For an on-premise installation, download the latest release from [github.com/exense/step/releases](https://github.com/exense/step/releases) and follow the [installation guide](https://step.dev/knowledgebase/setup/installation/binaries/quick-setup/).
+
+---
+
 ## Help
 
-For support, please check out our [contact form](https://step.dev/contact/).
+- Documentation: [step.dev](https://step.dev)
+- Support: [step.dev/contact](https://step.dev/contact/)
