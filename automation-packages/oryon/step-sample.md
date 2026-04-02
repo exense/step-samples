@@ -1,14 +1,15 @@
 ---
-practice: e2e-test-automation
+use-case: e2e-testing
 framework: oryon
 language: groovy
-technology: syrius
-strategy: keyword-driven
+target-platform: syrius
+approach: keyword-driven
+level: beginner
 ---
 
 # Oryon Keyword Sample
 
-Demonstrates how to write a Step keyword using the Oryon scripting runtime, which uses a Groovy-based DSL designed for the automation of Adcubum Syrius.
+Demonstrates how to write a Step keyword using the Oryon scripting runtime, which uses a Groovy-based DSL designed for rapid UI automation scripting.
 
 ## What this sample shows
 

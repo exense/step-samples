@@ -1,9 +1,10 @@
 ---
-practice: rpa
+use-case: rpa
 framework: selenium
 language: java
-technology: web
-strategy: keyword-driven
+target-platform: web
+approach: keyword-driven
+level: intermediate
 ---
 
 # RPA with Selenium (Java)

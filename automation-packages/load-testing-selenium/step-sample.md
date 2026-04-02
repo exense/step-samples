@@ -1,9 +1,10 @@
 ---
-practice: load-testing
+use-case: load-testing
 framework: selenium
 language: java
-technology: web
-strategy: keyword-driven
+target-platform: web
+approach: keyword-driven
+level: intermediate
 ---
 
 # Load Testing with Selenium (Java)

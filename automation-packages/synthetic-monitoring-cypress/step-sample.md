@@ -1,9 +1,10 @@
 ---
-practice: production-monitoring
+use-case: monitoring
 framework: cypress
 language: javascript
-technology: web
-strategy: project-integration
+target-platform: web
+approach: project-integration
+level: beginner
 ---
 
 # Synthetic Monitoring with Cypress

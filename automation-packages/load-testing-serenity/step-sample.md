@@ -1,9 +1,10 @@
 ---
-practice: load-testing
+use-case: load-testing
 framework: serenity-bdd
 language: java
-technology: web
-strategy: project-integration
+target-platform: web
+approach: project-integration
+level: advanced
 ---
 
 # Load Testing with Serenity BDD + Cucumber (Java)

@@ -1,9 +1,10 @@
 ---
-practice: load-testing
+use-case: load-testing
 framework: playwright
 language: java
-technology: web
-strategy: keyword-driven
+target-platform: web
+approach: keyword-driven
+level: intermediate
 ---
 
 # Load Testing with Playwright (Java)

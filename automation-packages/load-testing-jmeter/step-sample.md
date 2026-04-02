@@ -1,9 +1,10 @@
 ---
-practice: load-testing
+use-case: load-testing
 framework: jmeter
 language: xml
-technology: web
-strategy: project-integration
+target-platform: web
+approach: project-integration
+level: beginner
 ---
 
 # Distributed Load Testing with JMeter

@@ -1,14 +1,15 @@
 ---
-practice: load-testing
+use-case: load-testing
 framework: step-library-http
 language: java
-technology: rest
-strategy: keyword-driven
+target-platform: api
+approach: keyword-driven
+level: beginner
 ---
 
 # Load Testing HTTP / REST APIs
 
-Uses Step's `HttpRequest` keyword from the official HTTP keyword library to load test a REST API without writing any custom Java code. The plan defines a realistic multi-step purchase flow (add to cart → checkout) with inline assertions and performance thresholds.
+Uses Step's built-in `HttpRequest` keyword to load test a REST API without writing any custom code. The plan defines a realistic multi-step purchase flow (add to cart → checkout) with inline assertions and performance thresholds, entirely in `automation-package.yaml`.
 
 ## What this sample shows
 

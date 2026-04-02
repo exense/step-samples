@@ -1,9 +1,10 @@
 ---
-practice: load-testing
+use-case: load-testing
 framework: okhttp
 language: java
-technology: rest
-strategy: keyword-driven
+target-platform: api
+approach: keyword-driven
+level: intermediate
 ---
 
 # Load Testing HTTP with OkHttp (Java)

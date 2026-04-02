@@ -1,9 +1,10 @@
 ---
-practice: load-testing
+use-case: load-testing
 framework: appium
 language: java
-technology: mobile
-strategy: keyword-driven
+target-platform: mobile
+approach: keyword-driven
+level: advanced
 ---
 
 # Load Testing with Appium (Android)

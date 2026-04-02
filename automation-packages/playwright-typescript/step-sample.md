@@ -1,9 +1,10 @@
 ---
-practice: [e2e-test-automation, load-testing]
+use-case: [e2e-testing, load-testing]
 framework: playwright
 language: typescript
-technology: web
-strategy: keyword-driven
+target-platform: web
+approach: keyword-driven
+level: intermediate
 ---
 
 # Playwright Keywords in TypeScript

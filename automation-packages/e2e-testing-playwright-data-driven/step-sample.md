@@ -1,9 +1,10 @@
 ---
-practice: e2e-test-automation
+use-case: e2e-testing
 framework: playwright
 language: java
-technology: web
-strategy: keyword-driven
+target-platform: web
+approach: keyword-driven
+level: intermediate
 ---
 
 # E2E Testing with Playwright — Data-Driven (Java)

@@ -1,9 +1,10 @@
 ---
-practice: production-monitoring
+use-case: monitoring
 framework: playwright
 language: java
-technology: web
-strategy: keyword-driven
+target-platform: web
+approach: keyword-driven
+level: advanced
 ---
 
 # Synthetic Monitoring with Playwright — Advanced (Java)

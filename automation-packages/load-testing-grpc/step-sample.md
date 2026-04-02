@@ -1,9 +1,10 @@
 ---
-practice: load-testing
+use-case: load-testing
 framework: grpc
 language: java
-technology: rest
-strategy: keyword-driven
+target-platform: api
+approach: keyword-driven
+level: advanced
 ---
 
 # Load Testing a gRPC Service (Java)
