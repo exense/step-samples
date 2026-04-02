@@ -27,3 +27,10 @@ plans:
                 - callKeyword:
                     # Call the defined Keyword
                     keyword: "OpenCart Journey 10x"
+parameters:
+  # Enable live reporting (streaming) of k6 metrics during keyword execution
+  - key: enableLiveReporting
+    value: "true"
+  # Disable aggregation of k6 metrics in keywords
+  - key: measuresAsAvg
+    value: "false"
