@@ -41,20 +41,21 @@
     </scm>
 
     <properties>
-        <step.version>3.27.2</step.version>
-        <step-api.version>1.2.4</step-api.version>
+        <step.version>3.29.4</step.version>
+        <step-api.version>1.5.0</step-api.version>
         <playwright.version>1.40.0</playwright.version>
         <junit.version>4.13.1</junit.version>
 
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- !!! The base URL of your Step server !!! -->
+        <!-- The base URL of your Step server and the corresponding token should be defined in your settings.xml.
+        Uncomment the following if you want to define them directly here (unrecommended)
         <step.url>http://localhost:8080</step.url>
-        <!-- For Step EE, specify your Step token (in text format) and Step project name-->
         <step.auth-token>eyJhbGciOiJIUzI1NiJ9.eyJq...</step.auth-token>
+         -->
         <step.step-project-name>Common</step.step-project-name>
     </properties>
 
