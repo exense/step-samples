@@ -1,6 +1,34 @@
-# Playwright Automation Packages with Library
+---
+use-case: e2e-testing
+framework: playwright
+language: java
+target-platform: web
+approach: keyword-driven
+level: advanced
+---
 
-This project demonstrates how to structure a multi-module Maven project for Step automation packages using a shared library approach. It illustrates best practices for creating reusable, versioned code and sharing resources (like Playwright drivers) across multiple automation packages.
+# Playwright Automation Packages with Shared Library
+
+A multi-module Maven project that shows how to share a common Playwright driver library across multiple independent Automation Packages. Keywords from different packages reuse the same browser instance within a Step session.
+
+## What this sample shows
+
+- Structuring a multi-module Maven project with a parent BOM for dependency management
+- Building a shared `AbstractPlaywrightKeyword` library as an uber-jar deployed independently to Step
+- Sharing a Playwright browser instance across keywords from different packages using Step session storage (`session.put()` / `session.get()`)
+- Packaging consumer packages as uber-jars that exclude the shared library (`scope: provided`)
+- Running integration tests locally with JUnit and deploying all packages together to a Step instance
+
+## Modules
+
+| Module | Purpose |
+|--------|---------|
+| `playwright-automation-package-library` | Shared uber-jar: `AbstractPlaywrightKeyword` with driver lifecycle management |
+| `playwright-automation-package-opencart` | Keywords for the OpenCart demo shop |
+| `playwright-automation-package-exense-website` | Keywords for the Exense website |
+| `playwright-automation-package-test` | Integration test: plan that calls keywords from both packages in one session |
+
+---
 
 ## Overview
 
@@ -185,16 +213,6 @@ mvn install -pl playwright-automation-package-test
 2. **Execute the test plan *Playwright Multi-App Test*:**
    - The plan defined in `playwright-automation-package-test/src/main/resources/automation-package.yaml` can be executed once deployed to Step
    - Keywords from both OpenCart and Exense Website packages will share the same Playwright driver
-
-## Key Benefits of This Architecture
-
-1. **Code Reusability**: Common functionality is centralized in the library module
-2. **Version Management**: The Library can be versioned independently and shared across projects
-3. **Resource Efficiency**: Playwright driver is shared across keywords, reducing overhead
-4. **Modularity**: Each application package is independent and can be deployed separately
-5. **Testability**: Integration testing is possible both locally and on Step instances
-6. **Maintainability**: Changes to shared functionality only require updating the library
-7. **Scalability**: New automation packages can easily be added by depending on the library
 
 ## Dependencies
 
