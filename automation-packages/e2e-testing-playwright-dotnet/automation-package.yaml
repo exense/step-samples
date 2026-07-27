@@ -1,0 +1,30 @@
+---
+version: 1.2.0
+name: "e2e-testing-playwright-dotnet"
+parameters:
+  - key: targetUrl
+    value: "https://opencart-prf.stepcloud.ch/"
+keywords:
+  - DotNet:
+      name: "Purchase product in OpenCart"
+      dllFile: dotnet-keywords/bin/Debug/net8.0/e2e-testing-playwright-dotnet.dll
+      librariesFile: dotnet-keywords/bin/Debug/net8.0
+  - DotNet:
+      name: "Read order confirmation in Webmail"
+      dllFile: dotnet-keywords/bin/Debug/net8.0/e2e-testing-playwright-dotnet.dll
+      librariesFile: dotnet-keywords/bin/Debug/net8.0
+plans:
+  - name: "OpenCart Test Set 01"
+    root:
+      testSet:
+        children:
+          - testCase:
+              nodeName: "OpenCart Test Case 01"
+              children:
+                - callKeyword:
+                    keyword: "Purchase product in OpenCart"
+                    inputs:
+                      - Product: "MacBook"
+                - callKeyword:
+                    keyword: "Read order confirmation in Webmail"
+        threads: 1
