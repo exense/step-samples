@@ -1,12 +1,22 @@
 {
-    "compilerOptions": {
-      "noImplicitAny": false,
-      "noEmitOnError": true,
-      "removeComments": false,
-      "sourceMap": true,
-      "target": "es5",
-      "outDir": "keywords"
-    },
-    "include": [
-      "./src/keywords/**/*.ts"]
-  }
+  "compilerOptions": {
+    // Keyword arguments (input, output, session, properties) are untyped: the
+    // Step Node.js SDK does not ship type definitions yet, so implicit `any`
+    // is allowed rather than declaring the SDK contract in every sample.
+    "noImplicitAny": false,
+    // Node 20+ is required by step-node-agent
+    "target": "es2023",
+    // "node20" keeps the CommonJS emit required by the Step Node agent (which
+    // forks CommonJS helpers into this project) while enabling modern Node
+    // module resolution and esModuleInterop.
+    "module": "node20",
+    "rootDir": "./src",
+    // The Step `Node` keyword runtime loads the compiled keywords from here
+    "outDir": "keywords",
+    "sourceMap": true,
+    "types": ["node"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["./src/**/*.ts"]
+}

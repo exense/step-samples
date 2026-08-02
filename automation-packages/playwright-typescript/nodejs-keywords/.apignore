@@ -1,0 +1,10 @@
+# Excluded from the automation package uploaded to Step.
+# The agent only needs package.json (it runs `npm install`) and the compiled
+# keywords/ directory. node_modules is the one that really matters for size.
+node_modules/
+src/
+tests/
+tsconfig.test.json
+*.tsbuildinfo
+# Recreated by the Step Node agent at runtime; never ship a stale copy
+agent-fork-libs/

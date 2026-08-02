@@ -3,8 +3,8 @@ schemaVersion: 1.0.0
 name: "eCommerce Plans"
 plans:
   # Functional test plan: runs the two OpenCart keywords sequentially.
-  # searchProductAndOpenIt opens the browser and verifies the product price;
-  # addProductToCartAndCompletePurchase reuses the same session to finish checkout.
+  # findProduct opens the browser and verifies the product price;
+  # checkout reuses the same session to finish the purchase.
   - name: "Functional Test Case - OpenCart purchase flow"
     agents: auto_detect
     root:
@@ -23,6 +23,7 @@ plans:
 
   # Load test plan: runs the full purchase flow (search + purchase) in a
   # thread group to simulate concurrent users hitting the OpenCart store.
+  # Exactly the same keywords and inputs as the functional plan above.
   - name: "Load Test - OpenCart purchase flow"
     agents: auto_detect
     root:
@@ -39,6 +40,16 @@ plans:
                       - productName: "iMac"
                 - callKeyword:
                     keyword: "checkout"
+
+# Technical configuration shared by every plan of the package. Parameters are
+# passed to the keywords as `properties` (always as strings), which is where
+# settings like this belong: the same knob can be redefined as a Parameter in
+# Step - globally, or per project or environment - without touching any plan.
+# Business data stays in the keyword `inputs` above.
+parameters:
+  # Set to "false" to watch the browser while the plan runs
+  - key: headless
+    value: "true"
 
 # Keyword definitions — both resolve to the same nodejs-keywords/ package.
 # findProduct : opens browser, searches for the product, returns its price

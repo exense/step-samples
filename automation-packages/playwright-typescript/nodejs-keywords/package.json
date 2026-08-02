@@ -1,13 +1,17 @@
 {
   "name": "my-keyword-library",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Step keywords implemented in TypeScript with the Playwright API",
+  "private": true,
   "scripts": {
-    "test": "npm run build && jest",
+    "test": "npm run build && npm run typecheck && node --import tsx --test \"tests/**/*.test.ts\"",
     "build": "tsc --build",
+    "typecheck": "tsc -p tsconfig.test.json",
     "clean": "tsc --build --clean",
-    "postinstall": "npx playwright install"
+    "postinstall": "playwright install chromium"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "author": "exense GmbH",
   "license": "ISC",
@@ -15,11 +19,9 @@
     "playwright": "1.58.2"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
     "@types/node": "24.6.2",
-    "jest": "^30.2.0",
-    "step-node-agent": "3.29.4",
-    "ts-jest": "^29.4.4",
-    "typescript": "5.9.3"
+    "step-node-agent": "3.30.1",
+    "tsx": "^4.19.3",
+    "typescript": "^6.0.3"
   }
 }
