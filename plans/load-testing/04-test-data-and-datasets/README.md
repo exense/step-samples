@@ -23,8 +23,8 @@ two virtual users collide.
 
 | Plan | Expected outcome | Shows |
 |------|------------------|-------|
-| A — One pool feeding one thread group | **PASSED** | The two-sibling shape, `item`, `.next()` |
-| B — One pool shared by two thread groups | **PASSED** | A shared cursor across populations |
+| A — One pool feeding one thread group | **PASSED** | Declaring in `before`, `item`, `.next()` |
+| B — One pool shared by two thread groups | **PASSED** | A shared cursor across parallel populations |
 | C — One account per virtual user | **PASSED** | Pulling in `beforeThread` instead of the loop body |
 | D — The pool runs dry | **FAILED** (on purpose) | `resetAtEnd: false` returns `null`, silently |
 | E — A pool that needs no file | **PASSED** | `json-array`, and the other sources |
@@ -41,42 +41,70 @@ This is the one thing to understand, and it is the opposite of what the name sug
 A `dataSet` node with children is a common and completely silent mistake: **the children are never
 executed, and the node still reports PASSED.**
 
-So the pattern is two **siblings** — the `dataSet` declares the pool, and the `threadGroup` after
-it pulls one row per iteration:
+## Declare the pool in a `before` block
+
+The declaration belongs in the `before` block of whatever node contains the load — and the thread
+group stays the root of the plan:
 
 ```yaml
 root:
-  testCase:
-    children:
-      - dataSet:
-          item: "shopperPool"          # names the CURSOR, not the row
-          resetAtEnd: true
-          dataSource:
-            csv: {file: "data/users.csv"}
+  threadGroup:
+    users: 1
+    iterations: 3
 
-      - threadGroup:
-          users: 1
-          iterations: 3
-          children:
-            - set:
-                key: shopper
-                value:
-                  expression: "shopperPool.next()"    # one pull per iteration
-            - callKeyword:
-                keyword: "Login"
-                inputs:
-                  - user:
-                      expression: "shopper.Username"
+    before:                              # runs once, before the load starts
+      steps:
+        - dataSet:
+            item: "shopperPool"          # names the CURSOR, not the row
+            resetAtEnd: true
+            dataSource:
+              csv: {file: "data/users.csv"}
+
+    children:
+      - set:
+          key: shopper
+          value:
+            expression: "shopperPool.next()"    # one pull per iteration
+      - callKeyword:
+          keyword: "Login"
+          inputs:
+            - user:
+                expression: "shopper.Username"
 ```
 
 `item` names the cursor. `shopperPool` is an object you call `.next()` on — it is **not** a map of
 columns. `.next()` advances the cursor and returns the row as a map.
 
+Two reasons for `before` rather than a sibling node:
+
+- **It removes a race.** See the next section — in a `testScenario` a sibling declaration is not
+  guaranteed to be bound before the load starts pulling from it.
+- **It keeps the thread group at the root.** A load plan's root should be the load profile.
+  Wrapping the whole thing in a `testCase` just to have somewhere to put the declaration buries
+  the profile one level down for no benefit.
+
 ## One pool, several thread groups
 
-The cursor is shared. Every `.next()` in the execution, from whichever thread group, takes the
-*following* row — so two populations drawing from one pool never collide on the same account,
-which is exactly what you want when the system under test locks a session per user.
+`testScenario` runs its children **in parallel**. A `dataSet` written as a plain sibling of the
+thread groups is therefore racing them: nothing guarantees the cursor is bound before the first
+`.next()`, and the failure mode is a plan that works on a quiet instance and breaks on a busy one.
+
+Put it in the scenario's `before` block, which runs to completion before any child starts:
+
+```yaml
+root:
+  testScenario:
+    before:
+      steps:
+        - dataSet: {item: "shopperPool", resetAtEnd: true, dataSource: {...}}
+    children:
+      - threadGroup: {nodeName: "Browsers", ...}
+      - threadGroup: {nodeName: "Buyers", ...}
+```
+
+Once bound, the cursor is **shared**. Every `.next()` in the execution, from whichever thread
+group, takes the *following* row — so two populations drawing from one pool never collide on the
+same account, which is exactly what you want when the system under test locks a session per user.
 
 The consequence: **which** rows a given thread group gets is not deterministic. It depends on the
 order the threads happen to reach their `.next()`. Never write a plan that assumes "the buyers get
@@ -84,15 +112,24 @@ shopper1".
 
 ## Where you pull decides how much data you need
 
-| Pull site | Rows consumed |
-|-----------|---------------|
-| the loop body | one per **iteration** |
-| `beforeThread` | one per **virtual user**, held for the thread's whole life |
+Three blocks, three frequencies:
+
+| Block | Runs | Holds |
+|-------|------|-------|
+| `before` | once for the test | the **declaration** |
+| `beforeThread` | once per virtual user | a pull, if the account belongs to the user |
+| `children` | every iteration | a pull, if the data belongs to the transaction |
+
+`before` is guaranteed to run before `beforeThread`, so the cursor is always bound by the time a
+thread claims its row.
 
 Per-virtual-user is the shape most load tests actually need: a virtual user logs in once and then
 does twenty things as that account — it does not become a different person between two clicks.
 
 ```yaml
+before:
+  steps:
+    - dataSet: {item: "shopperPool", resetAtEnd: false, dataSource: {...}}
 beforeThread:
   steps:
     - set:
