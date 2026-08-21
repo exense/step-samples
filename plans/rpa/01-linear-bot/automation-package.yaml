@@ -1,0 +1,250 @@
+---
+# ---------------------------------------------------------------------------
+# RPA sample 01 — Linear bot
+#
+# The baseline shape of an RPA plan: a single unattended bot run that opens an
+# application, reads a record, submits it, verifies the result and closes down.
+#
+# The focus of this sample is the PLAN. The keywords are 3-line Groovy stubs
+# that simulate a back-office application, so the package runs on any Java
+# agent with no browser, no build and no external system.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "rpa-01-linear-bot"
+
+plans:
+  - name: "Linear RPA bot"
+    categories:
+      - "RPA"
+    root:
+      # A `testCase` is the usual root for an RPA bot: one run = one business
+      # transaction, reported as a single test case in the execution tree.
+      testCase:
+        nodeName: "Process one record"
+        children:
+
+          # =============================================================
+          # The whole bot run happens inside ONE session.
+          #
+          # A `session` pins every keyword inside it to the same agent
+          # token. That matters because the keywords share the application
+          # itself: "Open Back Office" parks the application context (in a
+          # real bot, the Playwright or Selenium driver) in the agent's
+          # `session` object, and the keywords after it read it back from
+          # there.
+          #
+          # NOTE WHAT IS *NOT* IN THIS PLAN: no session id, no driver
+          # handle, no window reference is passed from keyword to keyword.
+          # Technical context travels through the keyword session object,
+          # invisibly to the plan. The plan only carries BUSINESS data -
+          # the record, its amount, the confirmation.
+          #
+          # Passing a session id around as a keyword input is a common
+          # mistake in hand-written plans: it clutters every call and it
+          # does not actually work for a real driver object, which cannot
+          # be serialised into a plan variable.
+          #
+          # Sessions get a sample of their own - see 06-session-and-
+          # scheduling for routing, and for where to put open/close so
+          # cleanup is guaranteed.
+          # =============================================================
+          - session:
+              nodeName: "One agent for the whole bot run"
+              children:
+
+                # -----------------------------------------------------
+                # 1. Open the application.
+                # Its context goes into the keyword session, so there is
+                # nothing here for the plan to capture.
+                # -----------------------------------------------------
+                - callKeyword:
+                    keyword: "Open Back Office"
+                    nodeName: "Open the back-office application"
+                    description: "Parks the application context in the agent session."
+
+                # -----------------------------------------------------
+                # 2. Read the record.
+                #
+                # THE KEY IDIOM OF THIS SAMPLE: the nested `set`.
+                #
+                # `output.<field>` is only in scope inside the calling
+                # node's own `children`. A `set` placed there reads the
+                # keyword output and promotes the variable to the PARENT
+                # scope, so it stays readable by every following sibling -
+                # not just the next one.
+                #
+                # This is for BUSINESS data flowing through the plan. The
+                # application context is not here; see the note above.
+                # -----------------------------------------------------
+                - callKeyword:
+                    keyword: "Read Record"
+                    nodeName: "Read the record to process"
+                    description: "Reads one record; its amount drives the submission below."
+                    inputs:
+                      - recordId: "REC-001"
+                    children:
+                      # Capture the fields this bot needs later on.
+                      #
+                      # `as Integer` is not decoration. A value read from a
+                      # keyword output is a JsonNumber wrapper - neither a
+                      # Groovy Integer nor a String - and passing it on
+                      # unconverted hands the next keyword a STRING. Coerce it
+                      # here and `amount` is a real number from then on.
+                      - set:
+                          key: amount
+                          value:
+                            expression: "output.amount as Integer"
+                      - set:
+                          key: customer
+                          value:
+                            expression: "output.customer"
+                      # An `assert` nested under the call is the one place
+                      # where `output.<field>` is used directly - no `set`.
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "PENDING"
+                          customErrorMessage: "The record was not in PENDING state - nothing to submit."
+
+                - echo:
+                    text:
+                      expression: "'Submitting ' + amount + ' for ' + customer"
+                    description: "Echo writes to the execution report - cheap audit trail for an unattended bot."
+
+                # -----------------------------------------------------
+                # 3. Submit the record.
+                #
+                # This call consumes values produced two steps earlier,
+                # which is exactly what `previous` could NOT do (step 4).
+                # -----------------------------------------------------
+                - callKeyword:
+                    keyword: "Submit Record"
+                    nodeName: "Submit the record"
+                    inputs:
+                      - recordId: "REC-001"
+                      - amount:
+                          expression: "amount"
+                    children:
+                      - set:
+                          key: confirmationId
+                          value:
+                            expression: "output.confirmationId"
+
+                      # The keyword echoes back what it received, so this
+                      # assert proves the VALUE arrived - not the variable
+                      # name. Swap the input above for "${amount}" and
+                      # this is what catches it.
+                      - assert:
+                          actual: "receivedAmount"
+                          operator: EQUALS
+                          expected: "1250"
+                          customErrorMessage: "The amount did not arrive - check that the input uses expression:, not a static string."
+
+                # -----------------------------------------------------
+                # ASIDE - there is no string interpolation in this YAML.
+                #
+                # Every reference to a variable above uses `expression:`.
+                # A plain string is a STATIC value, passed through as-is:
+                #
+                #     - amount: "${amount}"     # WRONG - the keyword
+                #                               # receives the literal
+                #                               # 9 characters "${amount}"
+                #     - amount:                 # RIGHT
+                #         expression: "amount"
+                #
+                # This is easiest to miss when the keyword ignores the input
+                # or only checks that it is non-empty: the plan goes green
+                # while the bot has been fed nonsense. This holds in keyword
+                # inputs, echo text and return outputs alike.
+                #
+                # To build a message out of variables, concatenate in the
+                # expression: expression: "'Record ' + recordId + ' done'"
+                # -----------------------------------------------------
+
+                # -----------------------------------------------------
+                # 4. `previous` - the fragile alternative.
+                #
+                # `previous.<field>` holds the output of the PRECEDING
+                # SIBLING, so it is only valid immediately after that
+                # keyword call. The next keyword call replaces it. Fine
+                # for an immediate check like this one; prefer the nested
+                # `set` for anything that has to survive further steps.
+                # -----------------------------------------------------
+                - check:
+                    expression: "previous.status == 'SUBMITTED'"
+                    nodeName: "Check the submission succeeded"
+                    description: "Reads the output of the immediately preceding keyword call."
+
+                # -----------------------------------------------------
+                # A deliberate wait - and what it is NOT for.
+                #
+                # The back office books the submission ASYNCHRONOUSLY:
+                # the call above returns as soon as the form is accepted,
+                # and the record settles a moment later. That is a
+                # property of the system under test, so waiting for it
+                # belongs in the plan.
+                #
+                # Do NOT use sleep to wait for a UI to become ready - for
+                # an element to appear, a spinner to stop, a page to load.
+                # That belongs inside the keyword, where the automation
+                # library has waits that return as soon as the condition
+                # is met. A sleep in the plan for that is both slower (it
+                # always costs the full duration) and flakier (one day it
+                # is not long enough).
+                #
+                # Even for an async backend a fixed sleep is the crude
+                # option: if you can ASK the system whether it is done,
+                # poll instead - see sample 05, plan D2. Reach for sleep
+                # when there is nothing to observe, or when you are
+                # deliberately pacing against a rate-limited system.
+                #
+                # `releaseTokens: true` would hand the agent token back
+                # while waiting. Here it stays false: the application is
+                # open on this agent and must not be given away.
+                # -----------------------------------------------------
+                - sleep:
+                    duration: 500
+                    unit: "ms"
+                    releaseTokens: false
+                    nodeName: "Wait for the back office to book the record"
+                    description: "The submission is processed asynchronously by the application, not by the UI."
+
+                - callKeyword:
+                    keyword: "Close Back Office"
+                    nodeName: "Close the back-office application"
+
+                # -------------------------------------------------------------
+                # 5. Final proof that the value chained across several hops.
+                # `confirmationId` was set in step 3 and is still readable here.
+                #
+                # NOTE - `assert` vs `check`, a common authoring mistake:
+                #   `assert` reads the OUTPUT REPORT of a keyword, so it is only
+                #   valid as a CHILD of a callKeyword (see step 2). Used as a
+                #   standalone sibling it fails the execution with
+                #   "Keyword report unreachable. Asserts should be wrapped in
+                #    Keyword nodes in the test plan."
+                #   `check` evaluates a Groovy expression against plan variables
+                #   and is the right control here.
+                # -------------------------------------------------------------
+                - check:
+                    expression: "confirmationId == 'CONF-REC-001'"
+                    nodeName: "Verify the confirmation id survived the whole plan"
+                    description: "Uses check, not assert: this reads a plan variable, not a keyword output report."
+
+keywords:
+  - GeneralScript:
+      name: "Open Back Office"
+      scriptLanguage: groovy
+      scriptFile: keywords/openBackOffice.groovy
+  - GeneralScript:
+      name: "Read Record"
+      scriptLanguage: groovy
+      scriptFile: keywords/readRecord.groovy
+  - GeneralScript:
+      name: "Submit Record"
+      scriptLanguage: groovy
+      scriptFile: keywords/submitRecord.groovy
+  - GeneralScript:
+      name: "Close Back Office"
+      scriptLanguage: groovy
+      scriptFile: keywords/closeBackOffice.groovy

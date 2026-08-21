@@ -1,0 +1,187 @@
+---
+# ---------------------------------------------------------------------------
+# RPA sample 06 - Sessions and scheduling
+#
+# Two things every unattended bot needs:
+#
+#   1. A SESSION, so all the steps of one bot run land on the same agent and
+#      can share a browser, a login, or an application handle.
+#   2. A SCHEDULE, so the bot runs at 03:00 without anybody launching it.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "rpa-06-session-and-scheduling"
+
+plans:
+
+  # =========================================================================
+  # A. session - pinning a bot run to one agent token.
+  #
+  # By default each keyword call takes whatever agent token is free, so two
+  # consecutive calls may run on DIFFERENT agents. That is fine for stateless
+  # keywords and fatal for UI automation: the second keyword would not find
+  # the browser the first one opened.
+  #
+  # `session` wraps a block so every keyword inside it uses the same token.
+  # Anything a keyword puts into its `session` map is then visible to the
+  # next keyword.
+  #
+  # WHERE TO PUT open/close - this bit is easy to get wrong.
+  #
+  # Do NOT use the session's own `before` / `after` blocks to open and close a
+  # stateful resource. A keyword in the session's
+  # `before` block runs on a DIFFERENT agent token than the session body, so
+  # the body cannot see what `before` put into the session and fails with
+  # "No browser in this session".
+  #
+  # Put a `sequence` INSIDE the session instead and use the sequence's
+  # before / after. Those steps run within the session's token, and `after`
+  # still runs when the body fails - so cleanup is still guaranteed.
+  # =========================================================================
+  - name: "A - Stateful bot in one session"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Drive one browser across several keywords"
+        children:
+          - session:
+              nodeName: "One agent, one browser, whole run"
+              description: "All keywords below share an agent token and therefore a browser."
+              children:
+                - sequence:
+                    nodeName: "Bot run with guaranteed browser cleanup"
+                    before:
+                      steps:
+                        - callKeyword:
+                            keyword: "Open Browser"
+                            nodeName: "Open the browser (before)"
+                    after:
+                      continueOnError: true
+                      steps:
+                        - callKeyword:
+                            keyword: "Close Browser"
+                            nodeName: "Close the browser (after) - always runs"
+                    children:
+
+                      # Each of these finds the browser the `before` step opened.
+                      - callKeyword:
+                          keyword: "Use Browser"
+                          nodeName: "Open the orders page"
+                          inputs:
+                            - page: "orders"
+
+                      - callKeyword:
+                          keyword: "Use Browser"
+                          nodeName: "Open the invoices page"
+                          inputs:
+                            - page: "invoices"
+                          children:
+                            - set:
+                                key: browserHandle
+                                value:
+                                  expression: "output.browser"
+
+                      - check:
+                          nodeName: "The same browser served both pages"
+                          expression: "browserHandle != null && browserHandle.startsWith('BROWSER-')"
+
+  # =========================================================================
+  # B. routing a bot to the right agent.
+  #
+  # An RPA bot usually needs a specific machine: the one with the fat client
+  # installed, or the one inside the customer's network.
+  #
+  # Two levels of control:
+  #
+  #   plan-level `agents:`   where the plan runs. `auto_detect` lets Step
+  #                          forecast what it needs; a list of entries with
+  #                          `pool` / `replicas` / `image` declares
+  #                          provisioning explicitly, e.g.
+  #                            agents:
+  #                              - replicas: 1
+  #                                pool: "<your-agent-pool>"
+  #
+  #   `routing:` on a session or a keyword call
+  #                          selects a token by agent ATTRIBUTES, e.g. only
+  #                          agents tagged as RPA workstations
+  #
+  # `routing` is commented out below because it needs agents carrying those
+  # attributes on your instance - an unmatched criterion means no token is
+  # ever granted and the plan waits.
+  # =========================================================================
+  - name: "B - Route the bot to the right agent"
+    categories: ["RPA"]
+    agents: auto_detect
+    root:
+      testCase:
+        nodeName: "Run on an agent that can do RPA"
+        children:
+          - session:
+              nodeName: "Session on a selected agent"
+              # routing:
+              #   - role: "rpa-workstation"
+              #   - os: "windows"
+              children:
+                - sequence:
+                    before:
+                      steps:
+                        - callKeyword:
+                            keyword: "Open Browser"
+                    after:
+                      continueOnError: true
+                      steps:
+                        - callKeyword:
+                            keyword: "Close Browser"
+                    children:
+                      - callKeyword:
+                          keyword: "Use Browser"
+                          inputs:
+                            - page: "home"
+
+# ---------------------------------------------------------------------------
+# Schedules - running the bot unattended.
+#
+# A schedule is created when the package is DEPLOYED, not when it is executed:
+#
+#     step ap deploy  -> registers plans, keywords and schedules in a project
+#     step ap execute -> runs the plans, and nothing else
+#
+# So this block has no effect if you only ever run the package with
+# `step ap execute`, which is how the other samples in this set are run.
+#
+# name              what the schedule is called in the Step UI
+# cron              a QUARTZ expression - SIX fields, seconds first. This is
+#                   the usual trip-up: "0 0 3 * * ?" is 03:00 every day, NOT
+#                   the five-field Unix form.
+# planName          the plan to run; must match a `name` above exactly
+# active            false ships the schedule switched off, which is what you
+#                   want for a sample - flip it to true to arm it
+# cronExclusions    windows where the bot must NOT run (maintenance, holidays)
+# executionParameters
+#                   the values the run starts with - the same mechanism a user
+#                   fills in by hand for an on-demand run (see sample 02)
+# ---------------------------------------------------------------------------
+schedules:
+  - name: "Nightly stateful bot"
+    cron: "0 0 3 * * ?"
+    planName: "A - Stateful bot in one session"
+    active: false
+    cronExclusions:
+      # No runs on Sunday - the back office is down for maintenance.
+      - "0 0 0-23 ? * SUN"
+    executionParameters:
+      env: "production"
+      recordId: "REC-NIGHTLY"
+
+keywords:
+  - GeneralScript:
+      name: "Open Browser"
+      scriptLanguage: groovy
+      scriptFile: keywords/openBrowser.groovy
+  - GeneralScript:
+      name: "Use Browser"
+      scriptLanguage: groovy
+      scriptFile: keywords/useBrowser.groovy
+  - GeneralScript:
+      name: "Close Browser"
+      scriptLanguage: groovy
+      scriptFile: keywords/closeBrowser.groovy

@@ -1,0 +1,269 @@
+---
+# ---------------------------------------------------------------------------
+# RPA sample 04 - Branching and variables
+#
+# An approval bot that decides what to do with each record: route it by type,
+# auto-approve small amounts, escalate large ones. This is where an RPA plan
+# stops being a script and starts encoding business rules.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "rpa-04-branching-and-variables"
+
+plans:
+
+  # =========================================================================
+  # A. switch / case - routing by record type.
+  #
+  # TWO THINGS TO GET RIGHT:
+  #
+  # 1. `switch.expression` MUST be the dynamic form.
+  #
+  #        expression: "recordType"                 # WRONG - the static
+  #                                                 # string "recordType",
+  #                                                 # which matches no case
+  #        expression:                              # RIGHT - reads the
+  #          expression: "recordType"               # variable
+  #
+  #    With the static form nothing matches and the switch runs NOTHING,
+  #    while still reporting PASSED. A silent no-op, like every other
+  #    static-vs-dynamic mistake in this YAML.
+  #
+  # 2. THERE IS NO `default` CASE.
+  #
+  #    A case with value "default" is just a case whose value is the string
+  #    "default". When the expression matches no case, the switch executes
+  #    nothing at all and passes. If you need a fallback, test for it AFTER
+  #    the switch - as this plan does with the `if` below.
+  #
+  # The fourth record has a type no case handles, so it exercises exactly
+  # that path.
+  # =========================================================================
+  - name: "A - Route records by type"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Route each record to the right sub-process"
+        children:
+          - forEach:
+              nodeName: "For each incoming record"
+              dataSource:
+                json-array:
+                  json: '[{"RecordId":"REC-001","Type":"INVOICE","Amount":"500"},{"RecordId":"REC-002","Type":"ORDER","Amount":"2500"},{"RecordId":"REC-003","Type":"CREDIT_NOTE","Amount":"100"},{"RecordId":"REC-004","Type":"UNKNOWN_TYPE","Amount":"75"}]'
+              children:
+
+                - callKeyword:
+                    keyword: "Read Record"
+                    nodeName: "Read the record"
+                    inputs:
+                      - recordId:
+                          expression: "row.RecordId"
+                      - recordType:
+                          expression: "row.Type"
+                      - amount:
+                          expression: "row.Amount"
+                    children:
+                      # Promote the fields the routing below needs.
+                      - set:
+                          key: recordType
+                          value:
+                            expression: "output.recordType"
+                      - set:
+                          key: amount
+                          value:
+                            expression: "output.amount as Integer"
+
+                # Declared out here, before the switch, so the branches can
+                # write to it and the check below can still read it. A `set`
+                # that only exists inside a case is scoped to that case.
+                - set:
+                    key: routed
+                    value: "NONE"
+                    nodeName: "Declare the routing outcome"
+
+                - switch:
+                    nodeName: "Route by record type"
+                    expression:
+                      expression: "recordType"
+                    children:
+                      - case:
+                          value: "INVOICE"
+                          children:
+                            - echo:
+                                text:
+                                  expression: "'Invoice path for ' + recordType"
+                            - set:
+                                key: routed
+                                value: "INVOICE"
+                      - case:
+                          value: "ORDER"
+                          children:
+                            - echo:
+                                text:
+                                  expression: "'Order path for ' + recordType"
+                            - set:
+                                key: routed
+                                value: "ORDER"
+                      - case:
+                          value: "CREDIT_NOTE"
+                          children:
+                            - echo:
+                                text:
+                                  expression: "'Credit note path for ' + recordType"
+                            - set:
+                                key: routed
+                                value: "CREDIT_NOTE"
+
+                # The replacement for the `default` case Step does not have:
+                # if nothing matched, `routed` is still NONE.
+                - if:
+                    nodeName: "Nothing matched?"
+                    condition:
+                      expression: "routed == 'NONE'"
+                    children:
+                      - echo:
+                          text:
+                            expression: "'Unhandled type ' + recordType + ' - sending to manual review'"
+                      - set:
+                          key: routed
+                          value: "MANUAL"
+
+                # Proves the routing actually happened. If the switch silently
+                # matched nothing - the static-expression mistake above - every
+                # record would come out MANUAL and this fails.
+                - check:
+                    nodeName: "The record took the branch its type demands"
+                    expression: "recordType == 'UNKNOWN_TYPE' ? routed == 'MANUAL' : routed == recordType"
+
+
+  # =========================================================================
+  # B. if - conditional execution, and how `set` scoping works.
+  #
+  # `if.condition` is a Groovy expression that must evaluate to a boolean.
+  # A common mistake is leaving it as a plain string: a non-empty string is
+  # not automatically truthy here, so write a real comparison.
+  # =========================================================================
+  - name: "B - Approve or escalate"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Auto-approve small amounts, escalate large ones"
+        children:
+
+          - callKeyword:
+              keyword: "Read Record"
+              nodeName: "Read the record"
+              inputs:
+                - recordId: "REC-100"
+                - amount: "2500"
+              children:
+                - set:
+                    key: amount
+                    value:
+                      expression: "output.amount as Integer"
+                - set:
+                    key: recordId
+                    value:
+                      expression: "output.recordId"
+
+          # ---------------------------------------------------------------
+          # The decision. Note the variable `decision` is declared BEFORE the
+          # branches, at this level.
+          #
+          # NOTE: a `set` inside an `if` belongs to the if's block and is
+          # NOT visible to the if's siblings afterwards. Declaring `decision`
+          # here first, then re-setting it inside the branches, keeps it
+          # readable after the branches - which is what the final check needs.
+          # ---------------------------------------------------------------
+          - set:
+              key: decision
+              value: "UNDECIDED"
+              nodeName: "Declare the decision variable in the outer scope"
+
+          - if:
+              nodeName: "Amount over 1000?"
+              condition:
+                expression: "amount > 1000"
+              description: "Large amounts need a human approver."
+              children:
+                - callKeyword:
+                    keyword: "Escalate"
+                    inputs:
+                      - recordId:
+                          expression: "recordId"
+                    children:
+                      - assert:
+                          actual: "decision"
+                          operator: EQUALS
+                          expected: "ESCALATED"
+                - set:
+                    key: decision
+                    value: "ESCALATED"
+
+          - if:
+              nodeName: "Amount 1000 or less?"
+              condition:
+                expression: "amount <= 1000"
+              children:
+                - callKeyword:
+                    keyword: "Auto Approve"
+                    inputs:
+                      - recordId:
+                          expression: "recordId"
+                    children:
+                      # `doNegate` inverts the operator: assert that the
+                      # decision is NOT the escalation outcome.
+                      - assert:
+                          actual: "decision"
+                          operator: EQUALS
+                          expected: "ESCALATED"
+                          doNegate: true
+                          customErrorMessage: "A small amount must not be escalated."
+                - set:
+                    key: decision
+                    value: "AUTO_APPROVED"
+
+          # `check` verifies a PLAN VARIABLE (unlike `assert`, which reads a
+          # keyword output report and must sit inside a callKeyword).
+          - check:
+              nodeName: "A decision was reached"
+              expression: "decision != 'UNDECIDED'"
+
+          - echo:
+              text:
+                expression: "'Record ' + recordId + ' (' + amount + ') -> ' + decision"
+
+  # =========================================================================
+  # C. skipNode - switching a branch off without deleting it.
+  #
+  # Handy for a step that is temporarily disabled (a downstream system under
+  # maintenance) or for a manual-only step during an unattended run.
+  # =========================================================================
+  - name: "C - Temporarily disabled steps"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Run with one step switched off"
+        children:
+          - echo:
+              text: "This step runs"
+          - callKeyword:
+              keyword: "Escalate"
+              nodeName: "Notify the approvals team (disabled)"
+              description: "skipNode leaves the step in the plan but does not execute it."
+              skipNode: true
+          - echo:
+              text: "This step runs too"
+
+keywords:
+  - GeneralScript:
+      name: "Read Record"
+      scriptLanguage: groovy
+      scriptFile: keywords/readRecord.groovy
+  - GeneralScript:
+      name: "Auto Approve"
+      scriptLanguage: groovy
+      scriptFile: keywords/autoApprove.groovy
+  - GeneralScript:
+      name: "Escalate"
+      scriptLanguage: groovy
+      scriptFile: keywords/escalate.groovy

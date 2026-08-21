@@ -1,0 +1,279 @@
+---
+# ---------------------------------------------------------------------------
+# RPA sample 03 - Data-driven loops
+#
+# The bread and butter of RPA: "do this for every row". This sample shows the
+# loop controls and the data sources that feed them, plus how to WRITE RESULTS
+# BACK into the source so a re-run can skip what is already done.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "rpa-03-data-driven-loops"
+
+plans:
+
+  # =========================================================================
+  # A. forEach over a CSV file - the most common RPA loop.
+  #
+  # Each row is exposed as the variable `row`; `row.<ColumnName>` reads a cell.
+  # =========================================================================
+  - name: "A - Process records from a CSV file"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Process every row of records.csv"
+        children:
+          - forEach:
+              nodeName: "For each record"
+              description: "Iterates the CSV; one bot transaction per row."
+              dataSource:
+                csv:
+                  file: "data/records.csv"
+                  delimiter: ","
+              children:
+                - echo:
+                    text:
+                      expression: "'Processing ' + row.RecordId + ' for ' + row.Customer"
+                - callKeyword:
+                    keyword: "Submit Record"
+                    inputs:
+                      - recordId:
+                          expression: "row.RecordId"
+                      - amount:
+                          expression: "row.Amount"
+
+  # =========================================================================
+  # B. Renaming the row variable, parallel workers and failure tolerance.
+  #
+  # item            renames `row` to something readable - useful when loops
+  #                 are nested and two `row` variables would collide
+  # threads         how many rows are processed in parallel; each thread takes
+  #                 its own agent token, so this is how you scale a bot
+  # maxFailedLoops  keep going after N failures instead of aborting the run -
+  #                 essential for an unattended batch where one bad record
+  #                 must not stop the other 999
+  # =========================================================================
+  - name: "B - Process records in parallel"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Process records with 2 parallel workers"
+        children:
+          - forEach:
+              nodeName: "For each record (2 workers)"
+              item: "invoice"
+              threads: 2
+              maxFailedLoops: 2
+              dataSource:
+                csv:
+                  file: "data/records.csv"
+              children:
+                - echo:
+                    text:
+                      expression: "'Worker processing ' + invoice.RecordId"
+                - callKeyword:
+                    keyword: "Submit Record"
+                    inputs:
+                      - recordId:
+                          expression: "invoice.RecordId"
+
+  # =========================================================================
+  # C. Other data sources.
+  #
+  # The loop body never changes - only the `dataSource` block does. Available
+  # sources: csv, excel, file, folder, gsheet, json, json-array, sequence, sql.
+  # =========================================================================
+  - name: "C - Other data sources"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "json-array, folder and sequence sources"
+        children:
+
+          # A JSON array - handy when the work list comes from an API.
+          - forEach:
+              nodeName: "For each record in a JSON array"
+              dataSource:
+                json-array:
+                  json: '[{"RecordId":"REC-101"},{"RecordId":"REC-102"}]'
+              children:
+                - callKeyword:
+                    keyword: "Submit Record"
+                    inputs:
+                      - recordId:
+                          expression: "row.RecordId"
+
+          # ---------------------------------------------------------------
+          # A drop folder - the classic "process whatever lands here" bot.
+          #
+          # NOT EXECUTED HERE, and the reason matters:
+          #
+          # `csv`, `excel` and `file` take a `file:` which is a RESOURCE
+          # REFERENCE - a path relative to the automation package (or a Step
+          # resource id), so the data travels with the package.
+          #
+          # `folder` takes a plain STRING PATH that is resolved on the AGENT's
+          # own filesystem. It cannot point inside the package. Pointing it at
+          # a package-relative path fails with a NullPointerException in
+          # step.datapool.file.FileDataPoolImpl, because the directory does
+          # not exist on the agent.
+          #
+          # That is the right design for a real drop-folder bot - the folder is
+          # normally a network share the agent can see - but it means the
+          # example below needs a path that exists on your agent:
+          #
+          #   - forEach:
+          #       nodeName: "For each file in the drop folder"
+          #       dataSource:
+          #         folder:
+          #           folder: "/mnt/rpa/dropfolder"     # absolute, on the agent
+          #       children:
+          #         - callKeyword:
+          #             keyword: "Process File"
+          #             inputs:
+          #               - file:
+          #                   expression: "row.file"
+          # ---------------------------------------------------------------
+
+          # An integer sequence - no external data needed.
+          - forEach:
+              nodeName: "For each number in a sequence"
+              item: "n"
+              dataSource:
+                sequence:
+                  start: 1
+                  end: 3
+                  inc: 1
+              children:
+                - echo:
+                    text:
+                      expression: "'Iteration ' + n"
+
+  # =========================================================================
+  # D. `for` - a plain counter loop.
+  #
+  # Use it when there is no data source at all: retry a fixed number of times,
+  # process N pages of a paginated back-office list, etc.
+  # =========================================================================
+  - name: "D - Counter loop"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Walk 3 pages of a back-office list"
+        children:
+          - for:
+              nodeName: "For page 1 to 3"
+              start: 1
+              end: 3
+              inc: 1
+              item: "page"
+              children:
+                - echo:
+                    text:
+                      expression: "'Opening page ' + page"
+
+
+  # =========================================================================
+  # E. Writing results BACK to the data source.
+  #
+  # The RPA closing-the-loop pattern: stamp each source row with the outcome,
+  # so a re-run can skip what is already done and the business gets the
+  # confirmation ids next to their records.
+  #
+  # THE MECHANISM - a `script` control inside the loop mutating the row map:
+  #
+  #     - script:
+  #         script: 'row.put("Result", "OK")'
+  #
+  # `row` is a plain Map, so `row.put(column, value)` sets a cell on the
+  # current row. That part is what this plan executes, and it passes.
+  #
+  # WHERE THE VALUES ACTUALLY LAND - read this before relying on it:
+  #
+  #   * A data file BUNDLED IN THE PACKAGE (like the `data/records.csv` used
+  #     below) is NOT a persistent store. The package is unpacked per
+  #     execution, so `row.put` succeeds and the value is readable in the
+  #     same iteration, but it is gone afterwards. With both a packaged CSV
+  #     and a packaged XLSX, a second forEach over the same file in the same
+  #     execution still reads the ORIGINAL values.
+  #
+  #   * To actually persist, point the data source at a STEP-MANAGED RESOURCE
+  #     by id instead of a package-relative path:
+  #
+  #         dataSource:
+  #           csv:
+  #             file:
+  #               id: "<your-resource-id>"        # a Step resource
+  #
+  #     ...or the same thing with `excel:` plus `headers: true`.
+  #
+  #     The write reaches the resource and survives the run, so a later
+  #     execution reads the updated values.
+  #
+  #     Upload the file as a resource in Step first, then substitute its id.
+  #     That is why this package cannot ship a runnable version of it - the
+  #     id only exists on the instance that holds the resource.
+  #
+  #   * BOTH csv and excel resources accept write-back.
+  #
+  #     Step's documentation says "writing to a CSV file from a dataset is
+  #     not supported" - note that sentence is about the `dataSet` control,
+  #     not `forEach`. A csv resource written through `forEach` + `script`
+  #     persists normally.
+  #
+  # A SQL source writes back through `writePKey`, which names the primary-key
+  # column Step uses to build the UPDATE statement:
+  #
+  #     dataSource:
+  #       sql:
+  #         connectionString: "jdbc:postgresql://db:5432/backoffice"
+  #         driverClass: "org.postgresql.Driver"
+  #         user: "rpa"
+  #         password:
+  #           expression: "dbPassword"
+  #         query: "SELECT id, record_id, status FROM records WHERE status = 'NEW'"
+  #         writePKey: "id"
+  # =========================================================================
+  - name: "E - Write results back to the data source"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Stamp each row with its result"
+        children:
+          - forEach:
+              nodeName: "Process and stamp each row"
+              dataSource:
+                csv:
+                  file: "data/records.csv"
+              children:
+                - callKeyword:
+                    keyword: "Submit Record"
+                    inputs:
+                      - recordId:
+                          expression: "row.RecordId"
+                    children:
+                      - set:
+                          key: confirmationId
+                          value:
+                            expression: "output.confirmationId"
+
+                # The write-back itself.
+                - script:
+                    nodeName: "Write the result back into the row"
+                    script: 'row.put("Result", "OK:" + confirmationId)'
+
+                # Reading the value straight back proves the row was mutated.
+                # (Persisting it beyond the run needs a Step resource - see
+                # the note above.)
+                - check:
+                    nodeName: "The row now carries the confirmation"
+                    expression: "row.Result.startsWith('OK:')"
+
+keywords:
+  - GeneralScript:
+      name: "Submit Record"
+      scriptLanguage: groovy
+      scriptFile: keywords/submitRecord.groovy
+  - GeneralScript:
+      name: "Process File"
+      scriptLanguage: groovy
+      scriptFile: keywords/processFile.groovy

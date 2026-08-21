@@ -1,0 +1,260 @@
+---
+# ---------------------------------------------------------------------------
+# RPA sample 07 - Composition and reuse
+#
+# Once you have more than one bot, the same sub-process shows up everywhere:
+# "log in", "look up a customer", "book an entry". This sample shows the three
+# ways Step lets you package a piece of plan once and call it from many bots.
+#
+#   Composite keyword   a plan that behaves like a keyword - inputs, outputs,
+#                       and it shows up in the keyword list. The cleanest
+#                       reuse mechanism.
+#   callPlan            call another plan by name
+#   testSet             run several bot plans as one orchestrated batch
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "rpa-07-composition-and-reuse"
+
+plans:
+
+  # =========================================================================
+  # A. Calling a composite keyword.
+  #
+  # "Process One Record" is declared at the bottom of this file as a Composite
+  # keyword: its implementation is a PLAN, not code. From here it is called
+  # exactly like any other keyword - inputs go in, `return` sends outputs back.
+  #
+  # This is the reuse mechanism to reach for first: the caller does not need to
+  # know the sub-process has five steps in it.
+  # =========================================================================
+  - name: "A - Use a composite keyword as a sub-bot"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Process records through a reusable sub-bot"
+        children:
+          - forEach:
+              nodeName: "For each record"
+              dataSource:
+                json-array:
+                  json: '[{"RecordId":"REC-001"},{"RecordId":"REC-002"}]'
+              children:
+                - callKeyword:
+                    keyword: "Process One Record"
+                    nodeName: "Run the reusable sub-bot"
+                    inputs:
+                      - recordId:
+                          expression: "row.RecordId"
+                    children:
+                      # The composite's `return` outputs are read exactly like
+                      # any other keyword's outputs.
+                      - set:
+                          key: confirmationId
+                          value:
+                            expression: "output.confirmationId"
+                      - assert:
+                          actual: "confirmationId"
+                          operator: BEGINS_WITH
+                          expected: "CONF-"
+
+                - echo:
+                    text:
+                      expression: "'Sub-bot returned ' + confirmationId"
+
+  # =========================================================================
+  # B. callPlan - invoking another plan by name.
+  #
+  # Use this when the thing you want to reuse is a whole bot in its own right
+  # (it has its own schedule, its own report), rather than a step inside one.
+  #
+  # `selectionAttributes` picks the target plan by its attributes - `name` is
+  # the usual one. `input` passes values in.
+  #
+  # Unlike a composite keyword, a called plan does NOT return outputs to the
+  # caller; it produces its own branch in the execution report.
+  # =========================================================================
+  - name: "B - Call another plan"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Delegate to a standalone bot plan"
+        children:
+          - callPlan:
+              nodeName: "Run the shared cleanup bot"
+              selectionAttributes:
+                - name: "Shared - Archive processed records"
+              input:
+                - archiveFolder: "/archive/2026-08"
+
+  # -------------------------------------------------------------------------
+  # The plan that B calls. An ordinary plan - nothing marks it as "a sub-plan",
+  # which means it is also executed on its own when the whole package runs.
+  #
+  # That is why it defaults its input: a plan meant to be called by others
+  # should still stand up when launched directly.
+  # -------------------------------------------------------------------------
+  - name: "Shared - Archive processed records"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Archive what the bots processed"
+        children:
+          - set:
+              key: archiveFolder
+              value:
+                expression: "binding.variables.containsKey('archiveFolder') ? archiveFolder : '/archive/default'"
+          - echo:
+              text:
+                expression: "'Archiving into ' + archiveFolder"
+              description: "Reads the value the caller passed through callPlan input."
+
+  # =========================================================================
+  # C. testSet - orchestrating several bots as one batch.
+  #
+  # A `testSet` runs its children (usually testCases or callPlans) as separate
+  # test cases, `threads` of them at a time. This is the "nightly RPA batch"
+  # shape: five independent bots, two agents, one report.
+  #
+  # Note the difference from `forEach threads`: forEach parallelises ROWS of
+  # one bot, testSet parallelises WHOLE BOTS.
+  # =========================================================================
+  - name: "C - Nightly batch of bots"
+    categories: ["RPA"]
+    root:
+      testSet:
+        nodeName: "Run the nightly bots"
+        threads: 2
+        children:
+          - testCase:
+              nodeName: "Bot 1 - invoices"
+              children:
+                - callKeyword:
+                    keyword: "Process One Record"
+                    inputs:
+                      - recordId: "INV-001"
+          - testCase:
+              nodeName: "Bot 2 - orders"
+              children:
+                - callKeyword:
+                    keyword: "Process One Record"
+                    inputs:
+                      - recordId: "ORD-001"
+          - testCase:
+              nodeName: "Bot 3 - credit notes"
+              children:
+                - callKeyword:
+                    keyword: "Process One Record"
+                    inputs:
+                      - recordId: "CRN-001"
+
+  # =========================================================================
+  # D. synchronized - serialising access to a shared resource.
+  #
+  # The classic RPA constraint: the legacy application has ONE floating
+  # licence, or the back office refuses two concurrent sessions for the same
+  # user. Parallel bots must queue up for it.
+  #
+  # `synchronized` lets only one thread at a time into the block.
+  #   lockName    the name of the lock; blocks sharing a name share the queue
+  #   globalLock  true serialises across the WHOLE controller (every running
+  #               execution), not just within this one
+  #
+  # Here three parallel workers contend for a single licence.
+  # =========================================================================
+  - name: "D - Queue for a single licence"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Three bots, one licence"
+        children:
+          - forEach:
+              nodeName: "For each record (3 workers)"
+              threads: 3
+              dataSource:
+                json-array:
+                  json: '[{"RecordId":"REC-001"},{"RecordId":"REC-002"},{"RecordId":"REC-003"}]'
+              children:
+                - synchronized:
+                    nodeName: "Only one bot in the legacy app at a time"
+                    lockName: "legacy-app-licence"
+                    globalLock: false
+                    children:
+                      - callKeyword:
+                          keyword: "Reserve Licence"
+                      - callKeyword:
+                          keyword: "Submit Record"
+                          inputs:
+                            - recordId:
+                                expression: "row.RecordId"
+
+keywords:
+
+  # -------------------------------------------------------------------------
+  # A COMPOSITE KEYWORD - a plan wearing a keyword's clothes.
+  #
+  # `plan.root` is an ordinary plan tree. Inputs arrive as plan variables
+  # (`input.recordId`), and `return.output` hands values back to the caller,
+  # where they appear as normal keyword outputs.
+  #
+  # Note the root here is a `sequence`, not a testCase: a composite is a step
+  # inside someone else's plan, not a test case of its own.
+  # -------------------------------------------------------------------------
+  - Composite:
+      name: "Process One Record"
+      description: "Reads a record and submits it. Reused by every bot in this package."
+      plan:
+        root:
+          sequence:
+            nodeName: "Process one record"
+            children:
+
+              - callKeyword:
+                  keyword: "Read Record"
+                  inputs:
+                    # The composite's own inputs arrive under `input`.
+                    - recordId:
+                        expression: "input.recordId"
+                  children:
+                    - set:
+                        key: amount
+                        value:
+                          expression: "output.amount as Integer"
+
+              - callKeyword:
+                  keyword: "Submit Record"
+                  inputs:
+                    - recordId:
+                        expression: "input.recordId"
+                    - amount:
+                        expression: "amount"
+                  children:
+                    - set:
+                        key: confirmationId
+                        value:
+                          expression: "output.confirmationId"
+
+              # `return` is what makes this a keyword rather than a plan:
+              # these become the outputs the caller reads with `output.*`.
+              #
+              # NOTE: these MUST use `expression:`. A plain string is a
+              # static value - "${confirmationId}" would hand the caller the
+              # literal seven-character string, not the id.
+              - return:
+                  output:
+                    - confirmationId:
+                        expression: "confirmationId"
+                    - amount:
+                        expression: "amount"
+
+  - GeneralScript:
+      name: "Read Record"
+      scriptLanguage: groovy
+      scriptFile: keywords/readRecord.groovy
+  - GeneralScript:
+      name: "Submit Record"
+      scriptLanguage: groovy
+      scriptFile: keywords/submitRecord.groovy
+  - GeneralScript:
+      name: "Reserve Licence"
+      scriptLanguage: groovy
+      scriptFile: keywords/reserveLicence.groovy
