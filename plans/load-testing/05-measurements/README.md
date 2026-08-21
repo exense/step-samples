@@ -22,7 +22,7 @@ you end up with a run full of numbers that cannot answer the question you ran it
 | B — A custom measurement around a whole transaction | `startMeasure` / `stopMeasure`, nested |
 | C — Count the failures too | Why a response-time average alone is the most misleading number in load testing |
 
-All three pass.
+Every plan in this package is expected to pass; none of them fails by design.
 
 ## The three sources
 
@@ -41,7 +41,7 @@ how a multi-keyword transaction gets an end-to-end number in the dashboards.
 Custom measurements are the only way to time something **smaller** than a keyword call — the two
 page loads inside one browser keyword, for instance.
 
-## The difference that catches people out
+## Which measurements can carry an SLA
 
 `performanceAssert` sees keyword measurements and custom measurements. It does **not** see
 instrumented-node measurements. Asserting on an instrumented sequence fails with:

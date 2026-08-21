@@ -27,7 +27,7 @@ what runs once per virtual user, and what runs on every iteration.
 | D — Run for a fixed time | `maxDuration`, and the trap that comes with it |
 | E — Setup per test versus per user | `before`, `beforeThread`, `afterThread`, `after` |
 
-All five pass.
+Every plan in this package is expected to pass; none of them fails by design.
 
 ## The knobs
 

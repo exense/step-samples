@@ -59,11 +59,12 @@ sample's README lists the expected outcome per plan:
 | [06](06-thresholds-and-slas/) | C — Threshold on the failure rate |
 | [06](06-thresholds-and-slas/) | E — A breached SLA |
 
-Everything else passes.
+Every other plan is expected to pass.
 
-## Two rules that are easy to get wrong
+## Two placement rules for `performanceAssert`
 
-Both cost an afternoon the first time, and neither is visible from the YAML:
+Neither follows from the structure of the YAML, and both report an error that names something
+other than the cause:
 
 **`performanceAssert` must live in an `after` or `afterThread` block.** Anywhere else — as a child
 of the thread group, of a `testCase`, of anything — the execution ends in `TECHNICAL_ERROR` with

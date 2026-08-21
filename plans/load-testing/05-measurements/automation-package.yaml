@@ -38,7 +38,7 @@ plans:
   # measurements and custom measurements. It does NOT see instrumented-node
   # measurements. Asserting on "Search and buy" below would fail with
   # "No measurement is matching the defined filters." - the same message a
-  # misspelled keyword name produces, which is why this catches people out.
+  # misspelled keyword name produces, so the mistake reads as a typo.
   #
   # So instrumented nodes are for the dashboards; SLAs go on keyword or
   # custom measurements.

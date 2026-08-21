@@ -26,7 +26,7 @@ parallel**, each with its own load profile.
 | C — Measure the site while the batch job runs | A thread group next to a plain `sequence` |
 | D — Warm-up phase then measured phase | `sequence` as the root — phases instead of parallelism |
 
-All four pass.
+Every plan in this package is expected to pass; none of them fails by design.
 
 ## The three composing roots
 
