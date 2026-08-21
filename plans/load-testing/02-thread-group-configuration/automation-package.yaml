@@ -263,13 +263,24 @@ plans:
   #   afterThread   once per VIRTUAL USER, after its last iteration
   #   after         once, when the whole thread group has finished
   #
-  # Getting this wrong is the most common way to make a load test lie.
-  # Logging in inside `children` means every iteration measures a login the
-  # real user does once a day, and the average response time is then a
-  # blend of two completely different things.
+  # THE RULE: put each step in the block that matches HOW OFTEN A REAL USER
+  # DOES IT. Getting it wrong distorts the traffic mix without producing any
+  # visible error.
   #
-  # The rule of thumb: `children` holds exactly the transaction the SLA is
-  # written about. Everything that sets it up goes in `beforeThread`.
+  # A real user logs in once per session and then does twenty things. Move
+  # the Login below from `beforeThread` into `children` and this plan sends
+  # 6 LOGINS INSTEAD OF 2 - triple the load on the authentication service,
+  # and a traffic mix production never sees. Nothing fails; the test just
+  # stops describing reality. (The counts in the `after` block are what make
+  # that visible, so try the move and watch them.)
+  #
+  # A narrower consequence for measurements, since it is easy to overstate:
+  # per-keyword measurements are NOT affected - performanceAssert aggregates
+  # by keyword name, so Login and Checkout stay separate series wherever
+  # they sit. What DOES get polluted is a TRANSACTION-LEVEL measurement
+  # wrapping the iteration - an instrumented sequence around both calls, or
+  # a custom measurement spanning them - which would fold the login time
+  # into the number you gate on.
   #
   # `before` is for the setup the whole test needs once - warming a cache,
   # seeding a data set, resetting a counter on the target.
@@ -303,7 +314,7 @@ plans:
         children:
           - callKeyword:
               keyword: "Checkout"
-              nodeName: "The transaction the SLA is about"
+              nodeName: "What the user does on every visit"
 
         afterThread:
           steps:
@@ -338,8 +349,11 @@ plans:
                 aggregator: COUNT
                 comparator: EQUALS
                 expectedValue: 6
+            # Named per keyword, so this threshold covers checkouts and
+            # nothing else - it would do so even if the login had been put
+            # in the wrong block. The counts above are what catch that.
             - performanceAssert:
-                nodeName: "The SLA covers checkouts only, not the logins"
+                nodeName: "And the checkouts met their threshold"
                 measurementName: "Checkout"
                 aggregator: AVG
                 comparator: LOWER_THAN

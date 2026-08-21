@@ -134,14 +134,24 @@ case explicitly rather than absorbing it.
 | `afterThread` | once per virtual user, after its last iteration |
 | `after` | once, when the whole thread group has finished |
 
-Getting this wrong is the most common way to make a load test lie. Logging in inside `children`
-means every iteration measures a login the real user performs once a day, and the reported average
-becomes a blend of two unrelated things.
+**Put each step in the block that matches how often a real user does it.** That is the whole rule,
+and getting it wrong distorts the traffic mix rather than producing any visible error.
 
-**The rule of thumb: `children` holds exactly the transaction the SLA is written about.** Setup
-goes in `beforeThread`; setup the whole test needs once — warming a cache, seeding a data set —
-goes in `before`. `afterThread` is the reliable place for per-user cleanup: it runs even when an
-iteration failed, which a last child would not.
+A real user logs in once per session and then does twenty things. Move `Login` from `beforeThread`
+into `children` in plan E and the run sends **6 logins instead of 2** — triple the load on the
+authentication service, and a traffic mix the production system never sees. Nothing fails; the
+test just stops describing reality.
+
+So: once-per-session steps in `beforeThread`, once-per-transaction steps in `children`, and setup
+the whole test needs once — warming a cache, seeding a data set — in `before`. `afterThread` is
+the reliable place for per-user cleanup: it runs even when an iteration failed, which a last child
+would not.
+
+There is a second, narrower consequence for measurements. Per-keyword measurements are **not**
+affected — `performanceAssert` aggregates by keyword name, so `Login` and `Checkout` stay separate
+series wherever they sit. What does get polluted is any **transaction-level** measurement that
+wraps the iteration: an `instrumentNode` sequence around both calls, or a custom measurement
+spanning them, would fold the login time into the transaction number you gate on.
 
 Plan E makes all of this visible with counts rather than prose: 1 warm-up, 2 logins, 6 checkouts,
 2 logouts.

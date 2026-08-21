@@ -78,14 +78,16 @@ produces, so the mistake reads as a typo. [05](05-measurements/) covers the ways
 
 The controls are the vocabulary; these are the ideas that decide whether a load plan is any good.
 
-1. **One iteration is one business transaction.** The children of a thread group should be the
-   smallest thing a *user* would call a complete action — search, add to cart, buy — not a single
-   HTTP call. That choice decides what the report can answer, because the sum of the parts is not
-   the experience.
+1. **The iteration is the unit your load numbers are counted in.** Everything a thread group
+   reports is per iteration, so `users: 10` with `pacing: 30000` is 20 iterations a minute — but
+   20 of *what*? Choose the iteration to be the thing your requirement is stated in, usually a
+   complete user action. An iteration nobody has a target for gives you a throughput figure that
+   has to be divided by something before anyone can act on it.
 
-2. **`children` holds exactly what the SLA is about.** Logging in inside the loop means every
-   iteration measures a login the real user performs once a day, and the reported average becomes a
-   blend of two unrelated things. Setup belongs in `beforeThread`, once-per-test setup in `before`.
+2. **Put each step in the block that matches how often a real user does it.** A real user logs in
+   once per session, so a login belongs in `beforeThread`; move it into `children` and a 2 × 3 run
+   sends six logins instead of two — triple the load on the authentication service, and no error
+   anywhere. Once-per-test setup goes in `before`.
 
 3. **Pace the load, or you are not testing — you are being tested.** Without `pacing`, throughput
    is whatever the system happens to allow, so two runs cannot be compared and a degrading system

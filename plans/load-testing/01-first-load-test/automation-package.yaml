@@ -44,12 +44,25 @@ plans:
         children:
 
           # -------------------------------------------------------------
-          # ONE ITERATION IS ONE BUSINESS TRANSACTION.
+          # THE ITERATION IS THE UNIT THE LOAD NUMBERS ARE COUNTED IN.
           #
-          # This is the load-testing counterpart of "one testCase run is one
-          # business transaction": the children of a thread group should be
-          # the smallest thing a user of the system would call a complete
-          # action - search, add to cart, buy - not a single HTTP call.
+          # Everything a thread group reports is PER ITERATION, so what goes
+          # in `children` decides what `users`, `pacing` and throughput
+          # actually mean. `users: 10` with `pacing: 30000` is 20 iterations
+          # a minute - but 20 of WHAT?
+          #
+          #   one HTTP call per iteration     -> 20 calls a minute, and a
+          #                                      30s pause between every call
+          #   a whole purchase per iteration  -> 20 PURCHASES a minute, and a
+          #                                      30s pause between purchases
+          #
+          # Choose the iteration to be the thing your requirement is stated
+          # in. Usually that is a complete user action, as below. Sometimes
+          # it really is one call - an API whose target reads "500 GET
+          # /products per second" is correctly modelled that way. What to
+          # avoid is an iteration nobody has a target for, because then the
+          # throughput figure has to be divided by something before anyone
+          # can act on it.
           #
           # `instrumentNode: true` wraps the sequence in a MEASUREMENT named
           # after its `nodeName`. Without it the report would show three

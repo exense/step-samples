@@ -10,9 +10,9 @@ level: beginner
 
 # 01 — First load test
 
-The baseline shape of a load-testing plan: a thread group runs one business transaction
-repeatedly, from several virtual users at once, and the plan states the SLA that transaction
-has to meet. Every other sample in this set builds on this structure.
+The baseline shape of a load-testing plan: a thread group repeats one transaction, from several
+virtual users at once, and the plan states the SLA that transaction has to meet. Every other
+sample in this set builds on this structure.
 
 The subject of this sample is the **plan**. The keywords are 3-line Groovy stubs that simulate
 a shop API, so the package runs on any Java agent — no build, no browser, no system under test.
@@ -20,7 +20,7 @@ a shop API, so the package runs on any Java agent — no build, no browser, no s
 ## What this sample shows
 
 - `threadGroup` as the root of a load plan, with `users` and `iterations`
-- **One iteration = one business transaction** — the decision that makes or breaks a load plan
+- **The iteration is the unit your load numbers are denominated in** — what to put in it, and why
 - `instrumentNode` for an end-to-end transaction measurement
 - `performanceAssert` as the SLA gate, and **the two rules about where it may go**
 - Why a load test still needs a functional `assert`
@@ -48,15 +48,28 @@ A `threadGroup` is to a load test what a `testCase` is to a functional test or a
 that says what "one run" means. `users` sizes the load — each virtual user holds its own agent
 token for the whole thread group, so it also sizes the agent capacity you need.
 
-## One iteration is one business transaction
+## What goes in one iteration
 
-The children of a thread group should be the smallest thing a *user of the system* would call a
-complete action — search, add to cart, buy — not a single HTTP call.
+Everything a thread group reports is *per iteration*, so what you put in `children` decides what
+`users`, `pacing` and throughput actually mean. Take `users: 10` with `pacing: 30000`:
 
-That choice decides what the report can tell you. Time the whole transaction and you can answer
-"can a customer buy something in under two seconds?". Time only the individual calls and you
-have a pile of numbers that never adds up to an answer, because the sum of the parts is not the
-experience.
+| If `children` is… | …the run means |
+|-------------------|----------------|
+| one HTTP call | 20 HTTP calls a minute, and a 30-second pause between **every call** |
+| search → add to cart → check out | 20 **purchases** a minute, and a 30-second pause between purchases |
+
+Same numbers, different tests. The second is a load somebody can state a requirement about — *the
+shop must sustain 1200 orders an hour* — and its pacing models a real user, who pauses between
+purchases rather than between two clicks of the same purchase.
+
+**Choose the iteration to be the thing your requirement is stated in.** Usually that is a complete
+user action: search, add to cart, buy. Sometimes it genuinely is one call — an API whose
+requirement reads *500 GET /products per second* is correctly modelled with one call per
+iteration. What you want to avoid is an iteration nobody has a target for, because then the
+throughput figure has to be divided by something before anyone can act on it.
+
+Sizing a transaction this way also gives the report an end-to-end number to gate on, which is what
+`instrumentNode` below is for.
 
 ## Where measurements come from
 
