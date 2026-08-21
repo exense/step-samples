@@ -25,8 +25,8 @@ everything else. That is where you go while writing the plan inside your package
 | Use case | Samples | Status |
 |----------|---------|--------|
 | [**RPA**](rpa/) | 7 samples — loops, branching, resilience, sessions, scheduling, reuse | available |
+| [**Load testing**](load-testing/) | 6 samples — thread groups, scenarios, data sets, measurements, SLA gates | available |
 | Functional testing | — | planned |
-| Load testing | — | planned |
 | Monitoring | — | planned |
 
 ## Reference
@@ -40,7 +40,7 @@ For what each control does and how to configure it, see the official
 |------|-------|
 | [reference/basic-plan-syntax.yml](reference/basic-plan-syntax.yml) | The shape of a plan: root artefact, `callKeyword` with inputs, capturing an output, `if`, `assert`, `check` |
 | [reference/dynamic-values.yml](reference/dynamic-values.yml) | Static values vs `expression:`, where plan variables come from, dynamic keyword names and `routing` |
-| [reference/performance-assert.yml](reference/performance-assert.yml) | A `threadGroup` with a `performanceAssert` — the load-testing shape |
+| [reference/performance-assert.yml](reference/performance-assert.yml) | A `threadGroup` with a `performanceAssert` — the load-testing shape, and the `after`-block rule |
 
 ## Plan formats
 
@@ -48,7 +48,7 @@ Step has three plan formats:
 
 | Format | Written as | Used by these samples |
 |--------|-----------|-----------------------|
-| **YAML** | The tree of controls documented at [step.dev](https://step.dev/knowledgebase/userdocs/plans/controls/) | Yes — the whole `rpa/` set |
+| **YAML** | The tree of controls documented at [step.dev](https://step.dev/knowledgebase/userdocs/plans/controls/) | Yes — the whole `rpa/` and `load-testing/` sets |
 | **Plain text** | A compact line-based syntax, one keyword call per line | No |
 | **UI** | Built in the Step plan editor, stored serialized as JSON | No — see [legacy-exports/](legacy-exports/) for what an export looks like |
 

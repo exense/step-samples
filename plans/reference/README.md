@@ -10,10 +10,11 @@ documentation:
 |------|-------|
 | [basic-plan-syntax.yml](basic-plan-syntax.yml) | The shape of a plan: a root artefact, `callKeyword` with inputs, capturing an output with a nested `set`, `if`, `assert` and `check` |
 | [dynamic-values.yml](dynamic-values.yml) | Static values vs `expression:`, where plan variables come from, and dynamic keyword names and `routing` |
-| [performance-assert.yml](performance-assert.yml) | A `threadGroup` with a `performanceAssert` — the load-testing shape |
+| [performance-assert.yml](performance-assert.yml) | A `threadGroup` with a `performanceAssert` — the load-testing shape, and the `after`-block rule |
 
 These files are **syntax illustrations, not runnable plans**: the keywords they call do not
-exist. For plans that execute and assert their own outcome, see [../rpa/](../rpa/).
+exist. For plans that execute and assert their own outcome, see [../rpa/](../rpa/) and
+[../load-testing/](../load-testing/).
 
 ## Standalone YAML plan files
 

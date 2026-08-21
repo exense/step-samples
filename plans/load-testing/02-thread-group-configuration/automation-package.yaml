@@ -1,0 +1,368 @@
+---
+# ---------------------------------------------------------------------------
+# Load-testing sample 02 - Configuring a thread group
+#
+# `users` and `iterations` from sample 01 describe a load, but not a REALISTIC
+# one. A real population does not appear all at once, does not hammer the
+# system as fast as it can answer, and does not stop after exactly N clicks.
+#
+# This sample covers every knob a thread group has, and the four blocks that
+# decide what runs once, what runs once per virtual user, and what runs on
+# every iteration.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "load-02-thread-group-configuration"
+
+plans:
+
+  # =========================================================================
+  # A. The counters every thread group publishes.
+  #
+  # Inside a thread group three variables are always in scope:
+  #
+  #   userId        which virtual user this is        1 .. users
+  #   literationId  the iteration within THIS user    1 .. iterations
+  #   gcounter      the iteration across the WHOLE thread group, unique
+  #                 1 .. users x iterations
+  #
+  # They are what you build unique test data out of - order numbers, e-mail
+  # addresses, search terms - without any external data source. `gcounter` is
+  # the one to use when the value has to be unique across the run;
+  # `userId` when it has to be stable for one virtual user.
+  #
+  # `item`, `userItem` and `localItem` RENAME them:
+  #
+  #   item       renames gcounter
+  #   userItem   renames userId
+  #   localItem  renames literationId
+  #
+  # Renaming REPLACES: once `userItem: "shopperNo"` is set, `userId` no longer
+  # exists. Worth knowing before renaming one counter in a plan that reads
+  # another by its default name.
+  # =========================================================================
+  - name: "A - The three counters"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "2 users x 3 iterations with renamed counters"
+        users: 2
+        iterations: 3
+        item: "orderNo"
+        userItem: "shopperNo"
+        localItem: "shopperOrderNo"
+        children:
+          - callKeyword:
+              keyword: "Record Iteration"
+              nodeName: "Place an order with a unique reference"
+              inputs:
+                # gcounter, renamed: unique across the whole thread group, so
+                # every order reference in the run is different.
+                - orderRef:
+                    expression: "'ORD-' + orderNo"
+                # userId, renamed: stable for the life of this virtual user.
+                - shopper:
+                    expression: "shopperNo"
+                # literationId, renamed: 1, 2, 3 for each user separately.
+                - orderOfThisShopper:
+                    expression: "shopperOrderNo"
+              children:
+                # The keyword echoes back what it received, so the plan can
+                # prove the counters carry real values rather than the
+                # literal text of the expression.
+                - assert:
+                    actual: "orderRef"
+                    operator: MATCHES
+                    expected: "ORD-[1-6]"
+                    customErrorMessage: "The global counter did not arrive as a number between 1 and 6."
+                - assert:
+                    actual: "shopper"
+                    operator: MATCHES
+                    expected: "[12]"
+                - assert:
+                    actual: "orderOfThisShopper"
+                    operator: MATCHES
+                    expected: "[123]"
+
+        after:
+          continueOnError: true
+          steps:
+            - performanceAssert:
+                nodeName: "Six distinct orders were placed"
+                measurementName: "Record Iteration"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 6
+
+  # =========================================================================
+  # B. `pacing` - controlling THROUGHPUT rather than concurrency.
+  #
+  # Without pacing, a virtual user starts its next iteration the instant the
+  # previous one returns. That is a stress test: the faster the system
+  # answers, the harder you hit it, so throughput is whatever the system
+  # happens to allow and you cannot compare two runs.
+  #
+  # `pacing` is the fixed period a thread group tries to keep between the
+  # STARTS of consecutive iterations. If an iteration takes less than that,
+  # the user waits; if it takes longer, the next one starts immediately.
+  #
+  # That makes throughput a number you CHOOSE:
+  #
+  #     iterations per second = users / (pacing in seconds)
+  #
+  # 1 user with a 3000 ms pacing is 20 transactions an hour, whether the
+  # system answers in 100 ms or in 2 seconds. That is the property that makes
+  # a load test repeatable - and the one that lets response time degrade
+  # visibly instead of being masked by the load backing off.
+  #
+  # `sequence` has a `pacing` field too, for pacing an inner block.
+  # =========================================================================
+  - name: "B - Pacing sets the throughput"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "One user checking out every 3 seconds"
+        users: 1
+        iterations: 3
+        pacing: 3000
+
+        # A variable set in `before` is visible to the iterations and to the
+        # `after` block, which is how this plan measures its own duration.
+        before:
+          steps:
+            - set:
+                key: startedAt
+                value:
+                  expression: "System.currentTimeMillis()"
+
+        children:
+          - callKeyword:
+              keyword: "Checkout"
+
+        after:
+          continueOnError: true
+          steps:
+            # Three iterations paced at 3 s start at 0 s, 3 s and 6 s, so the
+            # run cannot finish before 6 s. Unpaced, the same three
+            # iterations take about a second. This check fails if pacing
+            # stops working.
+            - check:
+                nodeName: "Pacing stretched the run out"
+                expression: "System.currentTimeMillis() - startedAt > 5500"
+
+            - performanceAssert:
+                nodeName: "Pacing slowed the run without dropping iterations"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 3
+
+  # =========================================================================
+  # C. Starting the load gradually - `rampup`, `pack` and `startOffset`.
+  #
+  #   rampup       the time the thread group takes to start ALL its users.
+  #                4 users over an 8000 ms ramp-up start at 0, 2, 4 and 6 s.
+  #                Starting every user at once is a spike test, which is a
+  #                different question from a load test: it measures the cold
+  #                start rather than the steady state.
+  #
+  #   pack         how many users are released TOGETHER at each ramp-up step.
+  #                The same 4 users over 8000 ms with `pack: 2` start at 0 s
+  #                and 4 s - two at a time. Use it for a stepped ramp, or
+  #                simply to keep a long ramp-up from trickling.
+  #
+  #   startOffset  a delay before the ramp-up begins. It does nothing on its
+  #                own in a single thread group; its purpose is staggering
+  #                several thread groups inside a scenario - see sample 03.
+  #
+  # A real ramp is much longer than this. Sample values stay in seconds so
+  # the package runs quickly.
+  # =========================================================================
+  - name: "C - Ramping the load up"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "4 users released two at a time over 8 seconds"
+        users: 4
+        iterations: 2
+        rampup: 8000
+        pack: 2
+        startOffset: 500
+        children:
+          - callKeyword:
+              keyword: "Checkout"
+
+        after:
+          continueOnError: true
+          steps:
+            - performanceAssert:
+                nodeName: "Every user completed its iterations"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 8
+
+  # =========================================================================
+  # D. `maxDuration` - running for a TIME instead of for a count.
+  #
+  # Most load tests are specified as "an hour at this rate", not "500
+  # iterations". `maxDuration` is the wall-clock cap on the whole thread
+  # group: when it expires, the group stops wherever it is.
+  #
+  # The idiom is to set `iterations` to a number nobody will reach and let
+  # `maxDuration` be the real stop condition, so the run takes the same time
+  # whether the system is fast or slow that day. Comparable runs are the
+  # whole point.
+  #
+  # THE TRAP THAT COMES WITH IT: the iteration count is now an OUTCOME, not
+  # an input - and a slow system produces both a longer response time and
+  # fewer iterations. So never write an SLA that only reads response times
+  # here; assert the throughput too, or a run that managed a tenth of the
+  # work will still report a healthy average.
+  #
+  # This plan asks for 100 iterations and cuts them off after 5 seconds.
+  # =========================================================================
+  - name: "D - Run for a fixed time"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "One user for 5 seconds"
+        users: 1
+        iterations: 100
+        maxDuration: 5000
+        children:
+          - callKeyword:
+              keyword: "Checkout"
+
+        after:
+          continueOnError: true
+          steps:
+            # It stopped early: nowhere near the 100 iterations requested.
+            - performanceAssert:
+                nodeName: "maxDuration cut the run short"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: LOWER_THAN
+                expectedValue: 50
+
+            # ...but it did do work. This is the throughput floor the note
+            # above is about - the assertion that catches a run which
+            # achieved almost nothing.
+            - performanceAssert:
+                nodeName: "And still did a useful amount of work"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: HIGHER_THAN
+                expectedValue: 2
+
+  # =========================================================================
+  # E. The four blocks: what runs once, per user, per iteration.
+  #
+  #   before        once, before the thread group starts
+  #   beforeThread  once per VIRTUAL USER, before its first iteration
+  #   children      every ITERATION
+  #   afterThread   once per VIRTUAL USER, after its last iteration
+  #   after         once, when the whole thread group has finished
+  #
+  # Getting this wrong is the most common way to make a load test lie.
+  # Logging in inside `children` means every iteration measures a login the
+  # real user does once a day, and the average response time is then a
+  # blend of two completely different things.
+  #
+  # The rule of thumb: `children` holds exactly the transaction the SLA is
+  # written about. Everything that sets it up goes in `beforeThread`.
+  #
+  # `before` is for the setup the whole test needs once - warming a cache,
+  # seeding a data set, resetting a counter on the target.
+  #
+  # `afterThread` is the reliable place for per-user cleanup. It runs even
+  # when an iteration failed, which a last child would not.
+  #
+  # The counts in the `after` block below are what make all of this visible:
+  # 1 warm-up, 2 logins, 6 checkouts, 2 logouts.
+  # =========================================================================
+  - name: "E - Setup per test versus per user"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "2 users x 3 checkouts, logging in once each"
+        users: 2
+        iterations: 3
+
+        before:
+          steps:
+            - callKeyword:
+                keyword: "Warm Up Cache"
+                nodeName: "Warm the cache once for the whole test"
+
+        beforeThread:
+          steps:
+            - callKeyword:
+                keyword: "Login"
+                nodeName: "Log in once per virtual user"
+
+        children:
+          - callKeyword:
+              keyword: "Checkout"
+              nodeName: "The transaction the SLA is about"
+
+        afterThread:
+          steps:
+            - callKeyword:
+                keyword: "Logout"
+                nodeName: "Log out once per virtual user"
+
+        after:
+          continueOnError: true
+          steps:
+            - performanceAssert:
+                nodeName: "The cache was warmed once for the whole run"
+                measurementName: "Warm Up Cache"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 1
+            - performanceAssert:
+                nodeName: "Each virtual user logged in once"
+                measurementName: "Login"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 2
+            - performanceAssert:
+                nodeName: "Each virtual user logged out once"
+                measurementName: "Logout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 2
+            - performanceAssert:
+                nodeName: "And the transaction ran on every iteration"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 6
+            - performanceAssert:
+                nodeName: "The SLA covers checkouts only, not the logins"
+                measurementName: "Checkout"
+                aggregator: AVG
+                comparator: LOWER_THAN
+                expectedValue: 5000
+
+keywords:
+  - GeneralScript:
+      name: "Record Iteration"
+      scriptLanguage: groovy
+      scriptFile: keywords/recordIteration.groovy
+  - GeneralScript:
+      name: "Checkout"
+      scriptLanguage: groovy
+      scriptFile: keywords/checkout.groovy
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy
+  - GeneralScript:
+      name: "Logout"
+      scriptLanguage: groovy
+      scriptFile: keywords/logout.groovy
+  - GeneralScript:
+      name: "Warm Up Cache"
+      scriptLanguage: groovy
+      scriptFile: keywords/warmUpCache.groovy

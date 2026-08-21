@@ -43,9 +43,10 @@ The two directories answer different questions, and most people need both:
 | Section | Contents |
 |---------|----------|
 | [plans/rpa](plans/rpa/) | Seven RPA plan samples: loops and data sources, branching, resilience, sessions, scheduling, reuse |
+| [plans/load-testing](plans/load-testing/) | Six load-testing plan samples: thread groups, scenarios and mixed load, test data, measurements, SLA gates |
 | [plans/reference](plans/reference/) | Standalone YAML plans illustrating the syntax — the shape of a plan, and static values vs expressions |
 
-Samples for functional testing, load testing and monitoring will follow the same structure.
+Samples for functional testing and monitoring will follow the same structure.
 
 ---
 

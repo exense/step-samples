@@ -1,0 +1,417 @@
+---
+# ---------------------------------------------------------------------------
+# Load-testing sample 04 - Test data and data sets
+#
+# A load test that sends the same account and the same product on every
+# iteration measures the target's caches, not the target. Realistic load needs
+# a pool of test data, handed out so that no two virtual users collide.
+#
+# `dataSet` is the control for that, and it does NOT work like `forEach`.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "load-04-test-data-and-datasets"
+
+plans:
+
+  # =========================================================================
+  # A. The shape: a pool declared once, pulled from inside the load.
+  #
+  # THE ONE THING TO UNDERSTAND ABOUT `dataSet`:
+  #
+  #   `forEach` is a LOOP. It runs its children once per row.
+  #   `dataSet` is a DECLARATION. It opens the data source, binds a CURSOR
+  #             over it to the variable named by `item`, and runs nothing.
+  #
+  # A `dataSet` node with children is a common and completely silent mistake:
+  # the children are never executed, and the node still reports PASSED.
+  #
+  # So the pattern is two SIBLINGS: the `dataSet` declares the pool, and the
+  # `threadGroup` after it pulls one row per iteration with `.next()`.
+  # =========================================================================
+  - name: "A - One pool feeding one thread group"
+    categories: ["Load testing"]
+    root:
+      testCase:
+        nodeName: "Each iteration gets its own account"
+        children:
+
+          # `item` names the CURSOR, not the row. `shopperPool` is an object
+          # you call `.next()` on - it is not a map of columns.
+          #
+          # `resetAtEnd: true` wraps around when the pool is used up, so a
+          # long run keeps going with the same rows recycled. See plan D for
+          # what `false` does, which is not what most people expect.
+          #
+          # A data source holding credentials can be declared with
+          # `protect: true`, which obfuscates its values in the report.
+          - dataSet:
+              nodeName: "Shopper accounts"
+              item: "shopperPool"
+              resetAtEnd: true
+              dataSource:
+                csv:
+                  file: "data/users.csv"
+                  delimiter: ","
+
+          - threadGroup:
+              nodeName: "1 user placing 3 orders"
+              users: 1
+              iterations: 3
+              children:
+
+                # One pull per iteration. `.next()` advances the shared
+                # cursor and returns the row as a map of columns.
+                - set:
+                    key: shopper
+                    value:
+                      expression: "shopperPool.next()"
+                    nodeName: "Take the next account from the pool"
+
+                - callKeyword:
+                    keyword: "Login"
+                    inputs:
+                      - user:
+                          expression: "shopper.Username"
+                      - password:
+                          expression: "shopper.Password"
+                    children:
+                      # The keyword echoes the account back, so this proves
+                      # the row really arrived - a static input, or a pool
+                      # that quietly handed out nothing, fails here.
+                      - assert:
+                          actual: "account"
+                          operator: BEGINS_WITH
+                          expected: "shopper"
+                          customErrorMessage: "The virtual user was not given an account from the pool."
+
+                - callKeyword:
+                    keyword: "Place Order"
+                    inputs:
+                      - productId:
+                          expression: "shopper.ProductId"
+                    children:
+                      - assert:
+                          actual: "product"
+                          operator: BEGINS_WITH
+                          expected: "P-"
+
+              after:
+                continueOnError: true
+                steps:
+                  - performanceAssert:
+                      nodeName: "Three orders were placed"
+                      measurementName: "Place Order"
+                      aggregator: COUNT
+                      comparator: EQUALS
+                      expectedValue: 3
+
+  # =========================================================================
+  # B. One pool shared by several thread groups.
+  #
+  # The cursor is shared: every `.next()` in the execution, from whichever
+  # thread group, takes the FOLLOWING row. Two populations drawing from one
+  # pool therefore never collide on the same account - which is exactly what
+  # you want when the system under test locks a session per user.
+  #
+  # The consequence: WHICH rows a given thread group gets is not
+  # deterministic. It depends on the order the threads happen to reach their
+  # `.next()`. Never write a plan that assumes "the buyers get shopper1".
+  # =========================================================================
+  - name: "B - One pool shared by two thread groups"
+    categories: ["Load testing"]
+    root:
+      testScenario:
+        nodeName: "Browsers and buyers drawing from one pool"
+        children:
+
+          - dataSet:
+              nodeName: "Shopper accounts"
+              item: "shopperPool"
+              resetAtEnd: true
+              dataSource:
+                csv:
+                  file: "data/users.csv"
+
+          - threadGroup:
+              nodeName: "Browsers"
+              users: 1
+              iterations: 2
+              children:
+                - set:
+                    key: shopper
+                    value:
+                      expression: "shopperPool.next()"
+                - callKeyword:
+                    keyword: "Login"
+                    inputs:
+                      - user:
+                          expression: "shopper.Username"
+                    children:
+                      - assert:
+                          actual: "account"
+                          operator: BEGINS_WITH
+                          expected: "shopper"
+
+          - threadGroup:
+              nodeName: "Buyers"
+              users: 1
+              iterations: 2
+              children:
+                - set:
+                    key: shopper
+                    value:
+                      expression: "shopperPool.next()"
+                - callKeyword:
+                    keyword: "Place Order"
+                    inputs:
+                      - productId:
+                          expression: "shopper.ProductId"
+                    children:
+                      - assert:
+                          actual: "product"
+                          operator: BEGINS_WITH
+                          expected: "P-"
+
+        after:
+          continueOnError: true
+          steps:
+            - performanceAssert:
+                nodeName: "Both populations drew from the pool"
+                measurementName: "Login"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 2
+            - performanceAssert:
+                nodeName: "And both did their work"
+                measurementName: "Place Order"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 2
+
+  # =========================================================================
+  # C. One account per VIRTUAL USER, not one per iteration.
+  #
+  # This is the shape most load tests actually need. A virtual user logs in
+  # once and then does twenty things as that account - it does not become a
+  # different person between two clicks.
+  #
+  # Pulling in `beforeThread` instead of in the loop body is the whole trick:
+  #
+  #   pull in the body          one row per ITERATION - burns the pool fast
+  #   pull in `beforeThread`    one row per VIRTUAL USER - held for the
+  #                             thread's whole life
+  #
+  # And it is not just tidier, it is cheaper. This plan has 2 users x 3
+  # iterations = 6 iterations against a pool of 4 rows with
+  # `resetAtEnd: false`. Pulling per iteration would exhaust the pool and the
+  # last two iterations would get null. Pulling per thread uses 2 rows.
+  # =========================================================================
+  - name: "C - One account per virtual user"
+    categories: ["Load testing"]
+    root:
+      testCase:
+        nodeName: "Each virtual user keeps its own account"
+        children:
+
+          - dataSet:
+              nodeName: "Shopper accounts"
+              item: "shopperPool"
+              resetAtEnd: false
+              dataSource:
+                csv:
+                  file: "data/users.csv"
+
+          - threadGroup:
+              nodeName: "2 users doing 3 orders each"
+              users: 2
+              iterations: 3
+
+              # Runs once per virtual user, before its first iteration.
+              # `myShopper` then belongs to that thread and every iteration
+              # of it reads the same account.
+              beforeThread:
+                steps:
+                  - set:
+                      key: myShopper
+                      value:
+                        expression: "shopperPool.next()"
+                      nodeName: "Claim one account for this virtual user"
+                  - callKeyword:
+                      keyword: "Login"
+                      nodeName: "Log in once per virtual user"
+                      inputs:
+                        - user:
+                            expression: "myShopper.Username"
+                        - password:
+                            expression: "myShopper.Password"
+                      children:
+                        - assert:
+                            actual: "account"
+                            operator: BEGINS_WITH
+                            expected: "shopper"
+
+              children:
+                - callKeyword:
+                    keyword: "Place Order"
+                    inputs:
+                      - productId:
+                          expression: "myShopper.ProductId"
+                    children:
+                      - assert:
+                          actual: "product"
+                          operator: BEGINS_WITH
+                          expected: "P-"
+                          customErrorMessage: "The account was lost between iterations - was the pull moved into the loop body?"
+
+              after:
+                continueOnError: true
+                steps:
+                  # Two logins for six orders: the proof that the pull ran
+                  # once per virtual user rather than once per iteration.
+                  - performanceAssert:
+                      nodeName: "One login per virtual user"
+                      measurementName: "Login"
+                      aggregator: COUNT
+                      comparator: EQUALS
+                      expectedValue: 2
+                  - performanceAssert:
+                      nodeName: "Six orders in total"
+                      measurementName: "Place Order"
+                      aggregator: COUNT
+                      comparator: EQUALS
+                      expectedValue: 6
+
+  # =========================================================================
+  # D. What happens when the pool runs dry.   (INTENTIONALLY FAILS)
+  #
+  # With `resetAtEnd: false`, `.next()` past the last row does NOT stop the
+  # thread group and does NOT raise an error. It returns null, and the run
+  # carries on feeding null into the keywords.
+  #
+  # Depending on the keyword that is either a confusing NullPointerException
+  # deep in the report, or - far worse - a keyword that shrugs, sends an
+  # empty value and keeps the run green while half the load was meaningless.
+  #
+  # The pool below has 4 rows and the thread group asks for 6. This plan
+  # fails on purpose, at the `check` guarding the pull - which is the cheap
+  # way to make the problem loud instead of silent.
+  #
+  # In a real test, decide deliberately:
+  #   resetAtEnd: true    recycle the rows - fine when the target does not
+  #                       care that the same account comes back
+  #   resetAtEnd: false   each row used at most once - then size the pool for
+  #                       the whole run, and guard the pull like this
+  # =========================================================================
+  - name: "D - The pool runs dry (intentionally fails)"
+    categories: ["Load testing"]
+    root:
+      testCase:
+        nodeName: "Six iterations against a pool of four"
+        children:
+
+          - dataSet:
+              nodeName: "Shopper accounts used once each"
+              item: "shopperPool"
+              resetAtEnd: false
+              dataSource:
+                csv:
+                  file: "data/users.csv"
+
+          - threadGroup:
+              nodeName: "1 user asking for 6 accounts"
+              users: 1
+              iterations: 6
+              children:
+                - set:
+                    key: shopper
+                    value:
+                      expression: "shopperPool.next()"
+
+                - check:
+                    nodeName: "The pool still had a row to give"
+                    expression: "shopper != null"
+
+                - callKeyword:
+                    keyword: "Place Order"
+                    inputs:
+                      - productId:
+                          expression: "shopper.ProductId"
+
+  # =========================================================================
+  # E. Other data sources.
+  #
+  # Only the `dataSource` block changes; the pull is always `.next()`.
+  # Available sources: csv, excel, file, folder, gsheet, json, json-array,
+  # sequence, sql.
+  #
+  # `json-array` is used here because it needs no file. In a real load test
+  # the two that come up most are `csv` - a generated pool checked in next to
+  # the plan - and `sql`, which reads the pool straight out of the system
+  # under test:
+  #
+  #     dataSource:
+  #       sql:
+  #         connectionString: "jdbc:postgresql://db:5432/shop"
+  #         driverClass: "org.postgresql.Driver"
+  #         user: "loadtest"
+  #         password:
+  #           expression: "dbPassword"
+  #         query: "SELECT username, product_id FROM test_accounts"
+  #
+  # `sequence` is the one to reach for when the data does not need to exist
+  # beforehand - a pool of unique order numbers, say.
+  # =========================================================================
+  - name: "E - A pool that needs no file"
+    categories: ["Load testing"]
+    root:
+      testCase:
+        nodeName: "An inline pool of products"
+        children:
+
+          - dataSet:
+              nodeName: "Products"
+              item: "productPool"
+              resetAtEnd: true
+              dataSource:
+                json-array:
+                  json: '[{"ProductId":"P-LAPTOP"},{"ProductId":"P-PHONE"}]'
+
+          - threadGroup:
+              nodeName: "1 user ordering 2 products"
+              users: 1
+              iterations: 2
+              children:
+                - set:
+                    key: product
+                    value:
+                      expression: "productPool.next()"
+                - callKeyword:
+                    keyword: "Place Order"
+                    inputs:
+                      - productId:
+                          expression: "product.ProductId"
+                    children:
+                      - assert:
+                          actual: "product"
+                          operator: BEGINS_WITH
+                          expected: "P-"
+
+              after:
+                continueOnError: true
+                steps:
+                  - performanceAssert:
+                      nodeName: "Two orders were placed"
+                      measurementName: "Place Order"
+                      aggregator: COUNT
+                      comparator: EQUALS
+                      expectedValue: 2
+
+keywords:
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy
+  - GeneralScript:
+      name: "Place Order"
+      scriptLanguage: groovy
+      scriptFile: keywords/placeOrder.groovy

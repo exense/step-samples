@@ -1,16 +1,58 @@
+# A thread group with a performance assert - the load-testing shape.
+#
+# A file like this can be dropped straight into the Step UI with
+# "Add plan" > "Create from YAML", or referenced from an automation package
+# like any other plan.
+#
+# This file is a syntax illustration, not a runnable plan - the keyword it
+# calls does not exist. For plans you can execute, see ../load-testing/.
+---
 version: 1.0.0
 name: "Performance assert example"
+
 root:
-  testCase:
+  # A `threadGroup` is the usual root of a load plan: `users` virtual users in
+  # parallel, each repeating the children `iterations` times.
+  threadGroup:
+    users: 1
+    iterations: 10
+    pacing: 0
+    maxDuration: 0
     children:
-      - threadGroup:
-          users: 1
-          pacing: 0
-          maxDuration: 0
-          iterations: 10
-          children:
-            - callKeyword:
-                keyword: "Buy MacBook in OpenCart"
-      - performanceAssert:
-          measurementName: "Buy MacBook in OpenCart"
-          expectedValue: 10000
+      - callKeyword:
+          keyword: "Buy MacBook in OpenCart"
+
+    # ------------------------------------------------------------------
+    # `performanceAssert` MUST live in an `after` or `afterThread` block.
+    #
+    # As an ordinary child - of the thread group, of a testCase, of anything -
+    # the execution ends in TECHNICAL_ERROR with
+    #   "PerformanceAssert can only be defined in an 'after' or
+    #    'after thread' block"
+    #
+    #   after        once, when the whole thread group has finished
+    #   afterThread  once per virtual user, as that user finishes
+    #
+    # `measurementName` names a KEYWORD measurement, or a custom measurement a
+    # keyword created with output.startMeasure(...). A measurement produced by
+    # `instrumentNode` on a plan node is NOT matched.
+    #
+    # `continueOnError: true` keeps the block going past the first breach, so
+    # one run reports every violated threshold rather than just one.
+    # ------------------------------------------------------------------
+    after:
+      continueOnError: true
+      steps:
+        - performanceAssert:
+            measurementName: "Buy MacBook in OpenCart"
+            aggregator: AVG            # AVG | MAX | MIN | COUNT | SUM
+            comparator: LOWER_THAN     # LOWER_THAN | HIGHER_THAN | EQUALS
+            expectedValue: 10000
+
+        # Assert the throughput too. A system that meets a latency target by
+        # doing less work passes the threshold above and fails this one.
+        - performanceAssert:
+            measurementName: "Buy MacBook in OpenCart"
+            aggregator: COUNT
+            comparator: EQUALS
+            expectedValue: 10
