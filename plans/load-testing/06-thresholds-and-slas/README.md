@@ -26,8 +26,11 @@ load test needs beyond "average response time".
 | A — A complete SLA gate | **PASSED** | All five aggregators, and which thresholds are worth writing |
 | B — One SLA per population | **PASSED** | Per-thread-group `after` blocks in a scenario |
 | C — Threshold on the failure rate | **FAILED** (on purpose) | Counting successes, and why a run with real errors is red anyway |
-| D — A threshold over the metric time series | **PASSED** | `assertMetric`, and how it differs from `performanceAssert` |
-| E — A breached SLA | **FAILED** (on purpose) | What a violation looks like in the report |
+| D — A breached SLA | **FAILED** (on purpose) | What a violation looks like in the report |
+
+`performanceAssert` is the control for every one of these. There is a second threshold control,
+`assertMetric`, which this sample deliberately does **not** use for gating — see the note at the
+end of this page for what it is actually for.
 
 ## The aggregators
 
@@ -139,44 +142,6 @@ If a rejection is **expected traffic** rather than an error — a payment the bu
 decline — do not raise a business error for it. Return it as an ordinary output and branch on it in
 the plan, and the run status then reflects your error budget rather than the provider's mood.
 
-## `performanceAssert` vs `assertMetric`
-
-They look similar and answer different questions.
-
-| | `performanceAssert` | `assertMetric` |
-|---|---|---|
-| Reads | the measurements **of this execution** | the **metric time series** |
-| Scope | this run only | **not scoped to this run** — the series spans every execution |
-| Sees instrumented-node measurements | no | **yes** |
-| Placement | must be in `after` / `afterThread` | anywhere |
-| Answers | *did this run meet its SLA?* | *is the system drifting?* |
-
-```yaml
-- assertMetric:
-    metric: "response-time"          # required
-    aggregation: AVG                 # required
-    comparator: LOWER_THAN
-    expectedValue: 60000
-    filters:
-      - field: "name"                # `name` selects a measurement name
-        filterType: EQUALS
-        filter: "Search transaction"
-```
-
-Two things to know before using `assertMetric` as a gate:
-
-1. **It is not scoped to the current execution.** A `COUNT` over a measurement name this run
-   produced twice comes back with every point the series holds, from every run that ever used the
-   same name. Count assertions are meaningless here — use `performanceAssert` for those.
-2. **It reaches measurements `performanceAssert` cannot**, including instrumented-node
-   measurements, and it can read gauges and counters a keyword pushed. Together with
-   `slidingWindow`, that is its real use: thresholds over *time* — is the response time drifting up
-   across the last ten minutes, across yesterday's run and today's — which is what monitoring and
-   alerting rules are built out of.
-
-Note `field: "name"` and not `attributes.name`; the latter matches nothing and reports
-`No metric found for the defined filters`.
-
 ## What a breach looks like
 
 ```
@@ -196,11 +161,33 @@ No measurement is matching the defined filters.
 That is what you get from a misspelled measurement name, from an instrumented-node name, and from
 a success measurement that was never emitted — three quite different problems with one message.
 
+## A note on `assertMetric`
+
+Step has a second threshold control, `assertMetric`, that looks like an alternative to
+`performanceAssert`. It is not one for load testing, and this sample deliberately leaves it out.
+
+| | `performanceAssert` | `assertMetric` |
+|---|---|---|
+| Reads | the measurements **of this execution** | the stored **metric time series**, across every execution |
+| Answers | *did this run meet its SLA?* | *is the system slower than it used to be?* |
+| Use it for | gating a load test | cross-run trend and regression detection |
+
+Because `assertMetric` is **not scoped to the current execution**, its aggregates fold in every
+past run that used the same measurement name — so on a single load test the numbers are
+meaningless, and it cannot serve as the gate. Its real home is a **cross-execution** assertion:
+comparing today's run against last week's, watching an error rate creep up over the last ten runs,
+typically inside an assertion plan attached to a **scheduled** execution. That is monitoring
+territory, covered by the monitoring samples rather than this set.
+
+So: **gate a load test with `performanceAssert`; reach for `assertMetric` only for cross-run
+assertions.** (A future Step release may let `assertMetric` default to the current execution's
+scope, which would make it usable here too — until then the split above holds.)
+
 ## Key files
 
 | File | Purpose |
 |------|---------|
-| `automation-package.yaml` | Five plans covering both threshold controls |
+| `automation-package.yaml` | Four plans, all gated with `performanceAssert` |
 | `keywords/checkout.groovy`, `searchProducts.groovy` | Transactions that meet their SLA |
 | `keywords/slowSearch.groovy` | Always breaches its threshold |
 | `keywords/flakyPayment.groovy` | Fails every third iteration, and emits a success measurement otherwise |

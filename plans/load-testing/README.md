@@ -17,7 +17,7 @@ asserts its own outcome rather than merely running.
 | 03 | [Scenarios and mixed load](03-scenarios-and-mixed-load/) | intermediate | `testScenario`, staged ramps, `sequence` as phases, `testSet` |
 | 04 | [Test data and data sets](04-test-data-and-datasets/) | intermediate | `dataSet`, `item`, `.next()`, `resetAtEnd`, data sources |
 | 05 | [Measurements](05-measurements/) | advanced | keyword / instrumented / custom measurements, `startMeasure`, naming |
-| 06 | [Thresholds and SLA gates](06-thresholds-and-slas/) | advanced | aggregators, failure rate, `assertMetric` vs `performanceAssert` |
+| 06 | [Thresholds and SLA gates](06-thresholds-and-slas/) | advanced | `performanceAssert` aggregators, failure rate, and why `assertMetric` is not a load-test gate |
 
 For what each control does and how to configure it, see the official
 [controls documentation](https://step.dev/knowledgebase/userdocs/plans/controls/). For the YAML
@@ -37,7 +37,7 @@ shape of a standalone plan, see [../reference/](../reference/).
 | `instrumentNode` | 01, 05, 06 |
 | `output.startMeasure` / `stopMeasure` | 05 |
 | `performanceAssert` — `AVG`, `MAX`, `MIN`, `COUNT`, `SUM` | 01, 02, 03, 04, 05, 06 |
-| `assertMetric` | 06 |
+| `assertMetric` (cross-execution — why *not* to use it to gate a load test) | 06 |
 | `assert` inside a load test | 01, 05, 06 |
 | `continueOnError`, `continueParentNodeExecutionOnError` | 01, 06 |
 
@@ -57,7 +57,7 @@ sample's README lists the expected outcome per plan:
 |--------|------|
 | [04](04-test-data-and-datasets/) | D — The pool runs dry |
 | [06](06-thresholds-and-slas/) | C — Threshold on the failure rate |
-| [06](06-thresholds-and-slas/) | E — A breached SLA |
+| [06](06-thresholds-and-slas/) | D — A breached SLA |
 
 Every other plan is expected to pass.
 

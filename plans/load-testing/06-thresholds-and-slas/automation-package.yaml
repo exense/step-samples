@@ -269,87 +269,38 @@ plans:
                 expectedValue: 4
 
   # =========================================================================
-  # D. `assertMetric` - the other threshold control, and what it is for.
+  # A NOTE ON `assertMetric` - and why this load-test sample does not use it.
   #
-  # `performanceAssert` aggregates the measurements OF THIS EXECUTION.
-  # `assertMetric` queries the METRIC TIME SERIES, which is a different thing
-  # with different rules:
+  # `assertMetric` looks like a second threshold control, and it is a real
+  # one, but it answers a DIFFERENT question and is the WRONG tool for gating
+  # a load test:
   #
-  #   metric          the series to query, e.g. "response-time"   (required)
-  #   aggregation     AVG | MAX | MIN | COUNT | SUM               (required)
-  #   comparator      LOWER_THAN | HIGHER_THAN | EQUALS
-  #   expectedValue   the threshold
-  #   filters         narrow the series - `field: "name"` selects a
-  #                   measurement name
-  #   slidingWindow   query a rolling window rather than the whole range
+  #   `performanceAssert`  aggregates the measurements OF THIS EXECUTION.
+  #                        This is what a load-test SLA gate needs, and it is
+  #                        what every plan in this sample uses.
   #
-  # TWO THINGS TO KNOW BEFORE USING IT AS A GATE:
+  #   `assertMetric`       queries the stored METRIC TIME SERIES, which is
+  #                        NOT scoped to the current execution. A COUNT over a
+  #                        measurement name comes back with every point the
+  #                        series holds, from every run that ever used that
+  #                        name - so on a single load test its numbers are
+  #                        meaningless.
   #
-  #  1. It is NOT scoped to the current execution. A COUNT over a measurement
-  #     name this run produced twice comes back with every point the series
-  #     holds, from every run that used the same name. Count assertions are
-  #     therefore not meaningful here - use `performanceAssert` for those.
+  # Its actual purpose is CROSS-EXECUTION assertion - "is today's run slower
+  # than last week's", "has the error rate crept up across the last ten
+  # runs" - typically inside an assertion plan attached to a SCHEDULED
+  # execution. That is trend and regression detection, not the pass/fail gate
+  # on one load test, and it is the subject of the monitoring samples rather
+  # than this set.
   #
-  #  2. It reaches measurements `performanceAssert` cannot, including
-  #     instrumented-node measurements, and it can read gauges and counters
-  #     a keyword pushed. That is its real use: thresholds over
-  #     TIME - is the response time drifting up across the last ten minutes,
-  #     across yesterday's run and today's - which is what monitoring and
-  #     alerting rules are built out of.
-  #
-  # The rule of thumb: `performanceAssert` for "did THIS run meet its SLA",
-  # `assertMetric` for "is the system drifting".
-  #
-  # Unlike `performanceAssert`, it does not have to sit in an `after` block -
-  # but keeping it there is still the right place for a gate.
+  # (A future Step release may let `assertMetric` default to the current
+  # execution's scope, which would make it usable here too; until then, gate
+  # a load test with `performanceAssert` and leave `assertMetric` for
+  # cross-run assertions.)
   # =========================================================================
-  - name: "D - A threshold over the metric time series"
-    categories: ["Load testing"]
-    root:
-      threadGroup:
-        nodeName: "2 users x 2 searches"
-        users: 2
-        iterations: 2
-        children:
-          - sequence:
-              nodeName: "Search transaction"
-              instrumentNode: true
-              children:
-                - callKeyword:
-                    keyword: "Search Products"
-
-        after:
-          continueOnError: true
-          steps:
-            # An instrumented-node measurement - which performanceAssert
-            # would refuse - carrying a threshold via assertMetric.
-            - assertMetric:
-                nodeName: "The search transaction is not drifting"
-                metric: "response-time"
-                aggregation: AVG
-                comparator: LOWER_THAN
-                expectedValue: 60000
-                filters:
-                  - field: "name"
-                    filterType: EQUALS
-                    filter: "Search transaction"
-
-            # The same run gated the reliable way, for comparison.
-            - performanceAssert:
-                nodeName: "And this run met its own SLA"
-                measurementName: "Search Products"
-                aggregator: AVG
-                comparator: LOWER_THAN
-                expectedValue: 5000
-            - performanceAssert:
-                nodeName: "All four searches ran"
-                measurementName: "Search Products"
-                aggregator: COUNT
-                comparator: EQUALS
-                expectedValue: 4
 
   # =========================================================================
-  # E. A breached threshold.                       (INTENTIONALLY FAILS)
+  # D. A breached threshold.                       (INTENTIONALLY FAILS)
   #
   # What a violation looks like, so you recognise it in a report. "Slow
   # Search" takes about 600 ms and the threshold below allows 100, so this
@@ -365,7 +316,7 @@ plans:
   # The second threshold below is also breached, and without the flag you
   # would fix the first one, re-run, and only then discover the second.
   # =========================================================================
-  - name: "E - A breached SLA (intentionally fails)"
+  - name: "D - A breached SLA (intentionally fails)"
     categories: ["Load testing"]
     root:
       threadGroup:

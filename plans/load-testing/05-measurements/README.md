@@ -55,8 +55,7 @@ gets "fixed" by changing a name that was already right.
 
 **Instrumented nodes are for the dashboards. SLAs go on keyword or custom measurements.** To put a
 threshold on a whole multi-step transaction, emit a custom measurement around it from inside the
-keyword — which is what plan B does. ([06](../06-thresholds-and-slas/) shows the other route:
-`assertMetric`, which *can* read instrumented nodes but has different rules.)
+keyword — which is what plan B does.
 
 ## Custom measurements
 
