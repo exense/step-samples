@@ -35,8 +35,17 @@ All three end up as ordinary plan variables, read with `expression: "name"`. Not
 
 ## Defaulting an execution parameter
 
-Step declares execution parameters as plan variables **only if the caller supplied them**.
-Referencing a missing one fails, so a plan that must also run unattended should default it:
+Step declares execution parameters as plan variables **only if the caller supplied them**, so
+referencing one the caller omitted fails the plan.
+
+That failure is often the behaviour you want: a bot that submits the wrong record because an
+input silently fell back to a default is worse than one that refuses to start.
+
+Default a parameter only where the value is genuinely **optional** — a dry-run flag that is
+off unless asked for, a batch size, a target environment that is nearly always the same.
+Anything that decides *what the bot acts on* is better left to fail.
+
+This sample defaults its parameters so it runs with no arguments; the idiom is:
 
 ```yaml
 - set:

@@ -25,17 +25,16 @@ plans:
   # Anything a keyword puts into its `session` map is then visible to the
   # next keyword.
   #
-  # WHERE TO PUT open/close - this bit is easy to get wrong.
+  # WHERE TO PUT INITIALIZATION AND CLEANUP.
   #
-  # Do NOT use the session's own `before` / `after` blocks to open and close a
-  # stateful resource. A keyword in the session's
-  # `before` block runs on a DIFFERENT agent token than the session body, so
-  # the body cannot see what `before` put into the session and fails with
-  # "No browser in this session".
+  # A session's own `before` / `after` blocks run OUTSIDE the session, so a
+  # keyword placed there cannot share application state with the session body.
   #
-  # Put a `sequence` INSIDE the session instead and use the sequence's
-  # before / after. Those steps run within the session's token, and `after`
-  # still runs when the body fails - so cleanup is still guaranteed.
+  # If you need initialization or cleanup steps that run WITHIN the session -
+  # opening a browser, logging in, closing it again - put a `sequence` inside
+  # the session and use the sequence's before / after. Those steps run within
+  # the session, and `after` still runs when the body fails, so cleanup is
+  # guaranteed.
   # =========================================================================
   - name: "A - Stateful bot in one session"
     categories: ["RPA"]

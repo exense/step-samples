@@ -30,15 +30,15 @@ automation: the second keyword would not find the browser the first one opened.
 `session` wraps a block so every keyword inside uses the same token. Anything a keyword puts
 into its `session` map is then visible to the next keyword.
 
-## Do not use the session's own `before` block for stateful setup
+## Initialization and cleanup inside the session
 
-A keyword in a **session's** `before` block runs on a **different
-agent token** than the session body, so the body cannot see what `before` put into the
-session.
+A session's own `before` and `after` blocks run **outside** the session, so a keyword placed
+there cannot share application state with the session body.
 
-Put a `sequence` inside the session and use **its** `before` / `after` instead. Those steps
-run within the session's token, and `after` still runs when the body fails — so cleanup is
-still guaranteed:
+If you need initialization or cleanup steps that run **within** the session — opening a
+browser, logging in, closing it again — put a `sequence` inside the session and use **its**
+`before` / `after`. Those steps run within the session, and `after` still runs when the body
+fails, so cleanup is guaranteed:
 
 ```yaml
 - session:

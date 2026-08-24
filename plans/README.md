@@ -2,13 +2,14 @@
 
 This directory is about one thing: **how to write a Step plan**.
 
-A plan is the control-flow tree inside an Automation Package — the loops, branches, retries
-and keyword calls that turn a handful of keywords into an automation that does something
-useful.
+A **plan** is the implementation of an automation scenario — a functional test case, a load
+test, an RPA routine, a synthetic monitoring probe. It combines **keywords**, the building
+blocks that do the work, with **controls** that build up the execution logic: loops,
+branches, retries, waits.
 
-Every sample here is a self-contained, runnable Automation Package, so each plan can be
-validated and executed rather than just read. Keyword code is deliberately reduced to
-3-line stubs so the plan itself is the subject.
+Every sample here ships as a runnable automation package, so each plan can be validated and
+executed rather than just read. Keyword code is deliberately reduced to 3-line stubs so the
+plan itself is the subject.
 
 ### How this differs from `automation-packages/`
 
@@ -18,7 +19,7 @@ synthetic monitoring with Cypress, RPA with Selenium), including its build, its 
 its plans. That is where you go to start a project.
 
 This directory is the **plan-authoring reference**: one plan concept per sample, stripped of
-everything else. That is where you go while writing the plan inside your package.
+everything else. That is where you go while writing a plan.
 
 ## Samples by use case
 
@@ -50,7 +51,7 @@ Step has three plan formats:
 |--------|-----------|-----------------------|
 | **YAML** | The tree of controls documented at [step.dev](https://step.dev/knowledgebase/userdocs/plans/controls/) | Yes — the whole `rpa/` and `load-testing/` sets |
 | **Plain text** | A compact line-based syntax, one keyword call per line | No |
-| **UI** | Built in the Step plan editor, stored serialized as JSON | No — see [legacy-exports/](legacy-exports/) for what an export looks like |
+| **UI** | Built in the Step plan editor; [imported and exported](https://step.dev/knowledgebase/userdocs/import-export-entities/) as JSON | No — see [legacy-exports/](legacy-exports/) for what an export looks like |
 
 **Automation packages support YAML and plain text.** Editing an automation package's plans in
 the UI is planned but not currently supported.

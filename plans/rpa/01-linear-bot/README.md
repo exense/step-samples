@@ -56,11 +56,11 @@ scope**, so it stays readable by every following sibling — not just the next o
 
 ### The full picture
 
-| Binding | Where it is in scope | Use it for |
-|---------|----------------------|------------|
-| `output.<field>` | **Only inside the calling node's own `children`** | Feeding a nested `set` or a nested `assert` |
-| `previous.<field>` | The **immediately preceding sibling** only — the next keyword call replaces it | A quick check right after a call |
-| `expression: "myVar"` | The block the `set` belongs to, and everything nested below it | Anything that must survive further steps |
+| Binding | Holds | Readable from |
+|---------|-------|---------------|
+| `output.<field>` | The output of the keyword call it sits under | **Only** the `children` of that calling keyword node |
+| `previous.<field>` | The output of the keyword call just before it | The node **immediately following** that call — the next keyword call overwrites it |
+| a variable created by `set` | Whatever you put in it | The block the `set` belongs to, and everything nested below. Read it with `expression: "myVar"` |
 
 `previous` is shown once in the plan (the `check` after *Submit the record*) and is deliberately
 flagged there as the fragile option.

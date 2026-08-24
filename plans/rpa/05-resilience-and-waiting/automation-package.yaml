@@ -225,50 +225,12 @@ plans:
   # waiting on genuinely FAILS rather than reporting a state - a call that
   # errors until the service is up - since that is retry, not polling.
   #
-  # Both call keywords perfectly well. The one caveat, described next,
-  # affects `while` on auto-provisioned agents.
+  # Both call keywords perfectly well.
   #
-  # This sample ships D1 (`while`, no keyword) and D2 (`retryIfFails`)
-  # because both run on any instance. The `while`-plus-keyword form needs an
-  # agent pool name, so it is documented below rather than executed.
-  #
-  # CALLING A KEYWORD INSIDE A `while` ON AUTO-PROVISIONED AGENTS.
-  #
-  # Step forecasts how many agents an execution needs before it starts, and
-  # that forecast does not account for keyword calls nested in a `while`. On
-  # an auto-provisioned setup the loop therefore fails with
-  #   "Not able to find any agent token matching selection criteria
-  #    $agenttype=default and accepting attributes {$tokenPartition=<execId>}"
-  #
-  # It is ONLY the provisioning forecast that is wrong. The construct itself
-  # is fine: with PERMANENT agents, or with provisioning declared explicitly
-  # on the plan, a `while` calling a keyword works normally.
-  #
-  # So if you want the `while` form and you are on auto-provisioning, declare
-  # the agents on the plan (substituting your own pool name):
-  #
-  #     - name: "Poll until the queue is empty"
-  #       agents:
-  #         - replicas: 1
-  #           pool: "<your-agent-pool>"
-  #       root:
-  #         testCase:
-  #           children:
-  #             - while:
-  #                 condition:
-  #                   expression: "queueSize > 0"
-  #                 maxIterations: 10
-  #                 timeout: 60000
-  #                 children:
-  #                   - callKeyword:
-  #                       keyword: "Check Queue Size"
-  #                       children:
-  #                         - set:
-  #                             key: queueSize
-  #                             value:
-  #                               expression: "output.queueSize as Integer"
-  #
-  # Again: this is a provisioning limitation, not a reason to avoid `while`.
+  # NOTE: on older Step versions, keyword calls nested in a `while` are not
+  # counted when forecasting how many agents to provision, so such a loop can
+  # fail to obtain an agent token on an auto-provisioned instance. Declaring
+  # `agents` on the plan avoids it if you encounter the issue.
   # =========================================================================
   - name: "D1 - Wait with while"
     categories: ["RPA"]
@@ -277,10 +239,9 @@ plans:
         nodeName: "Count a backlog down to zero"
         children:
 
-          # The loop counts down a plan variable so this plan runs on any
-          # instance. In a real bot the body would call a keyword that asks
-          # the system, and `set` the answer - see the block above the plan
-          # for that form and its provisioning caveat.
+          # The loop counts down a plan variable to keep the sample
+          # self-contained. In a real bot the body would call a keyword that
+          # asks the system, and `set` the answer.
 
           # A number, not the string "3" - see plan A.
           - set:

@@ -1,12 +1,17 @@
-# Static values vs dynamic expressions - the distinction that governs every
-# field in a Step YAML plan.
+# ==============================================================================
+# STANDALONE PLAN - STATIC VALUES vs DYNAMIC EXPRESSIONS
 #
-# A file like this can be dropped straight into the Step UI with
-# "Add plan" > "Create from YAML", or referenced from an automation package
-# like any other plan.
+# The distinction that governs every field in a Step YAML plan.
+#
+# Usage:
+# - Upload directly: import into the Step UI via "Add plan" > "Create from YAML".
+# - Convert/add to a package: move the contents under a `plans:` list entry
+#   inside an automation package manifest.
 #
 # This file is a syntax illustration, not a runnable plan - the keywords it
-# calls do not exist. For plans you can execute, see ../rpa/.
+# calls do not exist. For plans you can execute, see ../rpa/ and
+# ../load-testing/
+# ==============================================================================
 ---
 version: 1.0.0
 name: "Dynamic values and inputs"
@@ -49,8 +54,11 @@ root:
       - callKeyword:
           keyword: "Submit Record"
           inputs:
-            - literalInput: "abc"              # static
-            - numericInput: 777                # static number
+            # Quoting decides the type of a static value: YAML parses an
+            # unquoted number as a number, and the keyword receives it as one.
+            - literalString: "abc"             # static string
+            - quotedNumber: "777"              # static STRING "777"
+            - unquotedNumber: 777              # static NUMBER 777
             - fromVariable:
                 expression: "recordId"         # a plan variable
             - computed:

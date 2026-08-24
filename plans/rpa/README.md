@@ -63,11 +63,20 @@ step ap deploy -p . -u <your-step-url> --token <your-token> --projectName <your-
 
 Three plans in [05](05-resilience-and-waiting/) are **expected to fail** — that is the lesson
 in them. Their names say so, and that sample's README lists the expected outcome per plan.
+
+[07](07-composition-and-reuse/) contains a plan meant to be reached through `callPlan` rather
+than run directly. It is tagged with a `sub-plan` category, so exclude it:
+
+```bash
+step ap execute -p . --excludeCategories=sub-plan
+```
+
 Everything else passes.
 
 ## What these samples teach
 
-The controls are the vocabulary; these are the ideas that decide whether a plan is any good.
+The controls provide the vocabulary; the following principles determine whether a plan is
+well-designed:
 
 1. **The plan orchestrates, the keyword acts.** The plan carries *business* data — the
    record, the amount, the confirmation. Technical context — a browser, a driver, a

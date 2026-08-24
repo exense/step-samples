@@ -31,11 +31,11 @@ starts encoding business rules.
 | B | `if` threshold routing, `set` scoping, `assert` with `doNegate` |
 | C | `skipNode` on a temporarily disabled step |
 
-## Two ways `switch` silently does nothing
+## Notes on `switch`
 
-Both leave the plan reporting **PASSED** while no branch ran at all.
+Two behaviours worth knowing before writing one:
 
-### 1. The expression must be dynamic
+### The expression must be dynamic
 
 ```yaml
 - switch:
@@ -45,13 +45,13 @@ Both leave the plan reporting **PASSED** while no branch ran at all.
       expression: "recordType"      # RIGHT - reads the variable
 ```
 
-The static form matches no case, so the switch executes nothing. Same rule as everywhere
-else in this YAML: a plain string is a literal, never a variable reference.
+The static form matches no case, so the switch executes nothing — and the plan still reports
+PASSED. Same rule as everywhere else in this YAML: a plain string is a literal, never a
+variable reference.
 
-### 2. There is no `default` case
+### There is no `default` case
 
-`value: "default"` is just a case matching the literal string `"default"`. When the
-expression matches nothing, the switch runs **nothing** and passes.
+When the expression matches nothing, the switch runs **nothing** and passes.
 
 The fallback pattern — what plan A does — is to set a sentinel before the switch, have each
 case overwrite it, and test it afterwards:
@@ -64,7 +64,7 @@ case overwrite it, and test it afterwards:
       - case: {value: "INVOICE", children: [ ... , {set: {key: routed, value: "INVOICE"}}]}
       # ...
 - if:
-    condition: {expression: "routed == NONE"}
+    condition: {expression: "routed == 'NONE'"}
     children:
       - set: {key: routed, value: "MANUAL"}
 ```
@@ -72,8 +72,8 @@ case overwrite it, and test it afterwards:
 Note `routed` is declared **before** the switch — a `set` living only inside a case is
 scoped to that case (see `set` scoping below).
 
-Because both failure modes are silent, plan A ends each iteration with a `check` that the
-record took the branch its type demands. Break the switch and that check goes red.
+Because both behaviours are silent, plan A ends each iteration with a `check` that the record
+took the branch its type demands. Break the switch and that check goes red.
 
 ## How `set` scoping works
 

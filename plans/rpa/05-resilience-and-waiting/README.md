@@ -30,50 +30,13 @@ giving up too early or hanging forever.
 | Plan | Expected outcome | Shows |
 |------|------------------|-------|
 | A — Retry a flaky step | **PASSED** | `retryIfFails` absorbs two failures, passes on attempt 3 |
-| B — Guaranteed cleanup | **FAILED** (on purpose) | `after` cleanup runs; the step after the failure does not |
+| B — Guaranteed cleanup | **FAILED** (on purpose) | `after` cleanup runs; subsequent steps in the sequence do not |
 | C — Error propagation flags | **FAILED** (on purpose) | Both flags, and how they combine |
 | D1 — Wait with while | **PASSED** | `condition`, `postCondition`, `pacing`, `maxIterations`, `timeout` |
 | D2 — Wait with retryIfFails | **PASSED** | `retryIfFails` + a nested `assert` as the not-ready signal |
 | E — Explicit business failure | **TECHNICAL_ERROR** (on purpose) | `failure` with a custom message |
 
 ## Notes on the controls
-
-### Calling a keyword inside `while` on auto-provisioned agents
-
-Step forecasts how many agents an execution needs before it starts, and that forecast does
-**not** account for keyword calls nested in a `while`. On an auto-provisioned setup the loop
-therefore fails with
-
-```
-Not able to find any agent token matching selection criteria $agenttype=default
-and accepting attributes {$tokenPartition=<execId>}
-```
-
-**Only the forecast is affected — the construct itself is fine.** With permanent agents, or
-with provisioning declared on the plan, a `while` calling a keyword works normally. So if
-you want the `while` form on an auto-provisioned instance, declare the agents:
-
-```yaml
-- name: "Poll until the queue is empty"
-  agents:
-    - replicas: 1
-      pool: "<your-agent-pool>"
-```
-
-This is a provisioning limitation, not a reason to avoid `while`. Plan D2 uses
-`retryIfFails` simply because it needs no pool name and therefore runs on any instance:
-
-```yaml
-- retryIfFails:
-    maxRetries: 10
-    gracePeriod: 500
-    timeout: 60000
-    children:
-      - callKeyword:
-          keyword: "Check Queue Size"
-          children:
-            - assert: {actual: "queueSize", operator: EQUALS, expected: "0"}
-```
 
 ### `while` or `retryIfFails` for waiting?
 
@@ -83,31 +46,40 @@ Both call keywords perfectly well, and both wait. What separates them is **how y
 | | `while` | `retryIfFails` |
 |---|---|---|
 | Exit criterion | a **condition** stops holding | the block stops **failing** |
-| "Not ready" is… | a normal state | a failure you have to fabricate (usually a failing `assert`) |
+| "Not ready" is… | a normal state | an error — either a real one, or a failing `assert` you add |
 | Execution report | clean — nothing failed | one failed attempt per wait (soften with `reportLastTryOnly`) |
 
 **Prefer `while`** when the system gives you an answer you can test — *how many items are
 left?*, *is the status DONE?*. The condition reads as a condition, and a long wait does not
 fill the report with failures.
 
-**Prefer `retryIfFails`** when the thing you are waiting on genuinely **fails** rather than
-reporting a state — a call that errors until the service is up. That is retry, not polling,
-and it is also what you want for absorbing flakiness (plan A).
+**Prefer `retryIfFails`** when the call genuinely **errors** until the system is ready — a
+request refused while a service starts up. Then the failure is real, the retry is doing what
+it was designed for, and this is also the control for absorbing flakiness (plan A).
+
+Using `retryIfFails` purely to wait, with an `assert` added only to force a retry, works but
+is a workaround: it records every wait as a failed attempt. Plan D2 shows the shape, so that
+both forms appear side by side.
+
+> On older Step versions, keyword calls nested in a `while` are not counted when forecasting
+> how many agents to provision, so such a loop can fail to obtain an agent token on an
+> auto-provisioned instance. Declaring `agents` on the plan avoids it.
 
 ### Retry on a fresh session, not the same one
 
 Neither plan A nor plan D2 wraps its retry in a `session`, and that is deliberate.
 
-A retry is usually better on a **fresh** session — a new agent token, a new browser, a clean
-slate. Half the reason a step is flaky is state left behind by the attempt that just failed;
-retrying inside the same dirty session retries the problem along with the step.
+A failed attempt often leaves state behind — a half-filled form, a stale selection. Retrying
+inside that same session retries the mess along with the step, so a retry on a **fresh**
+session is usually more likely to succeed.
 
-Wrap a retry in a session only when the retried block genuinely depends on something
-established **earlier and outside it** — typically a login you do not want to redo on every
-attempt. That is a deliberate trade-off, not the default.
+The exception is when the retried block depends on something set up **before** it, such as a
+login you do not want to repeat on every attempt. Then wrap the retry in a session
+deliberately.
 
-This has a consequence for the keywords: **keep them stateless.** Both samples count
-attempts in the *plan* and pass the number in as an input:
+For this to be possible, **keywords must be stateless** — a keyword that remembers something
+between calls forces every caller to pin to one agent. So both samples count attempts in the
+*plan* and pass the number in as an input:
 
 ```yaml
 - set: {key: attempt, value: {expression: "0"}}     # a NUMBER, not "0"
@@ -134,9 +106,10 @@ caller to pin to one agent — which is how you end up needing a session you did
 
 ### `continueOnError` on an `after` block
 
-It governs whether one failing cleanup step stops the **remaining** cleanup steps — the same
-"keep going" semantics as on a sequence, applied to the cleanup list. Without it, a failing
-logout means the licence never gets released.
+On a `sequence`, `continueOnError` means "if one of my children fails, keep running the
+others" — that is what plan C uses it for. An `after` block takes the same attribute with the
+same meaning, applied to the cleanup steps: it governs whether one failing cleanup step stops
+the **remaining** ones. Without it, a failing logout means the licence never gets released.
 
 It does **not** suppress or hide anything: both the body error and the cleanup error are
 reported either way. And a failing cleanup step fails the run even when the body passed, so

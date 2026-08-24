@@ -34,8 +34,11 @@ plans:
           #
           # This is the defaulting idiom: ask the Groovy binding whether the
           # variable exists before reading it. It makes the plan runnable with
-          # no parameters at all, which is what you want for a bot that also
-          # runs on a schedule.
+          # no parameters at all, which is what this sample wants.
+          #
+          # Use it sparingly. Defaulting suits a value that is genuinely
+          # optional - a dry-run flag, a batch size. For a value that decides
+          # WHAT the bot acts on, failing is usually better than guessing.
           # -------------------------------------------------------------
           - set:
               key: recordId

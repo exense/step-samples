@@ -3,14 +3,17 @@
 # RPA sample 07 - Composition and reuse
 #
 # Once you have more than one bot, the same sub-process shows up everywhere:
-# "log in", "look up a customer", "book an entry". This sample shows the three
+# "log in", "look up a customer", "book an entry". This sample shows the two
 # ways Step lets you package a piece of plan once and call it from many bots.
 #
-#   Composite keyword   a plan that behaves like a keyword - inputs, outputs,
-#                       and it shows up in the keyword list. The cleanest
-#                       reuse mechanism.
-#   callPlan            call another plan by name
-#   testSet             run several bot plans as one orchestrated batch
+#   Composite keyword   a plan that behaves like a keyword: it returns outputs,
+#                       can declare an input schema, and reports as a single
+#                       keyword call
+#   callPlan            call another plan by name; returns nothing to the
+#                       caller and reports as its own branch
+#
+# It also uses `testSet`, which is not a reuse mechanism but the control for
+# running several test cases from one plan.
 # ---------------------------------------------------------------------------
 version: "1.2.0"
 name: "rpa-07-composition-and-reuse"
@@ -24,8 +27,9 @@ plans:
   # keyword: its implementation is a PLAN, not code. From here it is called
   # exactly like any other keyword - inputs go in, `return` sends outputs back.
   #
-  # This is the reuse mechanism to reach for first: the caller does not need to
-  # know the sub-process has five steps in it.
+  # Use a Composite when the reused part has to RETURN OUTPUTS, needs a
+  # declared INPUT SCHEMA, or should report as one keyword call rather than a
+  # separate branch.
   # =========================================================================
   - name: "A - Use a composite keyword as a sub-bot"
     categories: ["RPA"]
@@ -87,36 +91,40 @@ plans:
                 - archiveFolder: "/archive/2026-08"
 
   # -------------------------------------------------------------------------
-  # The plan that B calls. An ordinary plan - nothing marks it as "a sub-plan",
-  # which means it is also executed on its own when the whole package runs.
+  # The plan that B calls. It expects `archiveFolder` from its caller and has
+  # no reason to run on its own - so it carries a "sub-plan" category and is
+  # left out of a normal run:
   #
-  # That is why it defaults its input: a plan meant to be called by others
-  # should still stand up when launched directly.
+  #     step ap execute -p . --excludeCategories=sub-plan
+  #
+  # Categories are just labels; they change nothing about how `callPlan`
+  # reaches this plan.
+  #
+  # NOTE how the input is read: values passed through `callPlan.input` arrive
+  # under `input.`, the same way a Composite keyword receives its inputs.
+  # A bare `archiveFolder` is NOT bound.
   # -------------------------------------------------------------------------
   - name: "Shared - Archive processed records"
-    categories: ["RPA"]
+    categories: ["RPA", "sub-plan"]
     root:
       testCase:
         nodeName: "Archive what the bots processed"
         children:
-          - set:
-              key: archiveFolder
-              value:
-                expression: "binding.variables.containsKey('archiveFolder') ? archiveFolder : '/archive/default'"
           - echo:
               text:
-                expression: "'Archiving into ' + archiveFolder"
+                expression: "'Archiving into ' + input.archiveFolder"
               description: "Reads the value the caller passed through callPlan input."
 
   # =========================================================================
-  # C. testSet - orchestrating several bots as one batch.
+  # C. testSet - running several test cases from one plan.
   #
-  # A `testSet` runs its children (usually testCases or callPlans) as separate
-  # test cases, `threads` of them at a time. This is the "nightly RPA batch"
-  # shape: five independent bots, two agents, one report.
+  # Not a reuse mechanism: `testSet` is simply the control that runs its
+  # children - usually testCases - as separate test cases, `threads` of them
+  # at a time. This is the "nightly RPA batch" shape: three independent bots,
+  # two at a time, one report.
   #
-  # Note the difference from `forEach threads`: forEach parallelises ROWS of
-  # one bot, testSet parallelises WHOLE BOTS.
+  # Note the difference from `forEach threads`: forEach parallelises ROWS
+  # within one test case, testSet parallelises the TEST CASES.
   # =========================================================================
   - name: "C - Nightly batch of bots"
     categories: ["RPA"]
@@ -202,6 +210,16 @@ keywords:
   - Composite:
       name: "Process One Record"
       description: "Reads a record and submits it. Reused by every bot in this package."
+      # `schema` declares the inputs this keyword accepts, the same way any
+      # other keyword does. Callers get them documented and validated instead
+      # of having to read the plan to find out what it expects.
+      schema:
+        type: object
+        properties:
+          recordId:
+            type: string
+        required:
+          - recordId
       plan:
         root:
           sequence:

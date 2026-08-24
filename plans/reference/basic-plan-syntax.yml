@@ -1,12 +1,17 @@
-# A standalone YAML plan: the same tree you would write inside an automation
-# package, with a top-level `root:` and no package around it.
+# ==============================================================================
+# STANDALONE PLAN
 #
-# A file like this can be dropped straight into the Step UI with
-# "Add plan" > "Create from YAML", or referenced from an automation package
-# like any other plan.
+# This file represents a single, self-contained Step plan.
+#
+# Usage:
+# - Upload directly: import into the Step UI via "Add plan" > "Create from YAML".
+# - Convert/add to a package: move the contents under a `plans:` list entry
+#   inside an automation package manifest.
 #
 # This file is a syntax illustration, not a runnable plan - the keywords it
-# calls do not exist. For plans you can execute, see ../rpa/.
+# calls do not exist. For plans you can execute, see ../rpa/ and
+# ../load-testing/
+# ==============================================================================
 ---
 version: 1.0.0
 name: "Basic plan syntax"
