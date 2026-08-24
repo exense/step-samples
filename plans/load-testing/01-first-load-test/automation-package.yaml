@@ -177,34 +177,17 @@ plans:
           continueOnError: true
           steps:
 
-            # Did this STEP actually run as often as the load implies?
+            # A sanity check that every transaction completed. COUNT here is
+            # how many times "Checkout" ran; if an earlier step failed - as
+            # it might under load - that iteration aborts before checkout and
+            # the count falls short of 6. Paired with the AVG/MAX below, it
+            # stops a run that quietly did less work from hiding behind a
+            # healthy average.
             #
-            # A keyword's COUNT is not simply users x iterations. It is how
-            # many times that particular step was reached, and the two come
-            # apart as soon as an iteration is more than a single call:
-            #
-            #   an iteration that FAILS PART WAY   the keywords after the
-            #                                      failure never run, so
-            #                                      their counts fall short of
-            #                                      the ones before it
-            #   a keyword inside an `if`/`switch`  it runs only when the
-            #                                      branch is taken, so its
-            #                                      count tells you how often
-            #                                      that was
-            #   a data source that RAN DRY         iterations continue with
-            #                                      nothing to work on
-            #
-            # Which is why the COUNT to assert is the one on the LAST step of
-            # the transaction: it is the number that says the whole thing
-            # completed, not just started. Comparing counts across the three
-            # keywords of this iteration is how you find where iterations
-            # were breaking off.
-            #
-            # It is a COMPLETENESS check, not a throughput one: `iterations`
-            # is fixed here, so this is 6 however slow the system was. A
-            # slowdown stretches the RUN instead. To gate the RATE, pin the
-            # duration with `iterations: 0` + `maxDuration` and put the COUNT
-            # threshold on that - see sample 02 plan D.
+            # Note it is a COMPLETENESS check, not throughput: `iterations` is
+            # fixed, so this stays 6 however slow the run was - a slowdown
+            # stretches the RUN instead. To gate the RATE, pin the duration
+            # with `iterations: 0` + `maxDuration` - see sample 02 plan D.
             - performanceAssert:
                 nodeName: "All 6 checkouts ran"
                 measurementName: "Checkout"

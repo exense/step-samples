@@ -82,12 +82,13 @@ plans:
             # this is 6 however slow the run was.
             #
             # It is worth asserting anyway, because a keyword's count is how
-            # often that STEP was reached - not users x iterations. It falls
-            # short when iterations fail part way (the steps after the
-            # failure never run), when the step sits inside a branch that was
-            # not always taken, or when a data pool ran dry. On a one-keyword
-            # iteration like this one the two coincide; on the multi-step
-            # transactions of samples 01 and 05 they do not.
+            # often that STEP was reached - which equals users x iterations
+            # only when every iteration runs it. Under real load it can fall
+            # short: an iteration that fails part way skips the steps after
+            # it, a step inside a branch runs only when the branch is taken,
+            # a dry data pool leaves iterations with nothing to do. None of
+            # those occur in these stub runs, but the assertion is what
+            # catches them when they do.
             #
             # To gate the RATE instead, bound the duration - see the note
             # above and sample 02 plan D.

@@ -105,14 +105,31 @@ plans:
   # STARTS of consecutive iterations. If an iteration takes less than that,
   # the user waits; if it takes longer, the next one starts immediately.
   #
-  # That makes throughput a number you CHOOSE:
+  # That makes throughput a number you CHOOSE, out of `users` and `pacing`:
   #
   #     iterations per second = users / (pacing in seconds)
   #
-  # 1 user with a 3000 ms pacing is 20 transactions an hour, whether the
-  # system answers in 100 ms or in 2 seconds. That is the property that makes
-  # a load test repeatable - and the one that lets response time degrade
-  # visibly instead of being masked by the load backing off.
+  # and, turned around, to hit a target rate:
+  #
+  #     pacing (seconds) = users / (target iterations per second)
+  #
+  # 1 user at 3000 ms pacing is one checkout every 3 s - 20 a minute, 1200 an
+  # hour - whether the system answers in 100 ms or in 2 s. That is the
+  # property that makes a load test repeatable, and the one that lets response
+  # time degrade visibly instead of being masked by the load backing off.
+  #
+  # TWO THINGS PEOPLE GET WRONG:
+  #
+  #   - Setting only `users` and leaving `pacing` out gives UNCONTROLLED
+  #     throughput - the stress-test case above, where the rate is whatever
+  #     the system allows and no two runs compare. Defining the load by users
+  #     alone is the most common mistake.
+  #
+  #   - The formula holds only while each iteration FITS INSIDE its pacing
+  #     window. If an iteration outlasts `pacing`, that user starts the next
+  #     one immediately and falls behind, so the real rate drops below
+  #     users/pacing - back to response-time-bound. Give `pacing` headroom
+  #     over the slowest expected iteration, or add users.
   #
   # `sequence` has a `pacing` field too, for pacing an inner block.
   # =========================================================================
@@ -215,16 +232,17 @@ plans:
   # iterations". `maxDuration` is the wall-clock cap on the whole thread
   # group: when it expires, the group stops wherever it is.
   #
-  # HOW `iterations` AND `maxDuration` COMBINE - the part that is easy to get
-  # wrong, because the sensible-looking value is not the one you want:
+  # HOW `iterations` AND `maxDuration` COMBINE. A specified count is a target
+  # and 0 means unlimited; either way `maxDuration` caps the run. The one
+  # thing that surprises people is the DEFAULT when `iterations` is left out:
   #
-  #   iterations: N   each user runs N times, UNLESS maxDuration fires first
-  #                   and cuts it short. `maxDuration` is a ceiling here.
+  #   iterations: N   each user runs UP TO N times - `maxDuration` is a
+  #                   ceiling that cuts it short if it fires first.
   #   iterations: 0   UNLIMITED - each user loops until maxDuration expires.
   #                   This is what "run for a duration" actually means.
   #   iterations      omitted -> defaults to 1 per user. `maxDuration` then
   #     omitted       only caps that single iteration; it does NOT make the
-  #                   group loop. A frequent surprise.
+  #                   group loop. The one real gotcha here.
   #
   # So the form for a duration-bounded run is `iterations: 0` WITH
   # `maxDuration`, as below - not a large iteration count picked to be

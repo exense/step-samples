@@ -61,10 +61,9 @@ sample's README lists the expected outcome per plan:
 
 Every other plan is expected to pass.
 
-## Two placement rules for `performanceAssert`
+## Two rules for `performanceAssert`
 
-Neither follows from the structure of the YAML, and both report an error that names something
-other than the cause:
+Two rules to keep in mind:
 
 **`performanceAssert` must live in an `after` or `afterThread` block.** Anywhere else — as a child
 of the thread group, of a `testCase`, of anything — the execution ends in `TECHNICAL_ERROR` with

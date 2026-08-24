@@ -10,14 +10,14 @@ level: intermediate
 
 # 04 — Test data and data sets
 
-A load test that sends the same account and the same product on every iteration measures the
-target's caches, not the target. Realistic load needs a pool of test data, handed out so that no
-two virtual users collide.
+A load test that sends the same account and product on every iteration measures the target's
+caches, not the target. Realistic load needs a pool of test data, handed out so that no two virtual
+users collide. `dataSet` is the control for that — and it does **not** work like `forEach`.
 
-`dataSet` is the control for that, and it does **not** work like `forEach`.
+**The lesson is the commented [`automation-package.yaml`](automation-package.yaml)**, which walks
+each shape at its node. This page holds the plan index and the reference tables.
 
-> **One plan in this package fails on purpose.** That is the lesson in it: the plan name says
-> which one.
+> **One plan fails on purpose** — the plan name says which.
 
 ## The plans
 
@@ -31,167 +31,56 @@ two virtual users collide.
 
 ## `dataSet` is a declaration, not a loop
 
-This is the one thing to understand, and it is the opposite of what the name suggests:
-
 | Control | What it is |
 |---------|-----------|
-| `forEach` | a **loop**. It runs its children once per row. |
-| `dataSet` | a **declaration**. It opens the data source, binds a **cursor** over it to the variable named by `item`, and runs nothing. |
+| `forEach` | a **loop** — runs its children once per row |
+| `dataSet` | a **declaration** — opens the source, binds a **cursor** to the variable named by `item`, and runs nothing |
 
-A `dataSet` node with children is a common and completely silent mistake: **the children are never
-executed, and the node still reports PASSED.**
+A `dataSet` node with children is a silent mistake: the children never execute, and the node still
+reports PASSED. Instead, declare it in the **`before` block** of the node that holds the load (the
+thread group stays the plan root), and pull one row with `item.next()` inside the load. In a
+`testScenario`, `before` is also what removes the race — a sibling `dataSet` is not guaranteed to be
+bound before parallel thread groups start pulling.
 
-## Declare the pool in a `before` block
+The cursor is **shared**: every `.next()` in the execution takes the following row, so populations
+never collide on the same account — but *which* rows a given group gets is not deterministic. Never
+assume "the buyers get shopper1".
 
-The declaration belongs in the `before` block of whatever node contains the load — and the thread
-group stays the root of the plan:
+## Notes worth knowing
 
-```yaml
-root:
-  threadGroup:
-    users: 1
-    iterations: 3
+Selective notes, not a full reference — the commented descriptor covers every case. These are the
+points most worth getting right.
 
-    before:                              # runs once, before the load starts
-      steps:
-        - dataSet:
-            item: "shopperPool"          # names the CURSOR, not the row
-            resetAtEnd: true
-            dataSource:
-              csv: {file: "data/users.csv"}
+### Where you pull decides how much data you need
 
-    children:
-      - set:
-          key: shopper
-          value:
-            expression: "shopperPool.next()"    # one pull per iteration
-      - callKeyword:
-          keyword: "Login"
-          inputs:
-            - user:
-                expression: "shopper.Username"
-```
+| Block | Runs | Pull here when… |
+|-------|------|-----------------|
+| `before` | once for the test | never — this is the **declaration** |
+| `beforeThread` | once per virtual user | the account belongs to the user (log in once, act many times) |
+| `children` | every iteration | the data belongs to the transaction |
 
-`item` names the cursor. `shopperPool` is an object you call `.next()` on — it is **not** a map of
-columns. `.next()` advances the cursor and returns the row as a map.
+`before` always runs before `beforeThread`, so the cursor is bound by the time a thread claims its
+row. Per-virtual-user is the common case *and* the cheaper one: plan C serves 2×3 iterations from a
+4-row pool by pulling twice, not six times.
 
-Two reasons for `before` rather than a sibling node:
+### `resetAtEnd`, and running dry
 
-- **It removes a race.** See the next section — in a `testScenario` a sibling declaration is not
-  guaranteed to be bound before the load starts pulling from it.
-- **It keeps the thread group at the root.** A load plan's root should be the load profile.
-  Wrapping the whole thing in a `testCase` just to have somewhere to put the declaration buries
-  the profile one level down for no benefit.
-
-## One pool, several thread groups
-
-`testScenario` runs its children **in parallel**. A `dataSet` written as a plain sibling of the
-thread groups is therefore racing them: nothing guarantees the cursor is bound before the first
-`.next()`, and the failure mode is a plan that works on a quiet instance and breaks on a busy one.
-
-Put it in the scenario's `before` block, which runs to completion before any child starts:
-
-```yaml
-root:
-  testScenario:
-    before:
-      steps:
-        - dataSet: {item: "shopperPool", resetAtEnd: true, dataSource: {...}}
-    children:
-      - threadGroup: {nodeName: "Browsers", ...}
-      - threadGroup: {nodeName: "Buyers", ...}
-```
-
-Once bound, the cursor is **shared**. Every `.next()` in the execution, from whichever thread
-group, takes the *following* row — so two populations drawing from one pool never collide on the
-same account, which is exactly what you want when the system under test locks a session per user.
-
-The consequence: **which** rows a given thread group gets is not deterministic. It depends on the
-order the threads happen to reach their `.next()`. Never write a plan that assumes "the buyers get
-shopper1".
-
-## Where you pull decides how much data you need
-
-Three blocks, three frequencies:
-
-| Block | Runs | Holds |
-|-------|------|-------|
-| `before` | once for the test | the **declaration** |
-| `beforeThread` | once per virtual user | a pull, if the account belongs to the user |
-| `children` | every iteration | a pull, if the data belongs to the transaction |
-
-`before` is guaranteed to run before `beforeThread`, so the cursor is always bound by the time a
-thread claims its row.
-
-Per-virtual-user is the shape most load tests actually need: a virtual user logs in once and then
-does twenty things as that account — it does not become a different person between two clicks.
-
-```yaml
-before:
-  steps:
-    - dataSet: {item: "shopperPool", resetAtEnd: false, dataSource: {...}}
-beforeThread:
-  steps:
-    - set:
-        key: myShopper
-        value:
-          expression: "shopperPool.next()"
-    - callKeyword: {keyword: "Login", ...}
-```
-
-It is also much cheaper. Plan C runs 2 users × 3 iterations against a pool of 4 rows with
-`resetAtEnd: false`. Pulling per iteration would exhaust the pool; pulling per thread uses 2 rows.
-The plan proves it with counts — two logins for six orders.
-
-## When the pool runs dry
-
-With `resetAtEnd: false`, `.next()` past the last row does **not** stop the thread group and does
-**not** raise an error. It returns `null`, and the run carries on feeding `null` into the keywords.
-
-Depending on the keyword that is either a confusing `NullPointerException` deep in the report or —
-far worse — a keyword that shrugs, sends an empty value, and keeps the run green while half the
-load was meaningless.
-
-Guard the pull:
-
-```yaml
-- check:
-    nodeName: "The pool still had a row to give"
-    expression: "shopper != null"
-```
-
-Decide `resetAtEnd` deliberately:
+With `resetAtEnd: false`, `.next()` past the last row returns **`null`** — no stop, no error — and
+the run feeds `null` into the keywords. Guard the pull with a `check` on `!= null`.
 
 | Value | Meaning |
 |-------|---------|
-| `true` | recycle the rows — fine when the target does not care that the same account comes back |
-| `false` | each row used at most once — then size the pool for the whole run, and guard the pull |
+| `true` | recycle the rows — fine when the target does not mind the same account returning |
+| `false` | each row used at most once — size the pool for the whole run, and guard the pull |
 
-## Data sources
+### Data sources
 
 Only the `dataSource` block changes; the pull is always `.next()`. Available: `csv`, `excel`,
-`file`, `folder`, `gsheet`, `json`, `json-array`, `sequence`, `sql`.
-
-The two that come up most in load tests are `csv` — a generated pool checked in next to the plan —
-and `sql`, which reads the pool straight out of the system under test:
-
-```yaml
-dataSource:
-  sql:
-    connectionString: "jdbc:postgresql://db:5432/shop"
-    driverClass: "org.postgresql.Driver"
-    user: "loadtest"
-    password:
-      expression: "dbPassword"
-    query: "SELECT username, product_id FROM test_accounts"
-```
-
-`sequence` is the one to reach for when the data does not need to exist beforehand — a pool of
-unique order numbers, say. And for data that needs no pool at all, the thread-group counters
-(`gcounter`, `userId`) from [02](../02-thread-group-configuration/) are often enough.
-
-A source holding credentials can be declared with `protect: true`, which obfuscates its values in
-the report.
+`file`, `folder`, `gsheet`, `json`, `json-array`, `sequence`, `sql`. The common ones for load are
+`csv` (a pool checked in beside the plan) and `sql` (read straight from the system under test);
+`sequence` needs no data to exist beforehand, and for data needing no pool at all the thread-group
+counters from [02](../02-thread-group-configuration/) are often enough. A credential source takes
+`protect: true` to obfuscate its values in the report.
 
 ## Key files
 

@@ -12,10 +12,10 @@ level: beginner
 
 `users` and `iterations` describe a load, but not a realistic one. A real population does not
 appear all at once, does not hammer the system as fast as it can answer, and does not stop after
-exactly N clicks.
+exactly N clicks. This sample covers every thread-group knob and the four before/after blocks.
 
-This sample covers every knob a thread group has, and the four blocks that decide what runs once,
-what runs once per virtual user, and what runs on every iteration.
+**The lesson is the commented [`automation-package.yaml`](automation-package.yaml).** This page maps
+the knobs and calls out the handful that most often trip people up.
 
 ## The plans
 
@@ -24,122 +24,69 @@ what runs once per virtual user, and what runs on every iteration.
 | A — The three counters | `gcounter`, `userId`, `literationId`, and `item` / `userItem` / `localItem` |
 | B — Pacing sets the throughput | `pacing` — controlling throughput instead of concurrency |
 | C — Ramping the load up | `rampup`, `pack`, `startOffset` |
-| D — Run for a fixed time | `maxDuration`, and the trap that comes with it |
+| D — Run for a fixed time | `iterations: 0` + `maxDuration` |
 | E — Setup per test versus per user | `before`, `beforeThread`, `afterThread`, `after` |
 
-Every plan in this package is expected to pass; none of them fails by design.
+All five are expected to pass.
 
 ## The knobs
 
 | Field | Meaning |
 |-------|---------|
 | `users` | virtual users running in parallel — each holds an agent token for the whole thread group |
-| `iterations` | repetitions per user |
-| `pacing` | fixed period between the **starts** of consecutive iterations |
-| `rampup` | time taken to start all the users |
+| `iterations` | repetitions per user (but see the table below) |
+| `pacing` | fixed period between the **starts** of consecutive iterations — makes throughput a number you choose, so two runs compare |
+| `rampup` | time taken to start all the users; starting all at once is a spike test, not a load test |
 | `pack` | how many users are released together at each ramp-up step |
-| `startOffset` | delay before the ramp-up begins |
+| `startOffset` | delay before the ramp-up begins — only useful for staggering thread groups in a [scenario](../03-scenarios-and-mixed-load/) |
 | `maxDuration` | wall-clock cap on the whole thread group |
 
-### `pacing` — the field that makes runs comparable
+## Notes worth knowing
 
-Without pacing, a virtual user starts its next iteration the instant the previous one returns.
-That is a stress test: the faster the system answers, the harder you hit it, so throughput is
-whatever the system allows and two runs cannot be compared.
+Not a full reference — the [controls documentation](https://step.dev/knowledgebase/userdocs/plans/controls/)
+and the commented descriptor cover every field. These are the ones this sample dwells on because
+they are the easiest to get wrong.
 
-`pacing` makes throughput a number you choose:
+### Controlling throughput — `pacing` with `users`
+
+Define the load by `users` alone and the throughput is **uncontrolled** — it rises and falls with
+response time, so no two runs compare. This is the most common mistake. `pacing` (the fixed gap
+between iteration *starts*) turns throughput into a number you set:
 
 ```
-iterations per second = users / (pacing in seconds)
+iterations/sec = users ÷ pacing(s)          pacing(s) = users ÷ target-rate
 ```
 
-One user with a 3000 ms pacing is 20 transactions an hour whether the system answers in 100 ms or
-in two seconds. That is also what lets response time degrade *visibly* instead of being masked by
-the load quietly backing off.
+So 1 user at 3 s pacing is 20 transactions a minute, fast system or slow. One caveat: it holds only
+while each iteration finishes **within** its pacing window — if an iteration outlasts `pacing`, that
+user falls behind and the rate drops back to response-time-bound. Give `pacing` headroom over the
+slowest iteration, or add users.
 
-`sequence` has a `pacing` field too, for pacing an inner block.
+### Running for a duration
 
-### `rampup` and `pack`
+A fixed count needs nothing special — `iterations: N`. Running for a *time* is the non-obvious one:
+it needs **`iterations: 0`** (unlimited) together with `maxDuration`. `maxDuration` on its own does
+**not** give a duration-bounded run, because the `iterations` default is 1:
 
-`rampup` is the time the group takes to start all its users. Four users over an 8000 ms ramp-up
-start at 0, 2, 4 and 6 seconds. Starting everyone at once is a spike test — a different question,
-measuring the cold start rather than the steady state.
+| `iterations` | Result |
+|--------------|--------|
+| `0` | loops until `maxDuration` — the duration-bounded run |
+| omitted | runs **once** (defaults to 1); `maxDuration` only caps that single iteration |
 
-`pack` is how many users are released **together** at each step. The same four users over 8000 ms
-with `pack: 2` start at 0 s and 4 s, two at a time. Use it for a stepped ramp, or simply to stop
-a long ramp-up from trickling in one user at a time.
+### The counters every thread group publishes
 
-`startOffset` delays the ramp-up. On its own in a single thread group it does nothing useful; its
-purpose is staggering several thread groups inside a scenario — see [03](../03-scenarios-and-mixed-load/).
+| Variable | Value | Renamed by |
+|----------|-------|-----------|
+| `userId` | which virtual user this is — 1..`users` | `userItem` |
+| `literationId` | the iteration within **this** user — 1..`iterations` | `localItem` |
+| `gcounter` | the iteration across the **whole** group — 1..(`users`×`iterations`), unique | `item` |
 
-### Running for a time — `iterations` and `maxDuration` together
+Build unique test data from these — `gcounter` when it must be unique across the run, `userId` when
+it must be stable for one user. **Renaming replaces:** once `userItem: "shopperNo"` is set, `userId`
+no longer exists. Coerce with `as Integer` before passing a counter to a keyword, or it arrives as a
+string and `input.getInt` silently returns its default (see [06](../06-thresholds-and-slas/)).
 
-Most load tests are specified as "an hour at this rate", not "500 iterations". `maxDuration` is
-the wall-clock cap on the whole thread group. How it combines with `iterations` is the part worth
-getting right, because the obvious value is not the one you want:
-
-| `iterations` | Each user | `maxDuration` acts as |
-|--------------|-----------|-----------------------|
-| `N` | runs N times | a ceiling — cuts the run short if it fires first |
-| `0` | **loops until `maxDuration`** | the real stop condition |
-| omitted | runs **once** | a ceiling on that single iteration — it does **not** loop |
-
-So a duration-bounded run is **`iterations: 0` with `maxDuration`** — not a large iteration count
-picked to be "unreachable", and not `maxDuration` on its own (which runs once). The run then takes
-the same wall-clock time whether the system is fast or slow that day, which is the whole point:
-comparable runs.
-
-That configuration is also what makes a `COUNT` threshold mean throughput. Throughput is iterations
-÷ elapsed time, and the two configurations pin different halves:
-
-| Configuration | Pinned | A slow system produces | `COUNT` is therefore |
-|---------------|--------|------------------------|----------------------|
-| `iterations: 0` + `maxDuration` | the duration | **fewer iterations** | a **throughput** measure |
-| fixed `iterations` | the count | a **longer run** | a **completeness** check — same number quick or slow |
-
-Either way throughput fell, so never gate on response time alone: a struggling system meets any
-latency target by doing less work per unit time. A throughput aggregator that works whichever way
-the group is configured is planned for `performanceAssert` in a future release; until then, gate a
-rate by pinning the duration and counting.
-
-## The counters every thread group publishes
-
-Three variables are always in scope inside a thread group:
-
-| Variable | Value |
-|----------|-------|
-| `userId` | which virtual user this is — 1..`users` |
-| `literationId` | the iteration within **this** user — 1..`iterations` |
-| `gcounter` | the iteration across the **whole** thread group — 1..(`users` × `iterations`), unique |
-
-They are how you build unique test data — order numbers, e-mail addresses, search terms — with no
-external data source at all. `gcounter` when the value must be unique across the run, `userId`
-when it must be stable for one virtual user.
-
-`item`, `userItem` and `localItem` rename them:
-
-| Field | Renames |
-|-------|---------|
-| `item` | `gcounter` |
-| `userItem` | `userId` |
-| `localItem` | `literationId` |
-
-**Renaming replaces.** Once `userItem: "shopperNo"` is set, `userId` no longer exists — worth
-knowing before renaming one counter in a plan that reads another by its default name.
-
-### Coerce the counter before passing it on
-
-```yaml
-- iteration:
-    expression: "gcounter as Integer"
-```
-
-Without `as Integer` the counter reaches the keyword as a string, `input.getInt` silently returns
-its default, and every iteration takes the same branch. Nothing errors; the test just stops
-testing what you meant. Sample [06](../06-thresholds-and-slas/) has a keyword that reports this
-case explicitly rather than absorbing it.
-
-## The four blocks
+### The four blocks
 
 | Block | Runs |
 |-------|------|
@@ -149,33 +96,10 @@ case explicitly rather than absorbing it.
 | `afterThread` | once per virtual user, after its last iteration |
 | `after` | once, when the whole thread group has finished |
 
-**Put each step in the block that matches how often a real user does it.** That is the whole rule,
-and getting it wrong distorts the traffic mix rather than producing any visible error.
-
-A real user logs in once per session and then does twenty things. Move `Login` from `beforeThread`
-into `children` in plan E and the run sends **6 logins instead of 2** — triple the load on the
-authentication service, and a traffic mix the production system never sees. Nothing fails; the
-test just stops describing reality.
-
-So: once-per-session steps in `beforeThread`, once-per-transaction steps in `children`, and setup
-the whole test needs once — warming a cache, seeding a data set — in `before`. `afterThread` is
-the reliable place for per-user cleanup: it runs even when an iteration failed, which a last child
-would not.
-
-There is a second, narrower consequence for measurements. Per-keyword measurements are **not**
-affected — `performanceAssert` aggregates by keyword name, so `Login` and `Checkout` stay separate
-series wherever they sit. What does get polluted is any **transaction-level** measurement that
-wraps the iteration: an `instrumentNode` sequence around both calls, or a custom measurement
-spanning them, would fold the login time into the transaction number you gate on.
-
-Plan E makes all of this visible with counts rather than prose: 1 warm-up, 2 logins, 6 checkouts,
-2 logouts.
-
-A variable `set` in `before` is visible to the iterations and to the `after` block. Plan B uses
-that to time itself and prove pacing did something — a `COUNT` assertion alone would pass whether
-pacing worked or not. **That timestamp is a self-check for the sample, not a pattern to copy:**
-timing a run from inside the plan is not how thresholds are written in Step. See
-[06](../06-thresholds-and-slas/) for the controls that are.
+**Put each step in the block that matches how often a real user does it.** Getting it wrong
+distorts the traffic mix with no visible error: a login in `children` instead of `beforeThread`
+sends one login per iteration instead of one per session. Plan E proves the placement with counts
+(1 warm-up, 2 logins, 6 checkouts, 2 logouts).
 
 ## Key files
 
