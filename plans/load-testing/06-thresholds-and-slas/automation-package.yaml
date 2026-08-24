@@ -27,12 +27,33 @@ plans:
   #          because it is: a MAX threshold catches the timeout nobody saw.
   #   MIN    a floor. Mostly used, as below, to prove the measurement is real
   #          rather than empty.
-  #   COUNT  how many transactions happened - the throughput check, and the
-  #          one most often forgotten.
+  #   COUNT  how many transactions happened. What that tells you depends on
+  #          the thread group - see below.
   #   SUM    total time spent. Rarely a threshold; useful for capacity sums.
   #
   # A good gate uses several of these together. Response time on its own can
-  # always be met by doing less work.
+  # always be met by doing less work per unit time.
+  #
+  # WHAT `COUNT` MEANS DEPENDS ON WHAT THE THREAD GROUP PINS.
+  #
+  # Throughput is transactions divided by elapsed time, and a thread group
+  # fixes exactly one of the two:
+  #
+  #   fixed `iterations`   the COUNT is pinned. It is 6 below whether the
+  #                        system was quick or crawling, so this assertion is
+  #                        a COMPLETENESS check: how many times that step was
+  #                        actually REACHED.
+  #
+  #   `maxDuration`        the DURATION is pinned, so COUNT becomes a genuine
+  #                        THROUGHPUT threshold. That is the supported way to
+  #                        gate throughput today, and sample 02 plan D shows
+  #                        it. It also matches how load requirements are
+  #                        usually written - "an hour at this rate".
+  #
+  # A throughput aggregator that works regardless of which one is pinned is
+  # not available yet; it is planned for `performanceAssert` in a future
+  # release. Until then, express a throughput requirement as a duration-bound
+  # run with a COUNT threshold rather than computing a rate in the plan.
   # =========================================================================
   - name: "A - A complete SLA gate"
     categories: ["Load testing"]
@@ -57,8 +78,21 @@ plans:
           continueOnError: true
           steps:
 
+            # COMPLETENESS, not throughput: `iterations` is fixed here, so
+            # this is 6 however slow the run was.
+            #
+            # It is worth asserting anyway, because a keyword's count is how
+            # often that STEP was reached - not users x iterations. It falls
+            # short when iterations fail part way (the steps after the
+            # failure never run), when the step sits inside a branch that was
+            # not always taken, or when a data pool ran dry. On a one-keyword
+            # iteration like this one the two coincide; on the multi-step
+            # transactions of samples 01 and 05 they do not.
+            #
+            # To gate the RATE instead, bound the duration - see the note
+            # above and sample 02 plan D.
             - performanceAssert:
-                nodeName: "Throughput - all the work was done"
+                nodeName: "All the work was done"
                 measurementName: "Checkout"
                 aggregator: COUNT
                 comparator: EQUALS

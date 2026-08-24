@@ -72,20 +72,35 @@ a long ramp-up from trickling in one user at a time.
 `startOffset` delays the ramp-up. On its own in a single thread group it does nothing useful; its
 purpose is staggering several thread groups inside a scenario — see [03](../03-scenarios-and-mixed-load/).
 
-### `maxDuration` and the trap in it
+### Running for a time — `iterations` and `maxDuration` together
 
-Most load tests are specified as "an hour at this rate", not "500 iterations". The idiom is to
-set `iterations` to a number nobody will reach and let `maxDuration` be the real stop condition,
-so the run takes the same time whether the system is fast or slow that day.
+Most load tests are specified as "an hour at this rate", not "500 iterations". `maxDuration` is
+the wall-clock cap on the whole thread group. How it combines with `iterations` is the part worth
+getting right, because the obvious value is not the one you want:
 
-The trap: **the iteration count is now an outcome, not an input.** A slow system produces both a
-longer response time *and* fewer iterations. An SLA that reads only response times will pass a run
-that managed a tenth of the work. Always assert throughput as well:
+| `iterations` | Each user | `maxDuration` acts as |
+|--------------|-----------|-----------------------|
+| `N` | runs N times | a ceiling — cuts the run short if it fires first |
+| `0` | **loops until `maxDuration`** | the real stop condition |
+| omitted | runs **once** | a ceiling on that single iteration — it does **not** loop |
 
-```yaml
-- performanceAssert: {measurementName: "Checkout", aggregator: COUNT,
-                      comparator: HIGHER_THAN, expectedValue: 2}
-```
+So a duration-bounded run is **`iterations: 0` with `maxDuration`** — not a large iteration count
+picked to be "unreachable", and not `maxDuration` on its own (which runs once). The run then takes
+the same wall-clock time whether the system is fast or slow that day, which is the whole point:
+comparable runs.
+
+That configuration is also what makes a `COUNT` threshold mean throughput. Throughput is iterations
+÷ elapsed time, and the two configurations pin different halves:
+
+| Configuration | Pinned | A slow system produces | `COUNT` is therefore |
+|---------------|--------|------------------------|----------------------|
+| `iterations: 0` + `maxDuration` | the duration | **fewer iterations** | a **throughput** measure |
+| fixed `iterations` | the count | a **longer run** | a **completeness** check — same number quick or slow |
+
+Either way throughput fell, so never gate on response time alone: a struggling system meets any
+latency target by doing less work per unit time. A throughput aggregator that works whichever way
+the group is configured is planned for `performanceAssert` in a future release; until then, gate a
+rate by pinning the duration and counting.
 
 ## The counters every thread group publishes
 
@@ -156,8 +171,11 @@ spanning them, would fold the login time into the transaction number you gate on
 Plan E makes all of this visible with counts rather than prose: 1 warm-up, 2 logins, 6 checkouts,
 2 logouts.
 
-A variable `set` in `before` is visible to the iterations and to the `after` block — which is how
-plan B measures its own duration to prove pacing worked.
+A variable `set` in `before` is visible to the iterations and to the `after` block. Plan B uses
+that to time itself and prove pacing did something — a `COUNT` assertion alone would pass whether
+pacing worked or not. **That timestamp is a self-check for the sample, not a pattern to copy:**
+timing a run from inside the plan is not how thresholds are written in Step. See
+[06](../06-thresholds-and-slas/) for the controls that are.
 
 ## Key files
 

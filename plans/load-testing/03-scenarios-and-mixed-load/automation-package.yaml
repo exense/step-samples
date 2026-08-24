@@ -64,9 +64,14 @@ plans:
         # own `after` block still works and is the place for a threshold that
         # only concerns that one population.
         #
-        # Both counts are exact, and that is deliberate: in a scenario it is
-        # entirely possible for one population to be starved of agent tokens
-        # and quietly contribute nothing while the report still looks green.
+        # A COUNT PER POPULATION, and both exact.
+        #
+        # A scenario mixes populations that run different transactions, so one
+        # aggregate number cannot describe it. Asserting each population's own
+        # step separately is what keeps the traffic MIX honest: if the buyers
+        # broke off half way through their transaction while the browsers ran
+        # in full, the totals still look plausible and only the per-population
+        # counts show it.
         # -------------------------------------------------------------------
         after:
           continueOnError: true

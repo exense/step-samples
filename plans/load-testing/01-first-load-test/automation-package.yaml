@@ -177,10 +177,34 @@ plans:
           continueOnError: true
           steps:
 
-            # Did the load actually happen? COUNT is the cheapest sanity
-            # check there is, and it catches a thread group that quietly did
-            # less work than you asked for - a `maxDuration` that cut the run
-            # short, users that failed to start, a data source that ran dry.
+            # Did this STEP actually run as often as the load implies?
+            #
+            # A keyword's COUNT is not simply users x iterations. It is how
+            # many times that particular step was reached, and the two come
+            # apart as soon as an iteration is more than a single call:
+            #
+            #   an iteration that FAILS PART WAY   the keywords after the
+            #                                      failure never run, so
+            #                                      their counts fall short of
+            #                                      the ones before it
+            #   a keyword inside an `if`/`switch`  it runs only when the
+            #                                      branch is taken, so its
+            #                                      count tells you how often
+            #                                      that was
+            #   a data source that RAN DRY         iterations continue with
+            #                                      nothing to work on
+            #
+            # Which is why the COUNT to assert is the one on the LAST step of
+            # the transaction: it is the number that says the whole thing
+            # completed, not just started. Comparing counts across the three
+            # keywords of this iteration is how you find where iterations
+            # were breaking off.
+            #
+            # It is a COMPLETENESS check, not a throughput one: `iterations`
+            # is fixed here, so this is 6 however slow the system was. A
+            # slowdown stretches the RUN instead. To gate the RATE, pin the
+            # duration with `iterations: 0` + `maxDuration` and put the COUNT
+            # threshold on that - see sample 02 plan D.
             - performanceAssert:
                 nodeName: "All 6 checkouts ran"
                 measurementName: "Checkout"

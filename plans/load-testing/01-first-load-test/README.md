@@ -136,11 +136,27 @@ The plan asserts a floor as well as a ceiling:
 An upper bound alone passes happily when the measurement is missing, empty, or the keyword has
 been stubbed down to nothing. A floor fails the moment the transaction stops doing real work.
 
-### `COUNT` is the cheapest check there is
+### `COUNT` checks completeness
 
-`COUNT` on the transaction keyword catches a thread group that quietly did less work than you
-asked for — a `maxDuration` that cut the run short, users that never started, a data source that
-ran dry. Response times over a run that only did a third of the work look wonderful.
+A keyword's `COUNT` is not simply `users` × `iterations`. It is how many times **that step was
+reached**, and the two come apart as soon as an iteration is more than a single call:
+
+| Cause | Effect on the count |
+|-------|---------------------|
+| an iteration **fails part way** | keywords after the failure never run, so their counts fall short of the ones before |
+| a keyword sits inside an `if` / `switch` | it runs only when the branch is taken — the count tells you how often that was |
+| a data source **ran dry** | iterations carry on with nothing to work on |
+
+So the `COUNT` worth asserting is the one on the **last** step of the transaction: that is the
+number saying the whole thing completed rather than merely started. Comparing counts across the
+three keywords in this iteration is how you find where iterations were breaking off.
+
+Response times over a run that only completed a third of its transactions look wonderful.
+
+What `COUNT` does **not** measure here is throughput. This plan fixes `iterations`, so the count is
+6 whether the system was quick or crawling — a slowdown stretches the *run* instead. To gate the
+rate, pin the duration with `iterations: 0` + `maxDuration` and put the `COUNT` threshold on that;
+[02](../02-thread-group-configuration/) plan D shows it.
 
 ## A load test still has to check its answers
 

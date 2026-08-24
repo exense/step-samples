@@ -125,8 +125,15 @@ plans:
         iterations: 3
         pacing: 3000
 
-        # A variable set in `before` is visible to the iterations and to the
-        # `after` block, which is how this plan measures its own duration.
+        # NOT A PATTERN TO COPY. The timestamp below exists so that THIS
+        # SAMPLE can prove pacing did something - a COUNT assertion alone
+        # would pass whether pacing worked or not, which would make the
+        # sample worthless as evidence.
+        #
+        # Do not reach for this to express a real requirement. Timing a run
+        # from inside the plan is not how thresholds are written in Step:
+        # see sample 06 for the controls that are, and for the note on the
+        # throughput aggregator still to come.
         before:
           steps:
             - set:
@@ -144,9 +151,9 @@ plans:
             # Three iterations paced at 3 s start at 0 s, 3 s and 6 s, so the
             # run cannot finish before 6 s. Unpaced, the same three
             # iterations take about a second. This check fails if pacing
-            # stops working.
+            # stops working - which is the only reason it is here.
             - check:
-                nodeName: "Pacing stretched the run out"
+                nodeName: "Pacing stretched the run out - sample self-check"
                 expression: "System.currentTimeMillis() - startedAt > 5500"
 
             - performanceAssert:
@@ -202,33 +209,57 @@ plans:
                 expectedValue: 8
 
   # =========================================================================
-  # D. `maxDuration` - running for a TIME instead of for a count.
+  # D. Running for a TIME instead of for a count.
   #
   # Most load tests are specified as "an hour at this rate", not "500
   # iterations". `maxDuration` is the wall-clock cap on the whole thread
   # group: when it expires, the group stops wherever it is.
   #
-  # The idiom is to set `iterations` to a number nobody will reach and let
-  # `maxDuration` be the real stop condition, so the run takes the same time
-  # whether the system is fast or slow that day. Comparable runs are the
-  # whole point.
+  # HOW `iterations` AND `maxDuration` COMBINE - the part that is easy to get
+  # wrong, because the sensible-looking value is not the one you want:
   #
-  # THE TRAP THAT COMES WITH IT: the iteration count is now an OUTCOME, not
-  # an input - and a slow system produces both a longer response time and
-  # fewer iterations. So never write an SLA that only reads response times
-  # here; assert the throughput too, or a run that managed a tenth of the
-  # work will still report a healthy average.
+  #   iterations: N   each user runs N times, UNLESS maxDuration fires first
+  #                   and cuts it short. `maxDuration` is a ceiling here.
+  #   iterations: 0   UNLIMITED - each user loops until maxDuration expires.
+  #                   This is what "run for a duration" actually means.
+  #   iterations      omitted -> defaults to 1 per user. `maxDuration` then
+  #     omitted       only caps that single iteration; it does NOT make the
+  #                   group loop. A frequent surprise.
   #
-  # This plan asks for 100 iterations and cuts them off after 5 seconds.
+  # So the form for a duration-bounded run is `iterations: 0` WITH
+  # `maxDuration`, as below - not a large iteration count picked to be
+  # "unreachable". The run then takes the same wall-clock time whether the
+  # system is fast or slow that day, which is the whole point: comparable
+  # runs. (`maxDuration` without `iterations` runs once - see the table.)
+  #
+  # AND THIS IS THE FORM THAT MAKES `COUNT` MEAN THROUGHPUT.
+  #
+  # Throughput is iterations divided by elapsed time. Here the DURATION is
+  # pinned, so a COUNT threshold reads directly as a rate: a slow system does
+  # fewer iterations in the same window. With fixed `iterations` it is the
+  # other way round - the count is pinned and a slowdown STRETCHES the run,
+  # so there COUNT is a COMPLETENESS check (how many times the step was
+  # REACHED - short of users x iterations when an iteration fails part way,
+  # when the step sits in a branch, or when a data pool ran dry), not a rate.
+  #
+  # A throughput aggregator that works whichever way the group is configured
+  # is planned for `performanceAssert` in a future release; until then, gate
+  # a rate by pinning the duration and counting, rather than computing a rate
+  # inside the plan. Either way, never gate on response time alone: a
+  # struggling system meets any latency target by doing less work per unit
+  # time.
+  #
+  # This plan loops one user for 4 seconds and asserts the rate it sustained.
   # =========================================================================
   - name: "D - Run for a fixed time"
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "One user for 5 seconds"
+        nodeName: "One user for 4 seconds"
         users: 1
-        iterations: 100
-        maxDuration: 5000
+        iterations: 0            # unlimited: loop until maxDuration
+        maxDuration: 4000
+        pacing: 1000             # aim for one checkout per second
         children:
           - callKeyword:
               keyword: "Checkout"
@@ -236,23 +267,17 @@ plans:
         after:
           continueOnError: true
           steps:
-            # It stopped early: nowhere near the 100 iterations requested.
+            # The duration is pinned at 4 s, so this COUNT is a throughput
+            # floor: it fails a run that crawled, which no response-time
+            # threshold would have caught. One checkout per second over 4 s
+            # is 4 or 5 starts; asserting >1 keeps the sample robust on a
+            # shared agent while still proving the loop ran for the window.
             - performanceAssert:
-                nodeName: "maxDuration cut the run short"
-                measurementName: "Checkout"
-                aggregator: COUNT
-                comparator: LOWER_THAN
-                expectedValue: 50
-
-            # ...but it did do work. This is the throughput floor the note
-            # above is about - the assertion that catches a run which
-            # achieved almost nothing.
-            - performanceAssert:
-                nodeName: "And still did a useful amount of work"
+                nodeName: "Sustained more than one checkout per second window"
                 measurementName: "Checkout"
                 aggregator: COUNT
                 comparator: HIGHER_THAN
-                expectedValue: 2
+                expectedValue: 1
 
   # =========================================================================
   # E. The four blocks: what runs once, per user, per iteration.

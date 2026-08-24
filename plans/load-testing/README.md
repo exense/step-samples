@@ -94,10 +94,11 @@ The controls are the vocabulary; these are the ideas that decide whether a load 
    is whatever the system happens to allow, so two runs cannot be compared and a degrading system
    quietly reduces its own load.
 
-4. **Always assert throughput, not just response time.** A struggling system meets any latency
-   target by doing less work. `COUNT` is the cheapest check there is and the one most often
-   missing — and it is essential under `maxDuration`, where the iteration count becomes an outcome
-   rather than an input.
+4. **Response time alone is never the whole SLA.** A struggling system meets any latency target by
+   doing less work per unit time. Which threshold catches that depends on the thread group: run it
+   `iterations: 0` + `maxDuration` and the duration is pinned, so a `COUNT` threshold *is* a
+   throughput gate; with `iterations` fixed the count is pinned, so the same threshold only checks
+   completeness. State rate requirements as `iterations: 0` duration-bounded runs.
 
 5. **A load test still has to check its answers.** A system under stress starts returning fast,
    cheap, *wrong* responses; an error page renders quicker than a checkout. Without a functional

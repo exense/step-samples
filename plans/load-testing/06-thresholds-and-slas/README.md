@@ -36,11 +36,56 @@ load test needs beyond "average response time".
 | `AVG` | the headline number — and the one that hides the tail. An average of 800 ms is compatible with one user in twenty waiting eight seconds. |
 | `MAX` | the worst single transaction. Brutal, and useful precisely because it is: a MAX threshold catches the timeout nobody saw. |
 | `MIN` | a floor. Mostly used to prove the measurement is real rather than empty. |
-| `COUNT` | how many transactions happened — the throughput check, and the one most often forgotten. |
+| `COUNT` | how many transactions happened. With `iterations` fixed this is a **completeness** check, not a throughput one — see below. |
 | `SUM` | total time spent. Rarely a threshold; useful for capacity sums. |
 
 **A good gate uses several together.** Response time on its own can always be met by doing less
-work — which is exactly what a struggling system does.
+work per unit time — which is exactly what a struggling system does.
+
+## What `COUNT` tells you, and how to gate throughput
+
+Throughput is transactions ÷ elapsed time, and a thread group fixes exactly one of the two. That
+decides what a `COUNT` threshold on it actually means:
+
+| Configuration | Pinned | A `COUNT` threshold is |
+|---------------|--------|------------------------|
+| fixed `iterations` | the count | a **completeness** check — the same number however slow the run was |
+| `iterations: 0` + `maxDuration` | the duration | a genuine **throughput** threshold |
+
+Plan A fixes `iterations`, so its `COUNT` of 6 confirms the work was done but says nothing about
+the rate.
+
+It is still worth asserting, because a keyword's count is **how often that step was reached**, not
+`users` × `iterations`. It falls short when an iteration fails part way — the steps after the
+failure never run — when the step sits inside an `if` or `switch` that was not always taken, or
+when a data pool ran dry. On a single-keyword iteration like plan A's the two numbers coincide; on
+the multi-step transactions in [01](../01-first-load-test/) and [05](../05-measurements/) they do
+not, and comparing counts across the steps of one transaction is how you find where iterations were
+breaking off.
+
+**To gate throughput, bound the duration and count**, which is [02](../02-thread-group-configuration/)
+plan D's shape:
+
+```yaml
+threadGroup:
+  users: 1
+  iterations: 0            # unlimited: loop until maxDuration
+  maxDuration: 5000        # the real stop condition
+  pacing: 1000
+  after:
+    steps:
+      - performanceAssert: {measurementName: "Checkout", aggregator: COUNT,
+                            comparator: HIGHER_THAN, expectedValue: 2}
+```
+
+`iterations: 0` is the loop-for-a-duration form; a fixed count would pin the count instead of the
+duration, and omitting `iterations` runs a single time. This is also how load requirements are
+usually written — *an hour at this rate* — so it is rarely a
+compromise.
+
+> A throughput aggregator that works whichever of the two is pinned is **not available yet**; it is
+> planned for `performanceAssert` in a future release. Until then, express a throughput requirement
+> as a duration-bounded run with a `COUNT` threshold, rather than computing a rate inside the plan.
 
 Set `continueOnError: true` on the `after` block. Without it the block stops at the first breach,
 and a run that violates three thresholds tells you about one of them. Plan E shows the payoff: two

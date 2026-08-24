@@ -67,8 +67,10 @@ Both work. Prefer the thread group's own block when the threshold belongs to one
 reads next to the profile it describes. [06](../06-thresholds-and-slas/) covers this in more
 detail.
 
-Assert exact `COUNT`s in a scenario. It is entirely possible for one population to be starved of
-agent tokens and quietly contribute nothing while the report still looks green.
+Assert a `COUNT` **per population**, and make each one exact. A scenario mixes populations running
+different transactions, so no single aggregate describes it — and if the buyers broke off half way
+through their transaction while the browsers ran in full, the totals still look plausible. Only the
+per-population counts show it.
 
 ## A staged ramp
 
