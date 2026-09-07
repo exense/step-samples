@@ -1,0 +1,9 @@
+node_modules/
+.npm
+!/bin
+package-lock.json
+/keywords/
+*.tsbuildinfo
+*-trace.zip
+# Copied into the project by the Step Node agent at runtime
+agent-fork-libs/

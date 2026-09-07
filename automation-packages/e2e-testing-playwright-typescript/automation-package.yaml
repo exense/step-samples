@@ -1,0 +1,48 @@
+---
+schemaVersion: 1.0.0
+name: "end-to-end-testing-playwright-typescript"
+
+# Cross-application end-to-end test: the first keyword buys a product in the
+# OpenCart demo shop, the second one opens a webmail client and reads the order
+# confirmation that the shop sent. Two applications, one test case.
+plans:
+  - name: "OpenCart Test Set 01"
+    root:
+      testSet:
+        children:
+          - testCase:
+              nodeName: "OpenCart Test Case 01"
+              children:
+                - callKeyword:
+                    keyword: "Purchase product in OpenCart"
+                    inputs:
+                      - Product: "MacBook"
+                - callKeyword:
+                    keyword: "Read order confirmation in Webmail"
+        threads: 1
+
+# Technical configuration shared by every plan of the package. Parameters are
+# passed to the keywords as `properties` (always as strings), which is where
+# settings like this belong: the same knob can be redefined as a Parameter in
+# Step - globally, or per project or environment - without touching any plan.
+# Business data stays in the keyword `inputs` above.
+parameters:
+  # Set to "false" to watch the browser while the plan runs
+  - key: headless
+    value: "true"
+  # The two applications under test
+  - key: targetUrl
+    value: "https://opencart-prf.stepcloud.ch/"
+  - key: webmailUrl
+    value: "https://demo-webmail.exense.ch/"
+
+# Keyword definitions - both resolve to the same nodejs-keywords/ package.
+# The `name` is looked up as an export of the compiled keyword modules, which
+# is why the sources export the functions under their plan-facing names.
+keywords:
+  - Node:
+      name: "Purchase product in OpenCart"
+      jsfile: nodejs-keywords/
+  - Node:
+      name: "Read order confirmation in Webmail"
+      jsfile: nodejs-keywords/

@@ -1,0 +1,12 @@
+# Excluded from the automation package uploaded to Step.
+# The agent only needs package.json, tsconfig.json and the src directory: it
+# runs `npm install`, which builds keywords/ through the `prepare` script.
+# node_modules is the exclusion that really matters for size.
+#
+nodejs-keywords/node_modules/
+nodejs-keywords/tests/
+nodejs-keywords/keywords/
+nodejs-keywords/tsconfig.test.json
+nodejs-keywords/*.tsbuildinfo
+# Recreated by the Step Node agent at runtime; never ship a stale copy
+nodejs-keywords/agent-fork-libs/

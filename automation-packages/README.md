@@ -64,6 +64,7 @@ level: intermediate
 | [e2e-testing-playwright](e2e-testing-playwright/) | playwright | java | keyword-driven | intermediate |
 | [e2e-testing-playwright-data-driven](e2e-testing-playwright-data-driven/) | playwright | java | keyword-driven | intermediate |
 | [e2e-testing-playwright-dotnet](e2e-testing-playwright-dotnet/) | playwright | csharp | keyword-driven | intermediate |
+| [e2e-testing-playwright-typescript](e2e-testing-playwright-typescript/) | playwright | typescript | keyword-driven | intermediate |
 | [playwright-typescript](playwright-typescript/) | playwright | typescript | keyword-driven | intermediate |
 | [playwright-test](playwright-test/) | playwright | javascript | code-first | intermediate |
 | [playwright-automation-packages-with-library](playwright-automation-packages-with-library/) | playwright | java | keyword-driven | advanced |
