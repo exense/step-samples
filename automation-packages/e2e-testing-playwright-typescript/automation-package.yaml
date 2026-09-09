@@ -27,10 +27,8 @@ plans:
 # Step - globally, or per project or environment - without touching any plan.
 # Business data stays in the keyword `inputs` above.
 parameters:
-  # Set to "false" to watch the browser while the plan runs
   - key: headless
-    value: "true"
-  # The two applications under test
+    value: "false"
   - key: targetUrl
     value: "https://opencart-prf.stepcloud.ch/"
   - key: webmailUrl
@@ -43,6 +41,11 @@ keywords:
   - Node:
       name: "Purchase product in OpenCart"
       jsfile: nodejs-keywords/
+      schema:
+        properties:
+          Product:
+            type: "string"
+            default": "MacBook"
   - Node:
       name: "Read order confirmation in Webmail"
       jsfile: nodejs-keywords/
