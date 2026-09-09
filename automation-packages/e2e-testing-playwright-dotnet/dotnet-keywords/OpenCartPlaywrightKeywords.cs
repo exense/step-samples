@@ -38,7 +38,12 @@ namespace Step.Examples.E2ETesting.Playwright
             {
                 var page = await context.NewPageAsync();
                 await page.GotoAsync(shopUrl);
-                await page.Locator("text=" + product).ClickAsync();
+                // Type the product name into the search bar and submit
+                var searchBar = page.Locator("input[name='search']");
+                await searchBar.FillAsync(product);
+                await searchBar.PressAsync("Enter");
+                // Open the detail page of the first matching search result
+                await page.GetByRole(AriaRole.Link, new PageGetByRoleOptions { Name = product }).First.ClickAsync();
                 // The previous click loads quite a few resources such as jQuery etc.;
                 // If we don't include this wait, the next click may hang forever.
                 await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);

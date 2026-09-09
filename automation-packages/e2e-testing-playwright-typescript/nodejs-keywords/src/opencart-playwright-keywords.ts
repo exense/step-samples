@@ -40,7 +40,12 @@ async function purchaseProductInOpenCart(input, output, session, properties) {
         try {
             const page = await context.newPage();
             await page.goto(shopUrl);
-            await page.locator(`text=${product}`).click();
+            // Type the product name into the search bar and submit
+            const searchBar = page.locator('input[name="search"]');
+            await searchBar.fill(product);
+            await searchBar.press('Enter');
+            // Open the detail page of the first matching search result
+            await page.getByRole('link', { name: product }).first().click();
             // The previous click loads quite a few resources such as jQuery etc.;
             // If we don't include this wait, the next click may hang forever.
             await page.waitForLoadState('domcontentloaded');
