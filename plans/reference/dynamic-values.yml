@@ -1,0 +1,90 @@
+# ==============================================================================
+# STANDALONE PLAN - STATIC VALUES vs DYNAMIC EXPRESSIONS
+#
+# The distinction that governs every field in a Step YAML plan.
+#
+# Usage:
+# - Upload directly: import into the Step UI via "Add plan" > "Create from YAML".
+# - Convert/add to a package: move the contents under a `plans:` list entry
+#   inside an automation package manifest.
+#
+# This file is a syntax illustration, not a runnable plan - the keywords it
+# calls do not exist. For plans you can execute, see ../rpa/ and
+# ../load-testing/
+# ==============================================================================
+---
+version: 1.0.0
+name: "Dynamic values and inputs"
+
+root:
+  sequence:
+    nodeName: "Static and dynamic values"
+    children:
+
+      # ------------------------------------------------------------------
+      # Every value is one of two things.
+      #
+      #   a plain value          a STATIC literal, passed through verbatim
+      #   expression: "..."      Groovy, evaluated against the plan variables
+      #
+      # There is NO string interpolation: "${amount}" is the literal seven
+      # characters, not the value of `amount`. To build a string from
+      # variables, concatenate inside the expression.
+      # ------------------------------------------------------------------
+      - set:
+          key: recordId
+          value: "REC-001"                     # the string "REC-001"
+      - set:
+          key: attempts
+          value:
+            expression: "0"                    # the NUMBER 0, not "0"
+      - set:
+          key: attempts
+          value:
+            expression: "attempts + 1"         # arithmetic, not string work
+
+      - echo:
+          text:
+            expression: "'Record ' + recordId + ' attempt ' + attempts"
+
+      # ------------------------------------------------------------------
+      # The same choice applies to keyword inputs - and to the keyword name
+      # itself, which lets one node call different keywords per iteration.
+      # ------------------------------------------------------------------
+      - callKeyword:
+          keyword: "Submit Record"
+          inputs:
+            # Quoting decides the type of a static value: YAML parses an
+            # unquoted number as a number, and the keyword receives it as one.
+            - literalString: "abc"             # static string
+            - quotedNumber: "777"              # static STRING "777"
+            - unquotedNumber: 777              # static NUMBER 777
+            - fromVariable:
+                expression: "recordId"         # a plan variable
+            - computed:
+                expression: "attempts * 10"    # any Groovy
+
+      - callKeyword:
+          keyword:
+            expression: "'Submit ' + recordId"  # the keyword NAME is dynamic
+          # `routing` picks the agent token by attribute, rather than taking
+          # whichever token is free.
+          routing:
+            - role: "rpa-workstation"
+
+      # ------------------------------------------------------------------
+      # Where the values come from:
+      #
+      #   output.<field>    the calling node's own output - in scope only
+      #                     inside that callKeyword's children
+      #   previous.<field>  the preceding sibling's output; replaced by the
+      #                     next keyword call, so capture it if you need it
+      #                     later
+      #   a `set` variable  the block it was declared in, and everything
+      #                     nested below
+      #   row / `item`      the current row inside forEach / for / dataSet
+      #   parameters        execution parameters and Step `parameters`, both
+      #                     available as ordinary plan variables
+      # ------------------------------------------------------------------
+      - check:
+          expression: "previous.status == 'SUBMITTED'"

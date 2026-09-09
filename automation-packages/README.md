@@ -83,6 +83,11 @@ level: intermediate
 |--------|-----------|----------|----------|-------|
 | [rpa-selenium](rpa-selenium/) | selenium | java | keyword-driven | intermediate |
 
+> The sample above is a complete RPA project. For focused examples of the **plan** itself —
+> one concept at a time, with the keyword code stubbed out — see [plans/rpa](../plans/rpa/):
+> seven samples covering loops and data sources, branching, resilience, sessions, scheduling
+> and reuse.
+
 ### Reference
 
 | Sample | Description | Level |

@@ -1,0 +1,72 @@
+# ==============================================================================
+# STANDALONE PLAN
+#
+# This file represents a single, self-contained Step plan.
+#
+# Usage:
+# - Upload directly: import into the Step UI via "Add plan" > "Create from YAML".
+# - Convert/add to a package: move the contents under a `plans:` list entry
+#   inside an automation package manifest.
+#
+# This file is a syntax illustration, not a runnable plan - the keywords it
+# calls do not exist. For plans you can execute, see ../rpa/ and
+# ../load-testing/
+# ==============================================================================
+---
+version: 1.0.0
+name: "Basic plan syntax"
+
+root:
+  # The root is one of: sequence, testCase, testSet, testScenario,
+  # threadGroup, assertionPlan.
+  testCase:
+    nodeName: "Process one record"
+    children:
+
+      # A keyword call with inputs. A plain value is a static literal;
+      # `expression:` evaluates Groovy against the plan's variables.
+      - callKeyword:
+          keyword: "Read Record"
+          nodeName: "Read the record"
+          inputs:
+            - recordId: "REC-001"
+          children:
+
+            # A `set` nested in the call reads the keyword's output and
+            # promotes the variable to the enclosing block, so later siblings
+            # can still see it.
+            - set:
+                key: amount
+                value:
+                  expression: "output.amount as Integer"
+
+            # `assert` checks a field of the keyword's output report, so it is
+            # only valid HERE - as a child of the call that produced it.
+            # `actual` names an output field; it is not an expression.
+            - assert:
+                actual: "status"
+                operator: EQUALS
+                expected: "PENDING"
+                customErrorMessage: "The record was not ready to process."
+
+      # `if` takes a boolean expression.
+      - if:
+          nodeName: "Only large amounts need approval"
+          condition:
+            expression: "amount > 1000"
+          children:
+            - callKeyword:
+                keyword: "Request Approval"
+                inputs:
+                  - amount:
+                      expression: "amount"
+
+      - echo:
+          text:
+            expression: "'Processed for ' + amount"
+
+      # `check` evaluates an expression over PLAN VARIABLES - use it where
+      # `assert` would not apply, i.e. outside a keyword call.
+      - check:
+          nodeName: "An amount was read"
+          expression: "amount > 0"

@@ -24,6 +24,33 @@ Browse the **[automation-packages/README.md](automation-packages/README.md)** fo
 
 ---
 
+## Plan samples
+
+The **[plans](plans/)** directory is about **plans** — the implementation of an automation
+scenario, whether that is a functional test case, a load test, an RPA routine or a synthetic
+monitoring probe. A plan combines keywords with the controls that build up its execution
+logic: loops, branches, retries, waits.
+
+The two directories answer different questions, and most people need both:
+
+- **[automation-packages](automation-packages/)** — *"what does a real project look like?"*
+  Complete, real-world blueprints for a given use case and stack: load testing with
+  Playwright/TypeScript, synthetic monitoring with Cypress, RPA with Selenium. Take one as
+  the starting point for your own project.
+- **[plans](plans/)** — *"how do I express this logic in a plan?"* One plan concept per
+  sample, with keyword code deliberately reduced to 3-line stubs so the plan itself is the
+  subject. Look things up here when you are writing a plan.
+
+| Section | Contents |
+|---------|----------|
+| [plans/rpa](plans/rpa/) | Seven RPA plan samples: loops and data sources, branching, resilience, sessions, scheduling, reuse |
+| [plans/load-testing](plans/load-testing/) | Six load-testing plan samples: thread groups, scenarios and mixed load, test data, measurements, SLA gates |
+| [plans/reference](plans/reference/) | Standalone YAML plans illustrating the syntax — the shape of a plan, and static values vs expressions |
+
+Samples for functional testing and monitoring will follow the same structure.
+
+---
+
 ## Other directories
 
 These directories contain older, lower-level samples that predate Automation Packages. They remain useful as reference material for individual keywords or Step client usage.
@@ -31,7 +58,6 @@ These directories contain older, lower-level samples that predate Automation Pac
 | Directory | Contents |
 |-----------|----------|
 | [keywords](keywords/) | Standalone keyword examples by technology (Java, .NET, Cypress, TypeScript/Playwright, JMeter, k6, Oryon, gRPC, SoapUI, …) |
-| [plans](plans/) | Example Step plan files (JSON and YAML) |
 | [step-client](step-client/) | Sample projects using the Step Controller API (Java and REST) |
 | [plugins](plugins/) | Example Step plugin |
 | [maven-plugins](maven-plugins/) | Sample for the Step Maven upload plugin |

@@ -1,0 +1,393 @@
+---
+# ---------------------------------------------------------------------------
+# RPA sample 05 - Resilience and waiting
+#
+# The heart of unattended RPA. A bot that runs at 03:00 with nobody watching
+# has to cope with a slow UI, a flaky click, and an upstream job that has not
+# finished yet - without either giving up too early or hanging forever.
+#
+# Some plans in this package FAIL ON PURPOSE. That is the lesson: see which
+# steps still run after a failure. The plan names say which ones.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "rpa-05-resilience-and-waiting"
+
+plans:
+
+  # =========================================================================
+  # A. retryIfFails - absorbing a transient failure.
+  #
+  # maxRetries        how many attempts in total
+  # gracePeriod       milliseconds to wait between attempts - give the UI time
+  #                   to recover instead of hammering it
+  # timeout           give up after this many ms no matter how many attempts
+  #                   are left; the safety net against an endless retry
+  # reportLastTryOnly keep the report clean: only the final attempt is shown,
+  #                   so two absorbed failures do not look like real errors
+  # releaseTokens     hand the agent token back while waiting (only meaningful
+  #                   inside a session)
+  #
+  # The keyword fails twice and succeeds on the third attempt, so this plan
+  # PASSES - the failures are absorbed.
+  #
+  # NOTE THERE IS NO `session` HERE, ON PURPOSE.
+  #
+  # Retries are BETTER on a fresh session: a new agent token, a new browser, a
+  # clean slate. Half the reason a step is flaky is state left behind by the
+  # attempt that just failed, and retrying in the same dirty session retries
+  # the problem with it.
+  #
+  # Wrap a retry in a session only when the retried block genuinely depends on
+  # something established EARLIER and outside it - typically a login you do
+  # not want to redo on every attempt. That is a deliberate trade-off, not the
+  # default.
+  #
+  # =========================================================================
+  - name: "A - Retry a flaky step"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Absorb a transient UI failure"
+        children:
+
+          # `expression:` makes this a NUMBER. A plain "0" would be the
+          # string "0", and every later use would need .toInteger().
+          - set:
+              key: attempt
+              value:
+                expression: "0"
+              nodeName: "Declare the attempt counter in the outer scope"
+
+          - retryIfFails:
+              nodeName: "Retry the flaky step"
+              maxRetries: 5
+              gracePeriod: 1000
+              timeout: 30000
+              reportLastTryOnly: true
+              children:
+                # Re-setting a variable declared outside the block updates
+                # THAT variable, so the count survives across attempts.
+                - set:
+                    key: attempt
+                    value:
+                      expression: "attempt + 1"
+                - callKeyword:
+                    keyword: "Flaky Step"
+                    nodeName: "A step that fails the first two times"
+                    inputs:
+                      - attempt:
+                          expression: "attempt"
+
+          - check:
+              nodeName: "It took three attempts"
+              expression: "attempt == 3"
+
+  # =========================================================================
+  # B. Guaranteed cleanup with before / after.  (INTENTIONALLY FAILS)
+  #
+  # An RPA bot that dies mid-run must still log out, close the browser and
+  # release the licence - otherwise the next run finds a locked session.
+  #
+  # `before` and `after` belong to the sequence, not to its children, so the
+  # `after` steps run even when a child failed. This is the correct place for
+  # bot cleanup - a plain last child would be skipped on failure.
+  #
+  # `continueOnError: true` on the after block means one failing cleanup step
+  # does not stop the REMAINING cleanup steps - same meaning as on a sequence.
+  # Close the browser even if releasing the licence blew up.
+  #
+  # With a two-step after block whose first step fails:
+  #   with continueOnError: true   -> the second cleanup step runs
+  #   without it (the default)     -> the second cleanup step is skipped
+  #
+  # It does NOT hide anything: both the body error and the cleanup error are
+  # reported either way, and a failing cleanup step fails the run even when
+  # the body passed.
+  # =========================================================================
+  - name: "B - Guaranteed cleanup (intentionally fails)"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "The bot crashes but still logs out"
+        children:
+          - sequence:
+              nodeName: "Bot run with guaranteed cleanup"
+              before:
+                steps:
+                  - callKeyword:
+                      keyword: "Login"
+                      nodeName: "Log in (before)"
+              after:
+                # Two cleanup steps, so continueOnError is doing something:
+                # if the logout failed, the second step would still run.
+                continueOnError: true
+                steps:
+                  - callKeyword:
+                      keyword: "Logout"
+                      nodeName: "Log out (after) - runs even after a failure"
+                  - echo:
+                      text: "Session released"
+                      nodeName: "Release the licence (after)"
+              children:
+                - echo:
+                    text: "Doing the work..."
+                - callKeyword:
+                    keyword: "Always Fails"
+                    nodeName: "The step that breaks the bot"
+                - echo:
+                    text: "This is NOT reached - the sequence stops at the first error"
+
+  # =========================================================================
+  # C. continueOnError vs continueParentNodeExecutionOnError.
+  #                                                      (INTENTIONALLY FAILS)
+  #
+  # These two are constantly confused. They act at different levels:
+  #
+  # continueOnError                      set on a CONTAINER (sequence).
+  #                                      "If one of MY children fails, keep
+  #                                      running my remaining children."
+  #
+  # continueParentNodeExecutionOnError   set on a CHILD node.
+  #                                      "If I fail, let MY PARENT carry on
+  #                                      with its next sibling."
+  #
+  # Both blocks below still report as failed - neither flag hides the error,
+  # they only control what keeps running. That is usually what an RPA batch
+  # wants: finish the remaining work, but report the failure.
+  #
+  # Watch what this plan demonstrates about the difference:
+  #
+  # The first sequence carries `continueOnError`, so its own echo IS reached.
+  # But the sequence still ends up FAILED, and a failed child stops its
+  # parent - so without also setting `continueParentNodeExecutionOnError` on
+  # it, the testCase would stop there and the second demo below would never
+  # run.
+  #
+  # In other words the two flags are complementary, not alternatives:
+  # continueOnError keeps the INSIDE of a block going,
+  # continueParentNodeExecutionOnError keeps the OUTSIDE going.
+  # =========================================================================
+  - name: "C - Error propagation flags (intentionally fails)"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Two ways to keep going after an error"
+        children:
+
+          - sequence:
+              nodeName: "continueOnError on the container"
+              description: "The failing child does not stop its siblings inside this block."
+              continueOnError: true
+              # ...and this lets the testCase move on to the second block,
+              # even though this sequence ends up failed.
+              continueParentNodeExecutionOnError: true
+              children:
+                - callKeyword:
+                    keyword: "Always Fails"
+                    nodeName: "Fails here"
+                - echo:
+                    text: "REACHED - continueOnError let the sequence carry on"
+
+          - sequence:
+              nodeName: "continueParentNodeExecutionOnError on the child"
+              description: "The failing child tells this sequence to carry on."
+              continueParentNodeExecutionOnError: true
+              children:
+                - callKeyword:
+                    keyword: "Always Fails"
+                    nodeName: "Fails, but lets the parent continue"
+                    continueParentNodeExecutionOnError: true
+                - echo:
+                    text: "REACHED - the child released the parent"
+
+          - echo:
+              text: "End of plan"
+
+
+  # =========================================================================
+  # D. Waiting for something to be ready.
+  #
+  # The RPA "wait for the upstream batch to finish" pattern. Two controls can
+  # express it, and they differ in HOW YOU SAY "not ready yet":
+  #
+  #   `while`         you evaluate a CONDITION and loop while it holds.
+  #                   "Keep going while the queue is not empty."
+  #                   Not-ready is a normal state, so the report stays clean.
+  #
+  #   `retryIfFails`  you re-run a block until it stops FAILING.
+  #                   "Not ready" has to be expressed as a failure - usually
+  #                   an assert that fails until the system is ready - so
+  #                   every wait shows up as failed attempts in the report
+  #                   (use reportLastTryOnly to keep it readable).
+  #
+  # Prefer `while` when the system gives you an answer you can test ("how
+  # many items are left?"). Prefer `retryIfFails` when the thing you are
+  # waiting on genuinely FAILS rather than reporting a state - a call that
+  # errors until the service is up - since that is retry, not polling.
+  #
+  # Both call keywords perfectly well.
+  #
+  # NOTE: on older Step versions, keyword calls nested in a `while` are not
+  # counted when forecasting how many agents to provision, so such a loop can
+  # fail to obtain an agent token on an auto-provisioned instance. Declaring
+  # `agents` on the plan avoids it if you encounter the issue.
+  # =========================================================================
+  - name: "D1 - Wait with while"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Count a backlog down to zero"
+        children:
+
+          # The loop counts down a plan variable to keep the sample
+          # self-contained. In a real bot the body would call a keyword that
+          # asks the system, and `set` the answer.
+
+          # A number, not the string "3" - see plan A.
+          - set:
+              key: remaining
+              value:
+                expression: "3"
+              nodeName: "Seed the loop variable"
+
+          # condition     evaluated BEFORE each iteration (a classic while)
+          # postCondition evaluated AFTER each iteration - use it for do-while,
+          #               when the first pass is what produces the value tested
+          # pacing        ms between iterations - do not hammer the target
+          # maxIterations hard cap on the number of loops
+          # timeout       hard cap on wall-clock time; the guard that stops an
+          #               unattended bot from hanging until someone notices
+          #
+          # Always set maxIterations AND timeout. A polling loop without both
+          # is how an unattended bot hangs until someone notices.
+          - while:
+              nodeName: "While there is backlog left"
+              condition:
+                expression: "remaining > 0"
+              pacing: 200
+              maxIterations: 10
+              timeout: 60000
+              children:
+                - set:
+                    key: remaining
+                    value:
+                      expression: "remaining - 1"
+                - echo:
+                    text:
+                      expression: "'Backlog is now ' + remaining"
+
+          - check:
+              nodeName: "The backlog drained before the guards fired"
+              expression: "remaining == 0"
+
+  - name: "D2 - Wait with retryIfFails"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Wait for the back-office queue to empty"
+        children:
+
+          # The polling idiom: retryIfFails around a keyword call whose nested
+          # `assert` fails while the system is not ready yet. Each failed
+          # assert triggers another attempt after `gracePeriod` ms, until the
+          # assert passes or the guards fire.
+          #
+          # No `session` here either - see plan A. Polling a system is a
+          # read: each poll can happen on whatever agent is free. Only wrap it
+          # in a session if the poll goes through a UI you already have open.
+          #
+          # Note what this costs: the two "not ready yet" polls are recorded
+          # as FAILED attempts, because retryIfFails only knows "failed" and
+          # "succeeded". `reportLastTryOnly` keeps the report readable. A
+          # `while` loop testing the same value reports nothing but passes -
+          # which is the main reason to prefer it when you have a value to
+          # test.
+          #
+          # The poll counter lives in the plan, so "Check Queue Size" stays a
+          # stateless query - which is what a real one would be.
+          - set:
+              key: polls
+              value:
+                expression: "0"
+              nodeName: "Declare the poll counter in the outer scope"
+
+          - retryIfFails:
+              nodeName: "Poll until the queue is empty"
+              maxRetries: 10
+              gracePeriod: 500
+              timeout: 60000
+              reportLastTryOnly: true
+              children:
+                - set:
+                    key: polls
+                    value:
+                      expression: "polls + 1"
+                - callKeyword:
+                    keyword: "Check Queue Size"
+                    nodeName: "Ask how many items are left"
+                    inputs:
+                      - polls:
+                          expression: "polls"
+                    children:
+                      - assert:
+                          actual: "queueSize"
+                          operator: EQUALS
+                          expected: "0"
+                          customErrorMessage: "Queue not drained yet - retrying."
+
+          - check:
+              nodeName: "The queue drained within the guards"
+              expression: "polls == 3"
+
+  # =========================================================================
+  # E. failure - stopping on purpose.       (INTENTIONALLY FAILS)
+  #
+  # Sometimes the bot works perfectly and the ANSWER is unacceptable: the
+  # record is in the wrong state, the total does not reconcile. `failure`
+  # aborts the run and puts your own message in the report, so whoever reads
+  # it knows the bot did its job and the DATA was wrong.
+  #
+  # Note a `failure` node reports the run as TECHNICAL_ERROR (with your
+  # message attached), not FAILED. If you want the
+  # run to come out as FAILED instead, express the rule as a `check` - a
+  # false `check` expression fails the node - or raise a business error from
+  # inside a keyword with `output.setBusinessError(...)`.
+  # =========================================================================
+  - name: "E - Explicit business failure (intentionally fails)"
+    categories: ["RPA"]
+    root:
+      testCase:
+        nodeName: "Stop the run with a business message"
+        children:
+          - set:
+              key: reconciled
+              value: "false"
+          - if:
+              nodeName: "Did the totals reconcile?"
+              condition:
+                expression: "reconciled == 'false'"
+              children:
+                - failure:
+                    message: "Totals did not reconcile - the bot stopped instead of booking a wrong entry."
+
+keywords:
+  - GeneralScript:
+      name: "Flaky Step"
+      scriptLanguage: groovy
+      scriptFile: keywords/flakyStep.groovy
+  - GeneralScript:
+      name: "Check Queue Size"
+      scriptLanguage: groovy
+      scriptFile: keywords/checkQueueSize.groovy
+  - GeneralScript:
+      name: "Always Fails"
+      scriptLanguage: groovy
+      scriptFile: keywords/alwaysFails.groovy
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy
+  - GeneralScript:
+      name: "Logout"
+      scriptLanguage: groovy
+      scriptFile: keywords/logout.groovy

@@ -1,0 +1,288 @@
+---
+# ---------------------------------------------------------------------------
+# Load-testing sample 03 - Scenarios and mixed load
+#
+# Real systems are never hit by one kind of user. While a few hundred people
+# browse, a handful buy, and at 02:00 a batch job runs straight through the
+# middle of it. A load test that models only the happy path measures a system
+# nobody is using.
+#
+# `testScenario` is the control that composes those populations: it runs its
+# children IN PARALLEL, each with its own load profile.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "load-03-scenarios-and-mixed-load"
+
+plans:
+
+  # =========================================================================
+  # A. The mixed-workload shape.
+  #
+  # Two populations with different sizes, different transactions and
+  # different rhythms, running at the same time against the same system.
+  #
+  # Each thread group keeps its own configuration - that is the whole point.
+  # Browsers are many and cheap; buyers are few and expensive. Modelling them
+  # as one thread group doing "browse then buy" would produce a traffic mix
+  # no real shop ever sees.
+  # =========================================================================
+  - name: "A - Browsers and buyers at the same time"
+    categories: ["Load testing"]
+    root:
+      testScenario:
+        nodeName: "Shop under mixed traffic"
+        children:
+
+          - threadGroup:
+              nodeName: "Browsers"
+              users: 2
+              iterations: 3
+              pacing: 1000
+              children:
+                - callKeyword:
+                    keyword: "Search Products"
+                    inputs:
+                      - term: "laptop"
+
+          - threadGroup:
+              nodeName: "Buyers"
+              users: 1
+              iterations: 2
+              # The buyers join once the browse traffic is already flowing,
+              # so the checkout numbers are measured against a busy system
+              # rather than an idle one.
+              startOffset: 2000
+              children:
+                - callKeyword:
+                    keyword: "Checkout"
+
+        # -------------------------------------------------------------------
+        # WHERE THE SLA GOES IN A SCENARIO.
+        #
+        # `after` on the testScenario runs once, when every thread group in it
+        # has finished - so this is the scenario-wide gate. A thread group's
+        # own `after` block still works and is the place for a threshold that
+        # only concerns that one population.
+        #
+        # A COUNT PER POPULATION, and both exact.
+        #
+        # A scenario mixes populations that run different transactions, so one
+        # aggregate number cannot describe it. Asserting each population's own
+        # step separately is what keeps the traffic MIX honest: if the buyers
+        # broke off half way through their transaction while the browsers ran
+        # in full, the totals still look plausible and only the per-population
+        # counts show it.
+        # -------------------------------------------------------------------
+        after:
+          continueOnError: true
+          steps:
+            - performanceAssert:
+                nodeName: "The browse traffic ran in full"
+                measurementName: "Search Products"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 6
+            - performanceAssert:
+                nodeName: "The buy traffic ran in full"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 2
+            - performanceAssert:
+                nodeName: "Checkout stays under 5s while browsing is going on"
+                measurementName: "Checkout"
+                aggregator: AVG
+                comparator: LOWER_THAN
+                expectedValue: 5000
+
+  # =========================================================================
+  # B. A staged ramp built out of several thread groups.
+  #
+  # `rampup` inside one thread group gives a smooth ramp to a single target
+  # (sample 02). What it cannot express is a STEP profile: hold 1 user, then
+  # 2, then 3, each for a while, and compare the response times between the
+  # steps. That is the shape that answers "where does it start to hurt?".
+  #
+  # Several thread groups in a scenario, staggered with `startOffset`, is how
+  # you write it. Each stage is its own node in the report, so each one has
+  # its own numbers.
+  #
+  # In a real test each stage would also carry `maxDuration` to hold the load
+  # for a fixed time rather than a fixed number of iterations.
+  # =========================================================================
+  - name: "B - Step ramp in three stages"
+    categories: ["Load testing"]
+    root:
+      testScenario:
+        nodeName: "Find the level where response times turn"
+        children:
+
+          - threadGroup:
+              nodeName: "Stage 1 - 1 user"
+              users: 1
+              iterations: 2
+              startOffset: 0
+              children:
+                - callKeyword:
+                    keyword: "Checkout"
+
+          - threadGroup:
+              nodeName: "Stage 2 - 2 users"
+              users: 2
+              iterations: 2
+              startOffset: 3000
+              children:
+                - callKeyword:
+                    keyword: "Checkout"
+
+          - threadGroup:
+              nodeName: "Stage 3 - 2 users"
+              users: 2
+              iterations: 2
+              startOffset: 6000
+              children:
+                - callKeyword:
+                    keyword: "Checkout"
+
+        after:
+          continueOnError: true
+          steps:
+            # A measurement name is shared by every node that produces it, so
+            # this COUNT spans all three stages: 2 + 4 + 4.
+            #
+            # To compare the stages against each OTHER - which is the reason
+            # to build a ramp this way - read them in the performance
+            # dashboards, where each stage is a separate node. A per-stage
+            # threshold goes in that stage's own `after` block.
+            - performanceAssert:
+                nodeName: "Every stage contributed its transactions"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 10
+
+  # =========================================================================
+  # C. Load and a batch job at the same time.
+  #
+  # A scenario's children do not all have to be thread groups. The classic
+  # question - "what do response times look like while the nightly batch is
+  # running?" - is a thread group next to a plain `sequence`.
+  #
+  # The sequence runs once, in parallel with the load, and its own duration
+  # is measured like anything else.
+  # =========================================================================
+  - name: "C - Measure the site while the batch job runs"
+    categories: ["Load testing"]
+    root:
+      testScenario:
+        nodeName: "Shoppers versus the nightly batch"
+        children:
+
+          - threadGroup:
+              nodeName: "Shoppers"
+              users: 2
+              iterations: 3
+              children:
+                - callKeyword:
+                    keyword: "Search Products"
+                    inputs:
+                      - term: "laptop"
+
+          - sequence:
+              nodeName: "Nightly batch"
+              children:
+                - callKeyword:
+                    keyword: "Run Batch Report"
+
+        after:
+          continueOnError: true
+          steps:
+            - performanceAssert:
+                nodeName: "The batch ran exactly once"
+                measurementName: "Run Batch Report"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 1
+            - performanceAssert:
+                nodeName: "Search survives the batch window"
+                measurementName: "Search Products"
+                aggregator: AVG
+                comparator: LOWER_THAN
+                expectedValue: 5000
+
+  # =========================================================================
+  # D. Phases, one after the other - and the control that is NOT testScenario.
+  #
+  # `testScenario` runs its children in parallel. When you want thread groups
+  # to run in SEQUENCE - a warm-up phase, then the measured phase, then a
+  # cool-down - the root is a plain `sequence`.
+  #
+  # This matters more than it looks. A warm-up nested in the same thread group
+  # as the measured load pollutes the measurement with the cold-start
+  # timings; a separate warm-up PHASE keeps them in different nodes, so the
+  # threshold below applies only to the measured phase.
+  #
+  # The three composing roots, side by side:
+  #
+  #   testScenario   children run in PARALLEL          -> mixed populations
+  #   sequence       children run ONE AFTER THE OTHER  -> phases
+  #   testSet        children run as separate test cases, `threads` at a time
+  #                  -> a batch of independent tests, not a load profile
+  # =========================================================================
+  - name: "D - Warm-up phase then measured phase"
+    categories: ["Load testing"]
+    root:
+      sequence:
+        nodeName: "Two phases in order"
+        children:
+
+          - threadGroup:
+              nodeName: "Warm-up phase"
+              users: 1
+              iterations: 2
+              children:
+                - callKeyword:
+                    keyword: "Warm Up"
+
+          - threadGroup:
+              nodeName: "Measured phase"
+              users: 2
+              iterations: 3
+              children:
+                - callKeyword:
+                    keyword: "Checkout"
+              # The threshold sits on the measured thread group, not on the
+              # sequence, so the warm-up cannot drag the average around.
+              after:
+                continueOnError: true
+                steps:
+                  - performanceAssert:
+                      nodeName: "Checkout meets its SLA once the system is warm"
+                      measurementName: "Checkout"
+                      aggregator: AVG
+                      comparator: LOWER_THAN
+                      expectedValue: 5000
+                  - performanceAssert:
+                      nodeName: "The measured phase ran in full"
+                      measurementName: "Checkout"
+                      aggregator: COUNT
+                      comparator: EQUALS
+                      expectedValue: 6
+
+keywords:
+  - GeneralScript:
+      name: "Search Products"
+      scriptLanguage: groovy
+      scriptFile: keywords/searchProducts.groovy
+  - GeneralScript:
+      name: "Checkout"
+      scriptLanguage: groovy
+      scriptFile: keywords/checkout.groovy
+  - GeneralScript:
+      name: "Run Batch Report"
+      scriptLanguage: groovy
+      scriptFile: keywords/runBatchReport.groovy
+  - GeneralScript:
+      name: "Warm Up"
+      scriptLanguage: groovy
+      scriptFile: keywords/warmUp.groovy

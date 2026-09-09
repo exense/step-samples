@@ -1,0 +1,371 @@
+---
+# ---------------------------------------------------------------------------
+# Load-testing sample 06 - Thresholds and SLA gates
+#
+# A load test that produces a report somebody has to interpret is a load test
+# nobody runs twice. A load test that comes back PASSED or FAILED is a gate
+# you can put in a pipeline.
+#
+# This sample covers the two threshold controls, what they can and cannot see,
+# and the thresholds a load test needs beyond "average response time".
+#
+# TWO PLANS HERE FAIL ON PURPOSE. That is the lesson in them: the plan names
+# say which ones.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "load-06-thresholds-and-slas"
+
+plans:
+
+  # =========================================================================
+  # A. The aggregators, and the thresholds worth writing.
+  #
+  #   AVG    the headline number - and the one that hides the tail. An
+  #          average of 800 ms is compatible with one user in twenty waiting
+  #          eight seconds.
+  #   MAX    the worst single transaction. Brutal, and useful precisely
+  #          because it is: a MAX threshold catches the timeout nobody saw.
+  #   MIN    a floor. Mostly used, as below, to prove the measurement is real
+  #          rather than empty.
+  #   COUNT  how many transactions happened. What that tells you depends on
+  #          the thread group - see below.
+  #   SUM    total time spent. Rarely a threshold; useful for capacity sums.
+  #
+  # A good gate uses several of these together. Response time on its own can
+  # always be met by doing less work per unit time.
+  #
+  # WHAT `COUNT` MEANS DEPENDS ON WHAT THE THREAD GROUP PINS.
+  #
+  # Throughput is transactions divided by elapsed time, and a thread group
+  # fixes exactly one of the two:
+  #
+  #   fixed `iterations`   the COUNT is pinned. It is 6 below whether the
+  #                        system was quick or crawling, so this assertion is
+  #                        a COMPLETENESS check: how many times that step was
+  #                        actually REACHED.
+  #
+  #   `maxDuration`        the DURATION is pinned, so COUNT becomes a genuine
+  #                        THROUGHPUT threshold. That is the supported way to
+  #                        gate throughput today, and sample 02 plan D shows
+  #                        it. It also matches how load requirements are
+  #                        usually written - "an hour at this rate".
+  #
+  # A throughput aggregator that works regardless of which one is pinned is
+  # not available yet; it is planned for `performanceAssert` in a future
+  # release. Until then, express a throughput requirement as a duration-bound
+  # run with a COUNT threshold rather than computing a rate in the plan.
+  # =========================================================================
+  - name: "A - A complete SLA gate"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "2 users x 3 checkouts"
+        users: 2
+        iterations: 3
+        children:
+          - callKeyword:
+              keyword: "Checkout"
+              children:
+                # Correctness is part of the SLA. A fast error is not a pass.
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "CONFIRMED"
+
+        after:
+          # Without this the block stops at the first breach, and a run that
+          # violates three thresholds only tells you about one of them.
+          continueOnError: true
+          steps:
+
+            # COMPLETENESS, not throughput: `iterations` is fixed here, so
+            # this is 6 however slow the run was.
+            #
+            # It is worth asserting anyway, because a keyword's count is how
+            # often that STEP was reached - which equals users x iterations
+            # only when every iteration runs it. Under real load it can fall
+            # short: an iteration that fails part way skips the steps after
+            # it, a step inside a branch runs only when the branch is taken,
+            # a dry data pool leaves iterations with nothing to do. None of
+            # those occur in these stub runs, but the assertion is what
+            # catches them when they do.
+            #
+            # To gate the RATE instead, bound the duration - see the note
+            # above and sample 02 plan D.
+            - performanceAssert:
+                nodeName: "All the work was done"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 6
+
+            - performanceAssert:
+                nodeName: "Average response time under 5s"
+                measurementName: "Checkout"
+                aggregator: AVG
+                comparator: LOWER_THAN
+                expectedValue: 5000
+
+            - performanceAssert:
+                nodeName: "No single checkout over 15s"
+                measurementName: "Checkout"
+                aggregator: MAX
+                comparator: LOWER_THAN
+                expectedValue: 15000
+
+            - performanceAssert:
+                nodeName: "The measurement is real, not empty"
+                measurementName: "Checkout"
+                aggregator: MIN
+                comparator: HIGHER_THAN
+                expectedValue: 50
+
+  # =========================================================================
+  # B. Per-population thresholds in a scenario.
+  #
+  # Different populations have different SLAs. Search may have to answer in
+  # under a second while a checkout is allowed three. Putting both thresholds
+  # in the scenario's `after` block works, but the threshold then sits far
+  # from the load it describes.
+  #
+  # Each thread group's own `after` block is usually the better home: the
+  # threshold reads next to the profile it belongs to, and it is evaluated as
+  # soon as that population finishes rather than at the end of the scenario.
+  # =========================================================================
+  - name: "B - One SLA per population"
+    categories: ["Load testing"]
+    root:
+      testScenario:
+        nodeName: "Two populations with two SLAs"
+        children:
+
+          - threadGroup:
+              nodeName: "Searchers"
+              users: 2
+              iterations: 2
+              children:
+                - callKeyword:
+                    keyword: "Search Products"
+              after:
+                continueOnError: true
+                steps:
+                  - performanceAssert:
+                      nodeName: "Search answers within its own budget"
+                      measurementName: "Search Products"
+                      aggregator: AVG
+                      comparator: LOWER_THAN
+                      expectedValue: 5000
+                  - performanceAssert:
+                      nodeName: "All searches ran"
+                      measurementName: "Search Products"
+                      aggregator: COUNT
+                      comparator: EQUALS
+                      expectedValue: 4
+
+          - threadGroup:
+              nodeName: "Buyers"
+              users: 1
+              iterations: 2
+              children:
+                - callKeyword:
+                    keyword: "Checkout"
+              after:
+                continueOnError: true
+                steps:
+                  - performanceAssert:
+                      nodeName: "Checkout has a looser budget than search"
+                      measurementName: "Checkout"
+                      aggregator: AVG
+                      comparator: LOWER_THAN
+                      expectedValue: 8000
+                  - performanceAssert:
+                      nodeName: "All checkouts ran"
+                      measurementName: "Checkout"
+                      aggregator: COUNT
+                      comparator: EQUALS
+                      expectedValue: 2
+
+  # =========================================================================
+  # C. Failure rate as a threshold.               (INTENTIONALLY FAILS)
+  #
+  # "Under 1% errors" is part of every real SLA, and it is not a response
+  # time. There is no failure-rate aggregator, so the pattern is to make the
+  # failures countable and then count them.
+  #
+  # WHY THIS PLAN STILL REPORTS FAILED, EVEN THOUGH BOTH THRESHOLDS PASS.
+  # Two payments genuinely failed, and a failed node fails the run. Step has
+  # no error-budget flag that makes a run with real errors come back green:
+  # the thresholds tell you the failure RATE was acceptable, the run status
+  # tells you failures happened. Both are true and both are worth reporting.
+  #
+  # If a rejection is EXPECTED traffic rather than an error - a payment the
+  # business means to decline - do not raise a business error for it. Return
+  # it as an ordinary output and branch on it in the plan, and the run status
+  # then reflects your error budget rather than the provider's mood.
+  #
+  # Here "Flaky Payment" fails on every third iteration, and the plan checks
+  # the successes separately from the attempts:
+  #
+  #   attempts   the COUNT of the keyword measurement - every call, whether
+  #              it succeeded or not
+  #   successes  the COUNT of a measurement the keyword only emits when the
+  #              payment went through
+  #
+  # 6 attempts, 2 of which fail, leaves 4 successes - so a threshold on the
+  # success count is a threshold on the failure rate.
+  #
+  # `continueParentNodeExecutionOnError` on the keyword call is what keeps
+  # the thread group running past a failed iteration. Without it the first
+  # failure ends that virtual user, and the run measures a fraction of the
+  # load you asked for - which is the opposite of what you want when the
+  # question is "how often does it fail?".
+  # =========================================================================
+  - name: "C - Threshold on the failure rate (intentionally fails)"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "2 users x 3 payments against a wobbly provider"
+        users: 2
+        iterations: 3
+        children:
+          - callKeyword:
+              keyword: "Flaky Payment"
+              nodeName: "Pay"
+              continueParentNodeExecutionOnError: true
+              inputs:
+                # The iteration number comes from the plan, so the keyword
+                # stays stateless and the failures land on fixed iterations.
+                #
+                # `as Integer` is not decoration. Without it the counter
+                # reaches the keyword as a STRING, `input.getInt` silently
+                # falls back to its default, and every iteration takes the
+                # same branch - a load test that looks uniformly broken for
+                # a reason that has nothing to do with the system under test.
+                - iteration:
+                    expression: "gcounter as Integer"
+
+        after:
+          continueOnError: true
+          steps:
+            - performanceAssert:
+                nodeName: "Every payment was attempted"
+                measurementName: "Flaky Payment"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 6
+
+            # 6 attempts, 2 failures, 4 successes: a 33% failure rate.
+            # Tighten this number and the assert catches a provider that got
+            # worse.
+            #
+            # If the success measurement is never emitted at all, this fails
+            # with "No measurement is matching the defined filters." rather
+            # than with a count of zero - an empty series and a misspelled
+            # name look identical here.
+            - performanceAssert:
+                nodeName: "4 of the 6 payments went through"
+                measurementName: "Payment accepted"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 4
+
+  # =========================================================================
+  # A NOTE ON `assertMetric` - and why this load-test sample does not use it.
+  #
+  # `assertMetric` looks like a second threshold control, and it is a real
+  # one, but it answers a DIFFERENT question and is the WRONG tool for gating
+  # a load test:
+  #
+  #   `performanceAssert`  aggregates the measurements OF THIS EXECUTION.
+  #                        This is what a load-test SLA gate needs, and it is
+  #                        what every plan in this sample uses.
+  #
+  #   `assertMetric`       queries the stored METRIC TIME SERIES, which is
+  #                        NOT scoped to the current execution. A COUNT over a
+  #                        measurement name comes back with every point the
+  #                        series holds, from every run that ever used that
+  #                        name - so on a single load test its numbers are
+  #                        meaningless.
+  #
+  # Its actual purpose is CROSS-EXECUTION assertion - "is today's run slower
+  # than last week's", "has the error rate crept up across the last ten
+  # runs" - typically inside an assertion plan attached to a SCHEDULED
+  # execution. That is trend and regression detection, not the pass/fail gate
+  # on one load test, and it is the subject of the monitoring samples rather
+  # than this set.
+  #
+  # (A future Step release may let `assertMetric` default to the current
+  # execution's scope, which would make it usable here too; until then, gate
+  # a load test with `performanceAssert` and leave `assertMetric` for
+  # cross-run assertions.)
+  # =========================================================================
+
+  # =========================================================================
+  # D. A breached threshold.                       (INTENTIONALLY FAILS)
+  #
+  # What a violation looks like, so you recognise it in a report. "Slow
+  # Search" takes about 600 ms and the threshold below allows 100, so this
+  # plan fails with:
+  #
+  #     Average of Slow Search expected to be lower than 100 but was <n>
+  #
+  # Note the shape of that message: the control reports the ACTUAL value
+  # alongside the threshold, so a breached SLA tells you how far off it was
+  # without opening the dashboards.
+  #
+  # `continueOnError: true` on the `after` block matters most exactly here.
+  # The second threshold below is also breached, and without the flag you
+  # would fix the first one, re-run, and only then discover the second.
+  # =========================================================================
+  - name: "D - A breached SLA (intentionally fails)"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "2 users x 2 slow searches"
+        users: 2
+        iterations: 2
+        children:
+          - callKeyword:
+              keyword: "Slow Search"
+
+        after:
+          continueOnError: true
+          steps:
+            - performanceAssert:
+                nodeName: "Average must stay under 100ms - it does not"
+                measurementName: "Slow Search"
+                aggregator: AVG
+                comparator: LOWER_THAN
+                expectedValue: 100
+            - performanceAssert:
+                nodeName: "Worst case must stay under 200ms - it does not"
+                measurementName: "Slow Search"
+                aggregator: MAX
+                comparator: LOWER_THAN
+                expectedValue: 200
+            # This one passes, which is the point: the run reports exactly
+            # which thresholds failed, not just that something did.
+            - performanceAssert:
+                nodeName: "All four searches ran - this one passes"
+                measurementName: "Slow Search"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 4
+
+keywords:
+  - GeneralScript:
+      name: "Checkout"
+      scriptLanguage: groovy
+      scriptFile: keywords/checkout.groovy
+  - GeneralScript:
+      name: "Search Products"
+      scriptLanguage: groovy
+      scriptFile: keywords/searchProducts.groovy
+  - GeneralScript:
+      name: "Slow Search"
+      scriptLanguage: groovy
+      scriptFile: keywords/slowSearch.groovy
+  - GeneralScript:
+      name: "Flaky Payment"
+      scriptLanguage: groovy
+      scriptFile: keywords/flakyPayment.groovy

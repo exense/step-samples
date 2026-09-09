@@ -1,0 +1,172 @@
+---
+# ---------------------------------------------------------------------------
+# RPA sample 02 - Parameterized bot (self-service RPA)
+#
+# A bot a business user launches ON DEMAND to perform one action, supplying the
+# inputs at execution time. This is the self-service RPA pattern: one plan,
+# many callers, different inputs each run.
+#
+# It covers the three distinct ways a value reaches a plan from outside:
+#   1. Execution parameters - chosen by the caller at execution start
+#   2. Step parameters      - centrally managed, incl. protected credentials
+#   3. Schedule parameters  - the same mechanism, pre-filled for an unattended
+#                             run (see sample 06)
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "rpa-02-parameterized-bot"
+
+plans:
+  - name: "Self-service record submission"
+    categories:
+      - "RPA"
+    root:
+      testCase:
+        nodeName: "Submit a record on demand"
+        children:
+
+          # -------------------------------------------------------------
+          # 1. Defaulting execution parameters.
+          #
+          # Step declares every execution parameter as a plan variable at the
+          # start of the execution, so `recordId` is read like any other
+          # binding. But if the caller did NOT supply it, the variable does
+          # not exist and any expression referencing it fails.
+          #
+          # This is the defaulting idiom: ask the Groovy binding whether the
+          # variable exists before reading it. It makes the plan runnable with
+          # no parameters at all, which is what this sample wants.
+          #
+          # Use it sparingly. Defaulting suits a value that is genuinely
+          # optional - a dry-run flag, a batch size. For a value that decides
+          # WHAT the bot acts on, failing is usually better than guessing.
+          # -------------------------------------------------------------
+          - set:
+              key: recordId
+              value:
+                expression: "binding.variables.containsKey('recordId') ? recordId : 'REC-001'"
+              nodeName: "Default the recordId execution parameter"
+              description: "Falls back to REC-001 when the caller supplies nothing."
+
+          - set:
+              key: amount
+              value:
+                expression: "binding.variables.containsKey('amount') ? amount : '1000'"
+              nodeName: "Default the amount execution parameter"
+
+          - echo:
+              text:
+                expression: "'Bot starting for record ' + recordId + ', amount ' + amount"
+
+          # -------------------------------------------------------------
+          # 2. Step parameters, inside a session.
+          #
+          # `botUser` and `botPassword` are declared in the `parameters`
+          # section at the bottom of this file. They are available to the plan
+          # as ordinary variables, so a credential never appears in the plan
+          # tree. `botPassword` is declared with `protectedValue: true`, which
+          # masks it in the UI and in execution reports.
+          #
+          # The three calls share a `session` so they run on one agent token.
+          # `Login` parks the application context in the agent session and the
+          # later keywords read it from there - which is why NO session id is
+          # passed between them here. See 01-linear-bot for the full note.
+          # -------------------------------------------------------------
+          - session:
+              nodeName: "One agent for the whole bot run"
+              children:
+
+                - callKeyword:
+                    keyword: "Login"
+                    nodeName: "Log into the back office"
+                    description: "Credentials come from protected Step parameters, not from the plan."
+                    inputs:
+                      - user:
+                          expression: "botUser"
+                      - password:
+                          expression: "botPassword"
+                    children:
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "LOGGED_IN"
+                      # Proves the protected parameter arrived as a value.
+                      - assert:
+                          actual: "loggedInAs"
+                          operator: EQUALS
+                          expected: "rpa-bot"
+                          customErrorMessage: "botUser did not arrive - check the input uses expression:."
+
+                # ---------------------------------------------------
+                # 3. Do the work the caller asked for.
+                # ---------------------------------------------------
+                - callKeyword:
+                    keyword: "Submit Record"
+                    nodeName: "Submit the requested record"
+                    inputs:
+                      - recordId:
+                          expression: "recordId"
+                      - amount:
+                          expression: "amount"
+                    children:
+                      - set:
+                          key: confirmationId
+                          value:
+                            expression: "output.confirmationId"
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "SUBMITTED"
+                      # Proves the execution parameter reached the keyword.
+                      - assert:
+                          actual: "receivedRecordId"
+                          operator: EQUALS
+                          expected: "REC-001"
+                          customErrorMessage: "recordId did not arrive - with -ep recordId=... this expected value changes."
+
+                - callKeyword:
+                    keyword: "Logout"
+                    nodeName: "Log out"
+
+                # Stays INSIDE the session: `confirmationId` was promoted to
+                # the enclosing block by the nested `set`, and that block is
+                # the session body - not the test case around it.
+                - echo:
+                    text:
+                      expression: "'Record ' + recordId + ' submitted - confirmation ' + confirmationId"
+                    description: "The value the caller cares about, surfaced in the execution report."
+
+# ---------------------------------------------------------------------------
+# Step parameters.
+#
+# key             the variable name the plan reads
+# value           the value; may be a dynamic expression
+# protectedValue  masks the value in the UI and in execution reports - always
+#                 use it for credentials
+# scope           GLOBAL (everywhere) | APPLICATION (one app) | FUNCTION (one
+#                 keyword). GLOBAL is the default and is what a plan variable
+#                 needs.
+# ---------------------------------------------------------------------------
+parameters:
+  - key: "botUser"
+    value: "rpa-bot"
+    description: "The technical account the bot logs in with."
+    scope: GLOBAL
+  - key: "botPassword"
+    value: "s3cr3t-demo-value"
+    description: "Masked in the UI and in execution reports."
+    protectedValue: true
+    scope: GLOBAL
+
+keywords:
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy
+  - GeneralScript:
+      name: "Submit Record"
+      scriptLanguage: groovy
+      scriptFile: keywords/submitRecord.groovy
+  - GeneralScript:
+      name: "Logout"
+      scriptLanguage: groovy
+      scriptFile: keywords/logout.groovy

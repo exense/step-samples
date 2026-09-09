@@ -1,0 +1,264 @@
+---
+# ---------------------------------------------------------------------------
+# Load-testing sample 05 - Measurements
+#
+# Everything a load test reports comes out of measurements. Which ones exist,
+# what they are called, and how they nest is decided partly by Step and partly
+# by the plan - and getting it wrong is how you end up with a run full of
+# numbers that cannot answer the question you ran it to answer.
+#
+# There are three sources of measurements, and only two of them can carry an
+# SLA.
+# ---------------------------------------------------------------------------
+version: "1.2.0"
+name: "load-05-measurements"
+
+plans:
+
+  # =========================================================================
+  # A. The three sources, side by side.
+  #
+  #  1. AUTOMATIC, per keyword call.
+  #     Every `callKeyword` is timed and reported under the KEYWORD's name -
+  #     never the node name. Two calls to "Checkout" from different nodes
+  #     land in the same series.
+  #
+  #  2. INSTRUMENTED NODES, per plan node.
+  #     `instrumentNode: true` on any node times that node and reports it
+  #     under its `nodeName`. This is how a multi-keyword transaction gets an
+  #     end-to-end number.
+  #
+  #  3. CUSTOM, from inside the keyword.
+  #     `output.startMeasure(name)` / `output.stopMeasure()` create
+  #     measurements the keyword decides on. This is the only way to time
+  #     something SMALLER than a keyword call - the two page loads inside one
+  #     browser keyword, for instance.
+  #
+  # THE DIFFERENCE THAT MATTERS: `performanceAssert` sees keyword
+  # measurements and custom measurements. It does NOT see instrumented-node
+  # measurements. Asserting on "Search and buy" below would fail with
+  # "No measurement is matching the defined filters." - the same message a
+  # misspelled keyword name produces, so the mistake reads as a typo.
+  #
+  # So instrumented nodes are for the dashboards; SLAs go on keyword or
+  # custom measurements.
+  # =========================================================================
+  - name: "A - Where measurements come from"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "2 users x 2 iterations"
+        users: 2
+        iterations: 2
+        children:
+
+          # (2) Instrumented node: one measurement named "Search and buy",
+          # covering both keyword calls below it.
+          - sequence:
+              nodeName: "Search and buy"
+              instrumentNode: true
+              children:
+
+                # (3) The keyword creates its own measurements - see
+                # keywords/browseCatalog.groovy. The call still produces its
+                # own automatic "Browse Catalog" measurement as well, so this
+                # one call yields three series.
+                - callKeyword:
+                    keyword: "Browse Catalog"
+                    nodeName: "Browse two pages"
+
+                # (1) Automatic: one measurement named "Checkout".
+                - callKeyword:
+                    keyword: "Checkout"
+                    nodeName: "Check out"
+
+        after:
+          continueOnError: true
+          steps:
+
+            # A keyword measurement.
+            - performanceAssert:
+                nodeName: "Checkout ran on every iteration"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 4
+
+            # A custom measurement, created by the keyword. Note the name is
+            # the one the SCRIPT chose, not the keyword name.
+            - performanceAssert:
+                nodeName: "The catalog page was measured separately"
+                measurementName: "Catalog page"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 4
+
+            - performanceAssert:
+                nodeName: "And so was the product page"
+                measurementName: "Product page"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 4
+
+            # The product page sleeps longer than the catalog page, so this
+            # pair proves the two custom measurements are really independent
+            # timings rather than the same number reported twice.
+            - performanceAssert:
+                nodeName: "The product page is the slower of the two"
+                measurementName: "Product page"
+                aggregator: MIN
+                comparator: HIGHER_THAN
+                expectedValue: 120
+            - performanceAssert:
+                nodeName: "The catalog page is the faster of the two"
+                measurementName: "Catalog page"
+                aggregator: MIN
+                comparator: LOWER_THAN
+                expectedValue: 120
+
+            # -------------------------------------------------------------
+            # The one that does NOT work, kept here as a comment because it
+            # fails the execution:
+            #
+            #   - performanceAssert:
+            #       measurementName: "Search and buy"   # instrumented node
+            #       aggregator: AVG
+            #       comparator: LOWER_THAN
+            #       expectedValue: 5000
+            #
+            # -> "No measurement is matching the defined filters."
+            #
+            # To put a threshold on a whole transaction, emit a custom
+            # measurement around it from inside the keyword instead - which
+            # is what plan B is about.
+            # -------------------------------------------------------------
+
+  # =========================================================================
+  # B. Naming measurements so the report can be read.
+  #
+  # A measurement name is the axis every dashboard, threshold and comparison
+  # is grouped by, so the names ARE the report. Two rules pay for themselves:
+  #
+  #   Name the business step, not the technical one.
+  #     "Checkout" tells you what broke. "POST /api/v3/order" tells you where,
+  #     which you can find out afterwards anyway.
+  #
+  #   Keep the name STABLE and BOUNDED.
+  #     A name built out of a variable - "Checkout for shopper 417" - creates
+  #     one series per virtual user. Nothing aggregates, the dashboards fill
+  #     with noise, and no threshold can be written against it. Put the
+  #     varying part in a measurement ATTRIBUTE instead:
+  #
+  #         output.stopMeasure(["region": "eu"])
+  #
+  # A keyword can also be called from several places in a plan. All those
+  # calls share one measurement name, which is usually what you want - and
+  # occasionally is not. When "Checkout" is called both as a warm-up and as
+  # the measured transaction, the warm-up timings land in the SLA. Sample 03
+  # plan D shows the fix: keep them in separate thread groups and put the
+  # threshold on the measured one.
+  # =========================================================================
+  - name: "B - A custom measurement around a whole transaction"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "2 users x 2 iterations"
+        users: 2
+        iterations: 2
+        children:
+          - callKeyword:
+              keyword: "Complete Purchase"
+              nodeName: "Search, add to cart and buy in one keyword"
+
+        after:
+          continueOnError: true
+          steps:
+            # "Purchase journey" is created by the keyword with
+            # startMeasure/stopMeasure, so - unlike an instrumented sequence -
+            # it CAN carry a threshold.
+            - performanceAssert:
+                nodeName: "The whole journey stays under 5s"
+                measurementName: "Purchase journey"
+                aggregator: AVG
+                comparator: LOWER_THAN
+                expectedValue: 5000
+            - performanceAssert:
+                nodeName: "Every iteration produced a journey"
+                measurementName: "Purchase journey"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 4
+            # The journey wraps three inner steps, so it must be slower than
+            # any of them. This is what proves the nesting is real.
+            - performanceAssert:
+                nodeName: "The journey covers more than its slowest step"
+                measurementName: "Purchase journey"
+                aggregator: MIN
+                comparator: HIGHER_THAN
+                expectedValue: 250
+
+  # =========================================================================
+  # C. Measuring the failures, not just the successes.
+  #
+  # A response time average computed over successful calls only is the most
+  # comfortable and most misleading number in load testing. When a system
+  # under stress starts failing fast, the average IMPROVES.
+  #
+  # Two habits prevent it:
+  #
+  #   Assert the count as well as the time. A run that did half the work has
+  #   a great average - see the COUNT assertions in every plan here.
+  #
+  #   Check the answers, so failures are counted as failures. The keyword
+  #   below fails every third iteration; the nested `assert` turns that into
+  #   a failure count in the report, next to the timings.
+  #
+  # Sample 06 puts thresholds on that failure count.
+  # =========================================================================
+  - name: "C - Count the failures too"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "2 users x 2 iterations against a wobbly service"
+        users: 2
+        iterations: 2
+        children:
+          - callKeyword:
+              keyword: "Checkout"
+              nodeName: "Check out"
+              children:
+                # Without this the run is green whatever comes back.
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "CONFIRMED"
+
+        after:
+          continueOnError: true
+          steps:
+            - performanceAssert:
+                nodeName: "The work was actually done"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 4
+            - performanceAssert:
+                nodeName: "The slowest checkout was still acceptable"
+                measurementName: "Checkout"
+                aggregator: MAX
+                comparator: LOWER_THAN
+                expectedValue: 10000
+
+keywords:
+  - GeneralScript:
+      name: "Browse Catalog"
+      scriptLanguage: groovy
+      scriptFile: keywords/browseCatalog.groovy
+  - GeneralScript:
+      name: "Checkout"
+      scriptLanguage: groovy
+      scriptFile: keywords/checkout.groovy
+  - GeneralScript:
+      name: "Complete Purchase"
+      scriptLanguage: groovy
+      scriptFile: keywords/completePurchase.groovy
