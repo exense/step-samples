@@ -29,17 +29,6 @@ holds the plan index and the reference tables.
 
 All four are expected to pass.
 
-## The three composing roots
-
-| Root | Children run | Use for |
-|------|--------------|---------|
-| `testScenario` | **in parallel** | mixed populations, staged ramps, load next to a batch job |
-| `sequence` | **one after the other** | phases — warm-up, measured, cool-down |
-| `testSet` | as separate test cases, `threads` at a time | a batch of independent tests, not a load profile |
-
-Confusing `testScenario` with `testSet` is the usual slip: `testSet` parallelises *test cases*,
-`testScenario` runs *load profiles* side by side.
-
 ## Notes worth knowing
 
 Selective notes, not a full reference — the commented descriptor covers every case. These are the
@@ -52,17 +41,13 @@ points most worth getting right.
 | `after` on the **testScenario** | once, when every thread group has finished — the scenario-wide gate |
 | `after` on a **thread group** | when that population finishes — for a threshold concerning only it |
 
-Prefer the thread group's own block when the threshold belongs to one population. Assert a `COUNT`
-**per population** and make each exact: a scenario mixes different transactions, so no single
-aggregate describes it, and one population breaking off mid-transaction still leaves the totals
-looking plausible.
+Prefer the thread group's own block when the threshold belongs to one population.
 
 ### Patterns in the plans
 
 - **Staged ramp** (B) — `rampup` inside one thread group ramps to a single target; a *step* profile
   (hold 1 user, then 2, then 3, comparing the steps) is several thread groups staggered with
-  `startOffset`, each its own node in the report. Compare the stages in the dashboards, not with one
-  cross-stage `COUNT`.
+  `startOffset`, each its own node in the report. Compare the stages in the dashboards.
 - **Load next to a batch** (C) — a scenario child need not be a thread group; a plain `sequence`
   runs once, in parallel with the load, and is measured like anything else.
 - **Phases** (D) — a warm-up nested in the measured thread group pollutes its measurement with

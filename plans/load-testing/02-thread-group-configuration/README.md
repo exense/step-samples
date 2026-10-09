@@ -49,9 +49,9 @@ they are the easiest to get wrong.
 
 ### Controlling throughput — `pacing` with `users`
 
-Define the load by `users` alone and the throughput is **uncontrolled** — it rises and falls with
-response time, so no two runs compare. This is the most common mistake. `pacing` (the fixed gap
-between iteration *starts*) turns throughput into a number you set:
+Defining the load by `users` alone can lead to an **uncontrolled** throughput depending on the response times.
+This is the most common mistake. `pacing` defines a fixed gap between iteration *starts* and allows to exactly 
+define the throughput:
 
 ```
 iterations/sec = users ÷ pacing(s)          pacing(s) = users ÷ target-rate
@@ -67,11 +67,6 @@ slowest iteration, or add users.
 A fixed count needs nothing special — `iterations: N`. Running for a *time* is the non-obvious one:
 it needs **`iterations: 0`** (unlimited) together with `maxDuration`. `maxDuration` on its own does
 **not** give a duration-bounded run, because the `iterations` default is 1:
-
-| `iterations` | Result |
-|--------------|--------|
-| `0` | loops until `maxDuration` — the duration-bounded run |
-| omitted | runs **once** (defaults to 1); `maxDuration` only caps that single iteration |
 
 ### The counters every thread group publishes
 

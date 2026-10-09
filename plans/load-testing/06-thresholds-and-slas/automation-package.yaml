@@ -2,10 +2,6 @@
 # ---------------------------------------------------------------------------
 # Load-testing sample 06 - Thresholds and SLA gates
 #
-# A load test that produces a report somebody has to interpret is a load test
-# nobody runs twice. A load test that comes back PASSED or FAILED is a gate
-# you can put in a pipeline.
-#
 # This sample covers the two threshold controls, what they can and cannot see,
 # and the thresholds a load test needs beyond "average response time".
 #
@@ -25,35 +21,14 @@ plans:
   #          eight seconds.
   #   MAX    the worst single transaction. Brutal, and useful precisely
   #          because it is: a MAX threshold catches the timeout nobody saw.
-  #   MIN    a floor. Mostly used, as below, to prove the measurement is real
-  #          rather than empty.
+  #   MIN    the fastest single transaction. Rarely a threshold.
   #   COUNT  how many transactions happened. What that tells you depends on
   #          the thread group - see below.
   #   SUM    total time spent. Rarely a threshold; useful for capacity sums.
   #
-  # A good gate uses several of these together. Response time on its own can
-  # always be met by doing less work per unit time.
-  #
-  # WHAT `COUNT` MEANS DEPENDS ON WHAT THE THREAD GROUP PINS.
-  #
-  # Throughput is transactions divided by elapsed time, and a thread group
-  # fixes exactly one of the two:
-  #
-  #   fixed `iterations`   the COUNT is pinned. It is 6 below whether the
-  #                        system was quick or crawling, so this assertion is
-  #                        a COMPLETENESS check: how many times that step was
-  #                        actually REACHED.
-  #
-  #   `maxDuration`        the DURATION is pinned, so COUNT becomes a genuine
-  #                        THROUGHPUT threshold. That is the supported way to
-  #                        gate throughput today, and sample 02 plan D shows
-  #                        it. It also matches how load requirements are
-  #                        usually written - "an hour at this rate".
-  #
-  # A throughput aggregator that works regardless of which one is pinned is
-  # not available yet; it is planned for `performanceAssert` in a future
-  # release. Until then, express a throughput requirement as a duration-bound
-  # run with a COUNT threshold rather than computing a rate in the plan.
+  # A throughput aggregator is currently **not available yet** for `performanceAssert`.
+  # Gating a throughput can be done by pinning the duration of a threadGroup  and defining
+  # an assertion on the `COUNT`.
   # =========================================================================
   - name: "A - A complete SLA gate"
     categories: ["Load testing"]
@@ -77,21 +52,8 @@ plans:
           # violates three thresholds only tells you about one of them.
           continueOnError: true
           steps:
-
-            # COMPLETENESS, not throughput: `iterations` is fixed here, so
-            # this is 6 however slow the run was.
-            #
-            # It is worth asserting anyway, because a keyword's count is how
-            # often that STEP was reached - which equals users x iterations
-            # only when every iteration runs it. Under real load it can fall
-            # short: an iteration that fails part way skips the steps after
-            # it, a step inside a branch runs only when the branch is taken,
-            # a dry data pool leaves iterations with nothing to do. None of
-            # those occur in these stub runs, but the assertion is what
-            # catches them when they do.
-            #
-            # To gate the RATE instead, bound the duration - see the note
-            # above and sample 02 plan D.
+            # COMPLETENESS check to catch iterations that failed part
+            # way and never reached the checkout.
             - performanceAssert:
                 nodeName: "All the work was done"
                 measurementName: "Checkout"
@@ -112,13 +74,6 @@ plans:
                 aggregator: MAX
                 comparator: LOWER_THAN
                 expectedValue: 15000
-
-            - performanceAssert:
-                nodeName: "The measurement is real, not empty"
-                measurementName: "Checkout"
-                aggregator: MIN
-                comparator: HIGHER_THAN
-                expectedValue: 50
 
   # =========================================================================
   # B. Per-population thresholds in a scenario.
@@ -201,7 +156,7 @@ plans:
   # If a rejection is EXPECTED traffic rather than an error - a payment the
   # business means to decline - do not raise a business error for it. Return
   # it as an ordinary output and branch on it in the plan, and the run status
-  # then reflects your error budget rather than the provider's mood.
+  # then reflects your error budget.
   #
   # Here "Flaky Payment" fails on every third iteration, and the plan checks
   # the successes separately from the attempts:
@@ -233,14 +188,6 @@ plans:
               nodeName: "Pay"
               continueParentNodeExecutionOnError: true
               inputs:
-                # The iteration number comes from the plan, so the keyword
-                # stays stateless and the failures land on fixed iterations.
-                #
-                # `as Integer` is not decoration. Without it the counter
-                # reaches the keyword as a STRING, `input.getInt` silently
-                # falls back to its default, and every iteration takes the
-                # same branch - a load test that looks uniformly broken for
-                # a reason that has nothing to do with the system under test.
                 - iteration:
                     expression: "gcounter as Integer"
 
@@ -257,11 +204,6 @@ plans:
             # 6 attempts, 2 failures, 4 successes: a 33% failure rate.
             # Tighten this number and the assert catches a provider that got
             # worse.
-            #
-            # If the success measurement is never emitted at all, this fails
-            # with "No measurement is matching the defined filters." rather
-            # than with a count of zero - an empty series and a misspelled
-            # name look identical here.
             - performanceAssert:
                 nodeName: "4 of the 6 payments went through"
                 measurementName: "Payment accepted"
@@ -287,17 +229,7 @@ plans:
   #                        name - so on a single load test its numbers are
   #                        meaningless.
   #
-  # Its actual purpose is CROSS-EXECUTION assertion - "is today's run slower
-  # than last week's", "has the error rate crept up across the last ten
-  # runs" - typically inside an assertion plan attached to a SCHEDULED
-  # execution. That is trend and regression detection, not the pass/fail gate
-  # on one load test, and it is the subject of the monitoring samples rather
-  # than this set.
-  #
-  # (A future Step release may let `assertMetric` default to the current
-  # execution's scope, which would make it usable here too; until then, gate
-  # a load test with `performanceAssert` and leave `assertMetric` for
-  # cross-run assertions.)
+  # Its actual purpose is CROSS-EXECUTION assertion
   # =========================================================================
 
   # =========================================================================

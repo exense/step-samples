@@ -34,11 +34,11 @@ shape of a standalone plan, see [../reference/](../reference/).
 | `before`, `beforeThread`, `afterThread`, `after` | 02, 04 |
 | `testScenario`, `sequence` and `testSet` as composing roots | 03 |
 | `dataSet` + `.next()`, `resetAtEnd`, `csv` / `json-array` / `sql` | 04 |
-| `instrumentNode` | 01, 05, 06 |
+| `instrumentNode` | 01, 05 |
 | `output.startMeasure` / `stopMeasure` | 05 |
-| `performanceAssert` — `AVG`, `MAX`, `MIN`, `COUNT`, `SUM` | 01, 02, 03, 04, 05, 06 |
+| `performanceAssert` — `AVG`, `MAX`, `COUNT` | 01, 02, 03, 04, 05, 06 |
 | `assertMetric` (cross-execution — why *not* to use it to gate a load test) | 06 |
-| `assert` inside a load test | 01, 05, 06 |
+| `assert` inside a load test | 01, 02, 04, 06 |
 | `continueOnError`, `continueParentNodeExecutionOnError` | 01, 06 |
 
 ## Running any of them
@@ -63,55 +63,40 @@ Every other plan is expected to pass.
 
 ## Two rules for `performanceAssert`
 
-Two rules to keep in mind:
+**`performanceAssert` must live in an `after` or `afterThread` block.** `after` runs once when
+the thread group (or scenario) finishes; `afterThread` runs once per virtual user.
 
-**`performanceAssert` must live in an `after` or `afterThread` block.** Anywhere else — as a child
-of the thread group, of a `testCase`, of anything — the execution ends in `TECHNICAL_ERROR` with
-`PerformanceAssert can only be defined in an 'after' or 'after thread' block`.
-
-**`performanceAssert` cannot see `instrumentNode` measurements.** It matches keyword measurements
-and custom ones a keyword created itself. Asserting on an instrumented sequence gives
-`No measurement is matching the defined filters.` — the same message a misspelled keyword name
-produces, so the mistake reads as a typo. [05](05-measurements/) covers the ways round it.
+**`measurementName` must name a keyword or custom measurement.** Measurements produced by
+`instrumentNode` are currently not supported in `performanceAssert`. For an SLA on a multi-step
+transaction, use a composite keyword or a custom measurement — see [05](05-measurements/).
 
 ## What these samples teach
 
 The controls are the vocabulary; these are the ideas that decide whether a load plan is any good.
 
-1. **The iteration is the unit your load numbers are counted in.** Everything a thread group
-   reports is per iteration, so `users: 10` with `pacing: 30000` is 20 iterations a minute — but
-   20 of *what*? Choose the iteration to be the thing your requirement is stated in, usually a
-   complete user action. An iteration nobody has a target for gives you a throughput figure that
-   has to be divided by something before anyone can act on it.
-
-2. **Put each step in the block that matches how often a real user does it.** A real user logs in
+1. **Put each step in the block that matches how often a real user does it.** If a real user logs in
    once per session, so a login belongs in `beforeThread`; move it into `children` and a 2 × 3 run
-   sends six logins instead of two — triple the load on the authentication service, and no error
-   anywhere. Once-per-test setup goes in `before`.
+   sends six logins instead of two. Once-per-test setup goes in `before`.
 
-3. **Pace the load, or you are not testing — you are being tested.** Without `pacing`, throughput
-   is whatever the system happens to allow, so two runs cannot be compared and a degrading system
-   quietly reduces its own load.
+2. **Pace the load:** Without `pacing`, throughput is uncontrolled and whatever the system happens 
+   to allow, so two runs cannot be compared and a degrading system quietly reduces its own load.
 
-4. **Response time alone is never the whole SLA.** A struggling system meets any latency target by
-   doing less work per unit time. Which threshold catches that depends on the thread group: run it
-   `iterations: 0` + `maxDuration` and the duration is pinned, so a `COUNT` threshold *is* a
-   throughput gate; with `iterations` fixed the count is pinned, so the same threshold only checks
-   completeness. State rate requirements as `iterations: 0` duration-bounded runs.
+3. **Response time alone is never the whole SLA.** A struggling system meets any latency target by
+   doing less work per unit time. Plans should ideally always assert the throughput. 
 
-5. **A load test still has to check its answers.** A system under stress starts returning fast,
+4. **A load test still has to check its answers.** A system under stress starts returning fast,
    cheap, *wrong* responses; an error page renders quicker than a checkout. Without a functional
    `assert` in the loop, the response times look excellent and mean nothing.
 
-6. **Real traffic is mixed.** Browsers, buyers and the nightly batch hit the system at once.
+5. **Real traffic is mixed.** Browsers, buyers and the nightly batch hit the system at once.
    `testScenario` composes those populations, each with its own profile — modelling them as one
    thread group produces a traffic mix nobody ever sees.
 
-7. **Data is part of the load.** The same account on every iteration measures the target's caches.
+6. **Data is part of the load.** The same account on every iteration measures the target's caches.
    A `dataSet` hands out a shared pool; where you pull from it — per iteration or per virtual user
    — decides both realism and how much data you need.
 
-8. **Names are the report.** Every dashboard, threshold and comparison groups by measurement name.
+7. **Names are the report.** Every dashboard, threshold and comparison groups by measurement name.
    Name the business step rather than the endpoint, and keep the name bounded — a name built from
    a variable creates one series per virtual user and nothing aggregates.
 

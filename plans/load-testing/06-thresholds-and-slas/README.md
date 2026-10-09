@@ -10,19 +10,17 @@ level: advanced
 
 # 06 — Thresholds and SLA gates
 
-A load test that produces a report somebody has to interpret is a load test nobody runs twice. One
-that comes back PASSED or FAILED is a gate you can put in a pipeline.
+In order for a load test to become a gate you can put in a pipeline, it has to assert the SLA
+and return PASSED or FAILED depending on these assertions.
 
 **The lesson is the commented [`automation-package.yaml`](automation-package.yaml).** This page
 holds the plan index and the reference tables.
-
-> **Two plans fail on purpose** — the plan names say which.
 
 ## The plans
 
 | Plan | Expected outcome | Shows |
 |------|------------------|-------|
-| A — A complete SLA gate | **PASSED** | All five aggregators, and which thresholds are worth writing |
+| A — A complete SLA gate | **PASSED** | Combining aggregators into one gate, and which thresholds are worth writing |
 | B — One SLA per population | **PASSED** | Per-thread-group `after` blocks in a scenario |
 | C — Threshold on the failure rate | **FAILED** (on purpose) | Counting successes, and why a run with real errors is red anyway |
 | D — A breached SLA | **FAILED** (on purpose) | What a violation looks like in the report |
@@ -34,43 +32,30 @@ holds the plan index and the reference tables.
 
 | Aggregator | What it is good for |
 |------------|---------------------|
-| `AVG` | the headline number — and the one that hides the tail |
-| `MAX` | the worst single transaction; catches the timeout nobody saw |
-| `MIN` | a floor — mostly used to prove the measurement is real, not empty |
+| `AVG` | the headline number |
+| `MAX` | the worst single transaction |
+| `MIN` | the fastest single transaction |
 | `COUNT` | how many transactions happened (completeness or throughput — see below) |
-| `SUM` | total time spent; rarely a threshold |
+| `SUM` | total time spent |
 
-A good gate uses several together; response time alone is always met by doing less work per unit
-time. Set `continueOnError: true` on the `after` block or it stops at the first breach.
+A good gate usually uses several together.
 
 ## Notes worth knowing
 
 Selective notes, not a full reference — the commented descriptor covers every case. These are the
 points most worth getting right.
 
-### What `COUNT` means, and gating throughput
+### Gating throughput
 
-A thread group pins exactly one of the two halves of throughput (transactions ÷ elapsed time), and
-that decides what a `COUNT` threshold means:
-
-| Configuration | Pinned | A `COUNT` threshold is |
-|---------------|--------|------------------------|
-| fixed `iterations` | the count | a **completeness** check — same number however slow the run was |
-| `iterations: 0` + `maxDuration` | the duration | a genuine **throughput** threshold |
-
-A completeness check is still worth asserting: a keyword's count is *how often that step was
-reached*, which falls short of `users` × `iterations` when an iteration fails part way, sits in an
-untaken branch, or hits a dry data pool. To gate the **rate**, use the `iterations: 0` + `maxDuration`
-shape from [02](../02-thread-group-configuration/) plan D.
-
-> A throughput aggregator that works whichever half is pinned is **not available yet**; it is planned
-> for `performanceAssert`. Until then, pin the duration and count — don't compute a rate in the plan.
+A throughput aggregator is currently **not available yet** for `performanceAssert`.
+Gating a throughput can be done by pinning the duration of a threadGroup  and defining
+an assertion on the `COUNT`.
 
 ### Where the threshold lives
 
 | Placement | Evaluated |
 |-----------|-----------|
-| `after` on a **thread group** | when that population finishes — usually the best home |
+| `after` on a **thread group** | when that population finishes |
 | `after` on a **testScenario** | once, when every thread group has finished |
 | `afterThread` | once per virtual user |
 
@@ -99,9 +84,8 @@ error budget.
 
 ### Reading the report
 
-- A breach names the actual value: `Average of Slow Search expected to be lower than 100 but was 1672`.
-- An empty series reads `No measurement is matching the defined filters.` — which covers a misspelled
-  name, an instrumented-node name, and a success measurement never emitted alike.
+A breach names the actual value next to the threshold, so it tells you how far off the run was:
+`Average of Slow Search expected to be lower than 100 but was 1672`.
 
 ## A note on `assertMetric`
 

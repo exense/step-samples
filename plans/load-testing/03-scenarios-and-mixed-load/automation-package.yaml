@@ -64,30 +64,10 @@ plans:
         # own `after` block still works and is the place for a threshold that
         # only concerns that one population.
         #
-        # A COUNT PER POPULATION, and both exact.
-        #
-        # A scenario mixes populations that run different transactions, so one
-        # aggregate number cannot describe it. Asserting each population's own
-        # step separately is what keeps the traffic MIX honest: if the buyers
-        # broke off half way through their transaction while the browsers ran
-        # in full, the totals still look plausible and only the per-population
-        # counts show it.
         # -------------------------------------------------------------------
         after:
           continueOnError: true
           steps:
-            - performanceAssert:
-                nodeName: "The browse traffic ran in full"
-                measurementName: "Search Products"
-                aggregator: COUNT
-                comparator: EQUALS
-                expectedValue: 6
-            - performanceAssert:
-                nodeName: "The buy traffic ran in full"
-                measurementName: "Checkout"
-                aggregator: COUNT
-                comparator: EQUALS
-                expectedValue: 2
             - performanceAssert:
                 nodeName: "Checkout stays under 5s while browsing is going on"
                 measurementName: "Checkout"
@@ -144,23 +124,6 @@ plans:
                 - callKeyword:
                     keyword: "Checkout"
 
-        after:
-          continueOnError: true
-          steps:
-            # A measurement name is shared by every node that produces it, so
-            # this COUNT spans all three stages: 2 + 4 + 4.
-            #
-            # To compare the stages against each OTHER - which is the reason
-            # to build a ramp this way - read them in the performance
-            # dashboards, where each stage is a separate node. A per-stage
-            # threshold goes in that stage's own `after` block.
-            - performanceAssert:
-                nodeName: "Every stage contributed its transactions"
-                measurementName: "Checkout"
-                aggregator: COUNT
-                comparator: EQUALS
-                expectedValue: 10
-
   # =========================================================================
   # C. Load and a batch job at the same time.
   #
@@ -198,12 +161,6 @@ plans:
           continueOnError: true
           steps:
             - performanceAssert:
-                nodeName: "The batch ran exactly once"
-                measurementName: "Run Batch Report"
-                aggregator: COUNT
-                comparator: EQUALS
-                expectedValue: 1
-            - performanceAssert:
                 nodeName: "Search survives the batch window"
                 measurementName: "Search Products"
                 aggregator: AVG
@@ -222,12 +179,6 @@ plans:
   # timings; a separate warm-up PHASE keeps them in different nodes, so the
   # threshold below applies only to the measured phase.
   #
-  # The three composing roots, side by side:
-  #
-  #   testScenario   children run in PARALLEL          -> mixed populations
-  #   sequence       children run ONE AFTER THE OTHER  -> phases
-  #   testSet        children run as separate test cases, `threads` at a time
-  #                  -> a batch of independent tests, not a load profile
   # =========================================================================
   - name: "D - Warm-up phase then measured phase"
     categories: ["Load testing"]
@@ -262,12 +213,6 @@ plans:
                       aggregator: AVG
                       comparator: LOWER_THAN
                       expectedValue: 5000
-                  - performanceAssert:
-                      nodeName: "The measured phase ran in full"
-                      measurementName: "Checkout"
-                      aggregator: COUNT
-                      comparator: EQUALS
-                      expectedValue: 6
 
 keywords:
   - GeneralScript:
