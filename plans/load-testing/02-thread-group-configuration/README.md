@@ -21,7 +21,7 @@ the knobs and calls out the handful that most often trip people up.
 
 | Plan | Shows |
 |------|-------|
-| A — The three counters | `gcounter`, `userId`, `literationId`, and `item` / `userItem` / `localItem` |
+| A — The three counters | `gcounter`, `userId`, `literationId` |
 | B — Pacing sets the throughput | `pacing` — controlling throughput instead of concurrency |
 | C — Ramping the load up | `rampup`, `pack`, `startOffset` |
 | D — Run for a fixed time | `iterations: 0` + `maxDuration` |
@@ -66,20 +66,19 @@ slowest iteration, or add users.
 
 A fixed count needs nothing special — `iterations: N`. Running for a *time* is the non-obvious one:
 it needs **`iterations: 0`** (unlimited) together with `maxDuration`. `maxDuration` on its own does
-**not** give a duration-bounded run, because the `iterations` default is 1:
+**not** give a duration-bounded run, because the `iterations` default is 1.
 
 ### The counters every thread group publishes
 
-| Variable | Value | Renamed by |
-|----------|-------|-----------|
-| `userId` | which virtual user this is — 1..`users` | `userItem` |
-| `literationId` | the iteration within **this** user — 1..`iterations` | `localItem` |
-| `gcounter` | the iteration across the **whole** group — 1..(`users`×`iterations`), unique | `item` |
+| Variable | Value |
+|----------|-------|
+| `userId` | which virtual user this is — 1..`users` |
+| `literationId` | the iteration within **this** user — 1..`iterations` |
+| `gcounter` | the iteration across the **whole** group — 1..(`users`×`iterations`), unique |
 
 Build unique test data from these — `gcounter` when it must be unique across the run, `userId` when
-it must be stable for one user. **Renaming replaces:** once `userItem: "shopperNo"` is set, `userId`
-no longer exists. Coerce with `as Integer` before passing a counter to a keyword, or it arrives as a
-string and `input.getInt` silently returns its default (see [06](../06-thresholds-and-slas/)).
+it must be stable for one user. Coerce with `as Integer` before passing a counter to a keyword, or
+it arrives as a string and `input.getInt` silently returns its default.
 
 ### The four blocks
 
@@ -93,8 +92,8 @@ string and `input.getInt` silently returns its default (see [06](../06-threshold
 
 **Put each step in the block that matches how often a real user does it.** Getting it wrong
 distorts the traffic mix with no visible error: a login in `children` instead of `beforeThread`
-sends one login per iteration instead of one per session. Plan E proves the placement with counts
-(1 warm-up, 2 logins, 6 checkouts, 2 logouts).
+sends one login per iteration instead of one per session. Plan E shows the placement: 1 warm-up,
+2 logins, 6 checkouts, 2 logouts.
 
 ## Key files
 

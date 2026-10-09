@@ -13,8 +13,8 @@ level: advanced
 Everything a load test reports comes out of measurements. Which ones exist, what they are called
 and how they nest is decided partly by Step and partly by the plan.
 
-**The lesson is the commented [`automation-package.yaml`](automation-package.yaml)** and the two
-measurement keywords. This page holds the plan index and the reference tables.
+**The lesson is the commented [`automation-package.yaml`](automation-package.yaml)** and the
+`Browse Catalog` keyword. This page holds the plan index and the reference tables.
 
 ## The plans
 
@@ -36,9 +36,8 @@ It is expected to pass.
 
 | File | Purpose |
 |------|---------|
-| `automation-package.yaml` | Two plans on where measurements come from and what they are worth |
+| `automation-package.yaml` | One plan on where measurements come from and which ones carry an SLA |
 | `keywords/browseCatalog.groovy` | Two custom measurements inside one keyword call |
-| `keywords/completePurchase.groovy` | A custom measurement wrapping three nested ones |
 | `keywords/checkout.groovy` | A plain keyword — its measurement is created for it |
 
 ## Running it

@@ -14,9 +14,9 @@ asserts its own outcome rather than merely running.
 |---|--------|-------|------------------|
 | 01 | [First load test](01-first-load-test/) | beginner | `threadGroup`, `users`, `iterations`, `instrumentNode`, `performanceAssert` |
 | 02 | [Configuring a thread group](02-thread-group-configuration/) | beginner | `pacing`, `rampup`, `pack`, `startOffset`, `maxDuration`, `before` / `beforeThread` / `afterThread` / `after`, the counters |
-| 03 | [Scenarios and mixed load](03-scenarios-and-mixed-load/) | intermediate | `testScenario`, staged ramps, `sequence` as phases, `testSet` |
+| 03 | [Scenarios and mixed load](03-scenarios-and-mixed-load/) | intermediate | `testScenario`, staged ramps, `sequence` as phases |
 | 04 | [Test data and data sets](04-test-data-and-datasets/) | intermediate | `dataSet`, `item`, `.next()`, `resetAtEnd`, data sources |
-| 05 | [Measurements](05-measurements/) | advanced | keyword / instrumented / custom measurements, `startMeasure`, naming |
+| 05 | [Measurements](05-measurements/) | advanced | keyword / instrumented / custom measurements, `startMeasure` |
 | 06 | [Thresholds and SLA gates](06-thresholds-and-slas/) | advanced | `performanceAssert` aggregators, failure rate, and why `assertMetric` is not a load-test gate |
 
 For what each control does and how to configure it, see the official
@@ -30,9 +30,9 @@ shape of a standalone plan, see [../reference/](../reference/).
 | `threadGroup` as a plan root | 01, 02, 05, 06 |
 | `users`, `iterations` | 01 |
 | `pacing`, `rampup`, `pack`, `startOffset`, `maxDuration` | 02 |
-| `item`, `userItem`, `localItem` and the `gcounter` / `userId` / `literationId` counters | 02 |
+| The `gcounter` / `userId` / `literationId` counters | 02 |
 | `before`, `beforeThread`, `afterThread`, `after` | 02, 04 |
-| `testScenario`, `sequence` and `testSet` as composing roots | 03 |
+| `testScenario` and `sequence` as composing roots | 03 |
 | `dataSet` + `.next()`, `resetAtEnd`, `csv` / `json-array` / `sql` | 04 |
 | `instrumentNode` | 01, 05 |
 | `output.startMeasure` / `stopMeasure` | 05 |
@@ -74,7 +74,7 @@ transaction, use a composite keyword or a custom measurement — see [05](05-mea
 
 The controls are the vocabulary; these are the ideas that decide whether a load plan is any good.
 
-1. **Put each step in the block that matches how often a real user does it.** If a real user logs in
+1. **Put each step in the block that matches how often a real user does it.** A real user logs in
    once per session, so a login belongs in `beforeThread`; move it into `children` and a 2 × 3 run
    sends six logins instead of two. Once-per-test setup goes in `before`.
 

@@ -57,5 +57,5 @@ no build, no browser, no system under test.
 step ap execute -p . -u <your-step-url> --token <your-token> --projectName <your-project>
 ```
 
-The report should show 6 passing transactions, 18 passing keyword calls and three passing
+The report should show 6 passing transactions, 18 passing keyword calls and two passing
 performance asserts.

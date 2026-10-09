@@ -26,8 +26,8 @@ plans:
   #          the thread group - see below.
   #   SUM    total time spent. Rarely a threshold; useful for capacity sums.
   #
-  # A throughput aggregator is currently **not available yet** for `performanceAssert`.
-  # Gating a throughput can be done by pinning the duration of a threadGroup  and defining
+  # A throughput aggregator is not available yet for `performanceAssert`.
+  # Gating a throughput can be done by pinning the duration of a thread group and defining
   # an assertion on the `COUNT`.
   # =========================================================================
   - name: "A - A complete SLA gate"
@@ -229,7 +229,7 @@ plans:
   #                        name - so on a single load test its numbers are
   #                        meaningless.
   #
-  # Its actual purpose is CROSS-EXECUTION assertion
+  # Its actual purpose is CROSS-EXECUTION assertion.
   # =========================================================================
 
   # =========================================================================

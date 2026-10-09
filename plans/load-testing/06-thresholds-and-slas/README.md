@@ -47,8 +47,8 @@ points most worth getting right.
 
 ### Gating throughput
 
-A throughput aggregator is currently **not available yet** for `performanceAssert`.
-Gating a throughput can be done by pinning the duration of a threadGroup  and defining
+A throughput aggregator is not available yet for `performanceAssert`.
+Gating a throughput can be done by pinning the duration of a thread group and defining
 an assertion on the `COUNT`.
 
 ### Where the threshold lives

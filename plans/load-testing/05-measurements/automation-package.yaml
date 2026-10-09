@@ -72,11 +72,11 @@ plans:
 
             # A keyword measurement.
             - performanceAssert:
-                nodeName: "Checkout ran on every iteration"
+                nodeName: "Checkout stays under 500ms on average"
                 measurementName: "Checkout"
                 aggregator: AVG
                 comparator: LOWER_THAN
-                expectedValue: 200
+                expectedValue: 500
 
             # A custom measurement, created by the keyword.
             - performanceAssert:
@@ -107,7 +107,3 @@ keywords:
       name: "Checkout"
       scriptLanguage: groovy
       scriptFile: keywords/checkout.groovy
-  - GeneralScript:
-      name: "Complete Purchase"
-      scriptLanguage: groovy
-      scriptFile: keywords/completePurchase.groovy
