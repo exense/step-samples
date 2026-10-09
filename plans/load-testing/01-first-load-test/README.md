@@ -22,10 +22,9 @@ no build, no browser, no system under test.
 ## What it covers
 
 - `threadGroup` as the root of a load plan, with `users` and `iterations`
-- choosing what one iteration contains — the unit your load numbers are denominated in
 - `instrumentNode` for an end-to-end transaction measurement
-- `performanceAssert` as the SLA gate, and the two rules about where it may go
-- why a load test still needs a functional `assert`
+- `performanceAssert` as the SLA gate
+- why a load test still needs functional `assert`s
 
 ## Where measurements come from
 
@@ -37,17 +36,11 @@ no build, no browser, no system under test.
 
 ## Two rules for `performanceAssert`
 
-1. **It must live in an `after` or `afterThread` block.** Anywhere else the run ends in
-   `TECHNICAL_ERROR`: `PerformanceAssert can only be defined in an 'after' or 'after thread' block`.
+1. **It must live in an `after` or `afterThread` block.** 
    `after` runs once when the thread group finishes (run-wide SLA); `afterThread` runs once per
    virtual user.
-2. **`measurementName` must name a keyword or custom measurement**, never an `instrumentNode` one —
-   that fails with `No measurement is matching the defined filters.`, the same message a misspelled
-   name gives. For an SLA on a multi-step transaction, emit a custom measurement — see
+2. **`measurementName` must name a keyword or custom measurement**, never an `instrumentNode` one. For an SLA on a multi-step transaction, emit a custom measurement or use a composite Keyword — see
    [05](../05-measurements/).
-
-Set `continueOnError: true` on the `after` block, or it stops at the first breach and hides the
-rest. Bound thresholds on both sides — an upper bound alone passes when the measurement is empty.
 
 ## Key files
 
