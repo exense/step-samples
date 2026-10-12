@@ -21,7 +21,7 @@ parameters:
   - key: "shopUrl"
     value: "http://localhost:8080"
     priority: 1
-  # Built from another parameter
+  # Built from another parameter. Technical setting: read by the keyword as a property, not passed as an input
   - key: "shopApiUrl"
     value: "${shopUrl}/api"
   - key: "shopUser"
@@ -43,7 +43,6 @@ plans:
                     keyword: "Open Application"
                     inputs:
                       - url: "${shopUrl}"
-                      - apiUrl: "${shopApiUrl}"
                     children:
                       - assert:
                           actual: "title"

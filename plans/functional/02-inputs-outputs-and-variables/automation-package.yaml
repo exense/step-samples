@@ -26,8 +26,7 @@ plans:
                       # Keep the output for later steps
                       - set:
                           key: "orderId"
-                          value:
-                            expression: "output.orderId"
+                          value: "${output.orderId}"
                 - callKeyword:
                     keyword: "Get Order"
                     inputs:
@@ -43,37 +42,30 @@ plans:
                           expected: "CONFIRMED"
 
           - testCase:
-              nodeName: "Where outputs can be read"
+              nodeName: "Pass an output to the next keyword"
               children:
-                - callKeyword:
-                    keyword: "Create Order"
-                    inputs:
-                      - customer: "jane"
-                      - quantity: 1
-                    children:
-                      - set:
-                          key: "firstOrderId"
-                          value:
-                            expression: "output.orderId"
-                - check:
-                    nodeName: "previous holds the output of the call just before"
-                    expression: "previous.orderId == 'ORD-JANE-1'"
                 - callKeyword:
                     keyword: "Create Order"
                     inputs:
                       - customer: "john"
                       - quantity: 1
-                - check:
-                    nodeName: "previous now holds the second call, the variable still holds the first"
-                    expression: "previous.orderId == 'ORD-JOHN-1' && firstOrderId == 'ORD-JANE-1'"
+                # previous holds the outputs of the keyword call just before
+                - callKeyword:
+                    keyword: "Get Order"
+                    inputs:
+                      - orderId: "${previous.orderId}"
+                    children:
+                      - assert:
+                          actual: "orderId"
+                          operator: EQUALS
+                          expected: "ORD-JOHN-1"
 
           - testCase:
               nodeName: "Unique test data"
               children:
                 - set:
                     key: "runId"
-                    value:
-                      expression: "UUID.randomUUID().toString().take(8)"
+                    value: "${UUID.randomUUID().toString().take(8)}"
                 - set:
                     key: "basketSize"
                     value:
