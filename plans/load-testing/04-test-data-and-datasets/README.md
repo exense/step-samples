@@ -17,15 +17,15 @@ users collide. `dataSet` is the control for that — and it does **not** work li
 **The lesson is the commented [`automation-package.yaml`](automation-package.yaml)**, which walks
 each shape at its node. This page holds the plan index and the reference tables.
 
-## The plans
+## Plans
 
-| Plan | Expected outcome | Shows |
-|------|------------------|-------|
-| A — One pool feeding one thread group | **PASSED** | Declaring in `before`, `item`, `.next()` |
-| B — One pool shared by two thread groups | **PASSED** | A shared cursor across parallel populations |
-| C — One account per virtual user | **PASSED** | Pulling in `beforeThread` instead of the loop body |
-| D — The pool runs dry | **FAILED** (on purpose) | `resetAtEnd: false` returns `null`, silently |
-| E — A pool that needs no file | **PASSED** | `json-array`, and the other sources |
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - One pool feeding one thread group | Giving each iteration the next row of a data set | PASSED |
+| B - One pool shared by two thread groups | Two user populations taking rows from the same data set | PASSED |
+| C - One account per virtual user | Giving each virtual user its own row for the whole test | PASSED |
+| D - The pool runs dry (intentionally fails) | What happens when a data set has no rows left | FAILED |
+| E - A pool that needs no file | A data set defined in the plan instead of a file | PASSED |
 
 ## Key files
 

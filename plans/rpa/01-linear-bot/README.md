@@ -29,6 +29,12 @@ external system.
 - `sleep` for asynchronous processing in the system under test — and why it is the wrong
   tool for waiting on a UI
 
+## Plans
+
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - Linear bot | A single bot run: open the application, process one record, verify the result, close | PASSED |
+
 ## Chaining keyword outputs: the three bindings
 
 This is where most hand-written Step plans go wrong. Three bindings can carry a keyword's output

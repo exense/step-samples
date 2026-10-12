@@ -18,16 +18,14 @@ measures a system nobody is using. `testScenario` composes those populations —
 **The lesson is the commented [`automation-package.yaml`](automation-package.yaml).** This page
 holds the plan index and the reference tables.
 
-## The plans
+## Plans
 
-| Plan | Shows |
-|------|-------|
-| A — Parallel thread groups | `testScenario` with two thread groups, `startOffset`, scenario-wide `after` |
-| B — Step ramp in three stages | A staged ramp built from several thread groups |
-| C — Background load | A thread group next to a plain `sequence` |
-| D — Warm-up phase | `sequence` as the root — phases instead of parallelism |
-
-All four are expected to pass.
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - Parallel thread groups | Two user populations running at the same time | PASSED |
+| B - Step ramp in three stages | Increasing the load in stages | PASSED |
+| C - Background load | Measuring the application while a background job runs | PASSED |
+| D - Warm-up phase | A warm-up phase before the measured phase | PASSED |
 
 ## Notes worth knowing
 

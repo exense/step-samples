@@ -17,17 +17,15 @@ exactly N clicks. This sample covers every thread-group knob and the four before
 **The lesson is the commented [`automation-package.yaml`](automation-package.yaml).** This page maps
 the knobs and calls out the handful that most often trip people up.
 
-## The plans
+## Plans
 
-| Plan | Shows |
-|------|-------|
-| A — The three counters | `gcounter`, `userId`, `literationId` |
-| B — Pacing sets the throughput | `pacing` — controlling throughput instead of concurrency |
-| C — Ramping the load up | `rampup`, `pack`, `startOffset` |
-| D — Run for a fixed time | `iterations: 0` + `maxDuration` |
-| E — Setup per test versus per user | `before`, `beforeThread`, `afterThread`, `after` |
-
-All five are expected to pass.
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - The three counters | Counters identifying the iteration and the virtual user | PASSED |
+| B - Pacing sets the throughput | Controlling the throughput with a fixed pace per iteration | PASSED |
+| C - Ramping the load up | Starting the virtual users progressively | PASSED |
+| D - Run for a fixed time | Running for a fixed duration instead of a number of iterations | PASSED |
+| E - Setup per test versus per user | Setup and cleanup once per test and once per virtual user | PASSED |
 
 ## The knobs
 

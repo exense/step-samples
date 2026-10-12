@@ -23,15 +23,15 @@ showing a different loop or data source, all doing the same "process each record
 - `for` — a plain counter loop
 - **Writing results back into the source row** with `script` + `row.put(...)`
 
-## The plans
+## Plans
 
-| Plan | Shows |
-|------|-------|
-| A | `forEach` + `csv`, `row.<Column>` expressions |
-| B | `item` to rename the row variable, `threads: 2`, `maxFailedLoops` |
-| C | `json-array` and `sequence` sources; `folder` documented |
-| D | `for` with `start` / `end` / `inc` |
-| E | Write-back with `script` + `row.put(...)` |
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - Process records from a CSV file | Looping over the rows of a CSV file | PASSED |
+| B - Process records in parallel | Processing rows in parallel, with a tolerance for failed rows | PASSED |
+| C - Other data sources | Looping over a JSON array and a number sequence | PASSED |
+| D - Counter loop | A loop driven by a counter | PASSED |
+| E - Write results back to the data source | Writing a result back into the processed row | PASSED |
 
 ## Two things worth knowing before you copy this
 

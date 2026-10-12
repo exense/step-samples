@@ -23,13 +23,13 @@ starts encoding business rules.
 - **How `set` scoping works**, and where to declare a variable that must outlive a branch
 - `skipNode` to switch a step off without deleting it
 
-## The plans
+## Plans
 
-| Plan | Shows |
-|------|-------|
-| A | `switch` / `case` per record type, plus the fallback pattern for unmatched values |
-| B | `if` threshold routing, `set` scoping, `assert` with `doNegate` |
-| C | `skipNode` on a temporarily disabled step |
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - Switch with a fallback | Routing each record by its type, with a fallback for unknown types | PASSED |
+| B - If and variable scope | Taking a decision with conditions, and where variables set in a branch are visible | PASSED |
+| C - Temporarily disabled steps | Switching a step off without removing it | PASSED |
 
 ## Notes on `switch`
 

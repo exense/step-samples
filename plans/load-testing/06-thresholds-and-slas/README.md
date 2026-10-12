@@ -16,14 +16,14 @@ and return PASSED or FAILED depending on these assertions.
 **The lesson is the commented [`automation-package.yaml`](automation-package.yaml).** This page
 holds the plan index and the reference tables.
 
-## The plans
+## Plans
 
-| Plan | Expected outcome | Shows |
-|------|------------------|-------|
-| A — A complete SLA gate | **PASSED** | Combining aggregators into one gate, and which thresholds are worth writing |
-| B — One SLA per population | **PASSED** | Per-thread-group `after` blocks in a scenario |
-| C — Threshold on the failure rate | **FAILED** (on purpose) | Counting successes, and why a run with real errors is red anyway |
-| D — A breached SLA | **FAILED** (on purpose) | What a violation looks like in the report |
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - A complete SLA gate | An SLA gate combining several thresholds | PASSED |
+| B - One SLA per population | A separate SLA for each user population | PASSED |
+| C - Threshold on the failure rate (intentionally fails) | A threshold on the share of failed transactions | FAILED |
+| D - A breached SLA (intentionally fails) | What a breached SLA looks like in the report | FAILED |
 
 `performanceAssert` is the control for every one of these. A second control, `assertMetric`, is
 **not** a load-test gate — see the note at the end for what it is for.

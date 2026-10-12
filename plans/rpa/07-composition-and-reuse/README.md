@@ -22,6 +22,16 @@ together and for keeping them out of each other's way.
 - `testSet` to run several test cases from one plan, several at a time
 - `synchronized` to serialise access to a single shared licence
 
+## Plans
+
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - Use a composite keyword as a sub-bot | Packaging a sub-process as one reusable keyword with inputs and outputs | PASSED |
+| B - Call another plan | Running another plan from a plan, with an input | PASSED |
+| Archive processed records | Plan called by plan B; it needs an input from its caller and is excluded from normal runs | Not run on its own |
+| C - Test set of bots | Running several bots as test cases of one test set, in parallel | PASSED |
+| D - Synchronized block | Letting only one parallel worker at a time into a section | PASSED |
+
 ## The two reuse mechanisms
 
 | Mechanism | Use it when |

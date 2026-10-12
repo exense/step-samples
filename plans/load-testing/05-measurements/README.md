@@ -16,13 +16,11 @@ and how they nest is decided partly by Step and partly by the plan.
 **The lesson is the commented [`automation-package.yaml`](automation-package.yaml)** and the
 `Browse Catalog` keyword. This page holds the plan index and the reference tables.
 
-## The plans
+## Plans
 
-| Plan | Shows |
-|------|-------|
-| A — Where measurements come from | The three sources side by side, and which ones carry an SLA |
-
-It is expected to pass.
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - Where measurements come from | Keyword, instrumented-node and custom measurements side by side | PASSED |
 
 ## The three sources
 

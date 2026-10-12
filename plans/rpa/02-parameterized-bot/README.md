@@ -22,6 +22,12 @@ inputs each run.
 - How a schedule pre-fills the same values for an unattended run (see
   [06-session-and-scheduling](../06-session-and-scheduling/))
 
+## Plans
+
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - Parameterized bot | A bot whose inputs come from execution parameters and protected parameters, with defaults | PASSED |
+
 ## The three ways a value reaches a plan
 
 | Source | Declared where | Use it for |

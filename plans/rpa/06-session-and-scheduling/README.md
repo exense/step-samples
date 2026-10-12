@@ -21,6 +21,13 @@ anybody launching it.
 - `agents` and `routing` for sending a bot to the right machine
 - `schedules` with a Quartz cron, `cronExclusions` and `executionParameters`
 
+## Plans
+
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - Stateful bot in one session | Keeping one application session across several keyword calls | PASSED |
+| B - Route the bot to the right agent | Running a bot on an agent with specific capabilities | PASSED |
+
 ## Why a session
 
 By default each keyword call takes whatever agent token is free, so two consecutive calls

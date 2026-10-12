@@ -25,16 +25,16 @@ giving up too early or hanging forever.
 - `while` vs `retryIfFails` for waiting — what actually separates them
 - `failure` for aborting with your own message
 
-## The plans
+## Plans
 
-| Plan | Expected outcome | Shows |
-|------|------------------|-------|
-| A — Retry a flaky step | **PASSED** | `retryIfFails` absorbs two failures, passes on attempt 3 |
-| B — Guaranteed cleanup | **FAILED** (on purpose) | `after` cleanup runs; subsequent steps in the sequence do not |
-| C — Error propagation flags | **FAILED** (on purpose) | Both flags, and how they combine |
-| D1 — Wait with while | **PASSED** | `condition`, `postCondition`, `pacing`, `maxIterations`, `timeout` |
-| D2 — Wait with retryIfFails | **PASSED** | `retryIfFails` + a nested `assert` as the not-ready signal |
-| E — Explicit business failure | **TECHNICAL_ERROR** (on purpose) | `failure` with a custom message |
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - Retry a flaky step | Retrying a step that fails intermittently | PASSED |
+| B - Guaranteed cleanup (intentionally fails) | Cleanup that runs even when the bot fails | FAILED |
+| C - Error propagation flags (intentionally fails) | Continuing after an error, for a whole block or for a single step | FAILED |
+| D1 - Wait with while | Waiting with a loop that checks a condition | PASSED |
+| D2 - Wait with retryIfFails | Waiting by retrying until a check passes | PASSED |
+| E - Explicit business failure (intentionally fails) | Stopping the run with a custom error message | TECHNICAL_ERROR |
 
 ## Notes on the controls
 

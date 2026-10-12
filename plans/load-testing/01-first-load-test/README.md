@@ -26,6 +26,12 @@ no build, no browser, no system under test.
 - `performanceAssert` as the SLA gate
 - why a load test still needs functional `assert`s
 
+## Plans
+
+| Plan | Shows | Expected |
+|------|-------|----------|
+| A - First load test | Several virtual users repeating a transaction, with an SLA on its response time | PASSED |
+
 ## Where measurements come from
 
 | Measurement | Named after | Created by | Can carry a `performanceAssert` |
