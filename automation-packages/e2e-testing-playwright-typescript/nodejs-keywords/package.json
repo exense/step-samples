@@ -1,0 +1,27 @@
+{
+  "name": "e2e-testing-playwright-typescript-keywords",
+  "version": "1.0.0",
+  "description": "Step keywords for the OpenCart / webmail end-to-end test, implemented in TypeScript with the Playwright API",
+  "private": true,
+  "scripts": {
+    "test": "npm run build && npm run typecheck && node --import tsx --test \"tests/**/*.test.ts\"",
+    "build": "tsc --build",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "clean": "tsc --build --clean",
+    "prepare": "npm run build && playwright install chromium"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "author": "exense GmbH",
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "1.58.2",
+    "@types/node": "24.6.2",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "step-node-agent": "3.30.3",
+    "tsx": "^4.19.3"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  // Type-checks the unit tests, which are not part of the keyword build:
+  // `tsx` strips types without checking them, so without this project the test
+  // sources would never be verified by the compiler.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": ["./src/**/*.ts", "./tests/**/*.ts"]
+}

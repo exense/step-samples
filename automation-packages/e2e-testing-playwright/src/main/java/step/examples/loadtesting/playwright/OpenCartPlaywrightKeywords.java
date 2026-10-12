@@ -1,6 +1,7 @@
 package step.examples.loadtesting.playwright;
 
 import com.microsoft.playwright.*;
+import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.LoadState;
 import com.microsoft.playwright.options.SelectOption;
 import step.grid.io.AttachmentHelper;
@@ -26,7 +27,12 @@ public class OpenCartPlaywrightKeywords extends AbstractKeyword {
 
             Page page = context.newPage();
             page.navigate("https://opencart-prf.stepcloud.ch/");
-            page.locator("text=" + product).click();
+            // Type the product name into the search bar and submit
+            Locator searchBar = page.locator("input[name='search']");
+            searchBar.fill(product);
+            searchBar.press("Enter");
+            // Open the detail page of the first matching search result
+            page.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName(product)).first().click();
             // The previous click loads quite a few resources such as jQuery etc.;
             // If we don't include this wait, the next click may hang forever.
             page.waitForLoadState(LoadState.DOMCONTENTLOADED);
