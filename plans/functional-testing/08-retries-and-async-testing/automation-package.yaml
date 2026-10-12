@@ -55,7 +55,7 @@ plans:
                 - set:
                     key: "orderId"
                     value: "${output.orderId}"
-          # Stands in for the shop, which publishes this event when the order ships
+          # Publishes the event; usually done by another plan running in parallel
           - callKeyword:
               keyword: "EBC_Put"
               inputs:
