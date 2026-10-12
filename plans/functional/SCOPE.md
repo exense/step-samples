@@ -115,24 +115,10 @@ plan.
 | Plan | Shows | Expected |
 |------|-------|----------|
 | A, Assert operators | `assert` with `equals`, `contains`, `beginsWith`, `endsWith`, `matches`, `lessThan`, `greaterThan`, `isNull`, `doNegate`, `customErrorMessage`; one `check` for a condition across two keyword outputs, which `assert` cannot express | PASSED |
-| B, Negative tests: business errors (priority) | Invalid login and an invalid order are rejected: the keyword returns a business error output, and the test asserts on it | PASSED |
-| C, Handling a technical error | See below | to define (FAILED is likely: the error stays an error) |
-| D, "Expected to fail - collect all failures" | Several asserts with `continueOnError`; two fail on purpose and both are reported | FAILED (on purpose) |
+| B, Negative tests | Invalid login and an invalid order are rejected: the keyword returns a business error output, and the test asserts on it | PASSED |
+| C, "Expected to fail - collect all failures" | Several asserts with `continueOnError`; two fail on purpose and both are reported | FAILED (on purpose) |
 
-**Plan C framing.** A technical error means something unexpected went wrong, so handling it in
-the plan is not good practice: it should fail the test. The plan is there for the cases where
-people still want to act on the error, such as reporting it somewhere else. Pattern: a `set`
-inside the `callKeyword` node reads the error with `callReport.error.msg`, then passes it on
-(e.g. to a reporting keyword). The README states this framing first.
-
-**Controls:** `assert`, `check`, `doNegate`, `customErrorMessage`, `continueOnError`,
-`callReport.error.msg`
-
-**To verify in phase 2 (plan C):**
-- `callReport.error.msg` is readable from a `set` child of the failing `callKeyword` (probably
-  undocumented)
-- whether children of a failed call run at all
-- the resulting verdict of the test case
+**Controls:** `assert`, `check`, `doNegate`, `customErrorMessage`, `continueOnError`
 
 ## 06 Data-driven tests
 
