@@ -9,8 +9,8 @@
 #   inside an automation package manifest.
 #
 # This file is a syntax illustration, not a runnable plan - the keywords it
-# calls do not exist. For plans you can execute, see ../rpa/ and
-# ../load-testing/
+# calls do not exist. For plans you can execute, see ../functional-testing/,
+# ../rpa/ and ../load-testing/
 # ==============================================================================
 ---
 version: 1.0.0

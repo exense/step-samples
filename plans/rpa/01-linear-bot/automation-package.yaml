@@ -9,7 +9,7 @@
 # that simulate a back-office application, so the package runs on any Java
 # agent with no browser, no build and no external system.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "rpa-01-linear-bot"
 
 plans:
@@ -96,8 +96,7 @@ plans:
                             expression: "output.amount as Integer"
                       - set:
                           key: customer
-                          value:
-                            expression: "output.customer"
+                          value: "${output.customer}"
                       # An `assert` nested under the call is the one place
                       # where `output.<field>` is used directly - no `set`.
                       - assert:
@@ -107,8 +106,7 @@ plans:
                           customErrorMessage: "The record was not in PENDING state - nothing to submit."
 
                 - echo:
-                    text:
-                      expression: "'Submitting ' + amount + ' for ' + customer"
+                    text: "Submitting ${amount} for ${customer}"
                     description: "Echo writes to the execution report - cheap audit trail for an unattended bot."
 
                 # -----------------------------------------------------
@@ -127,38 +125,23 @@ plans:
                     children:
                       - set:
                           key: confirmationId
-                          value:
-                            expression: "output.confirmationId"
+                          value: "${output.confirmationId}"
 
                       # The keyword echoes back what it received, so this
-                      # assert proves the VALUE arrived - not the variable
-                      # name. Swap the input above for "${amount}" and
-                      # this is what catches it.
+                      # assert proves the value arrived.
                       - assert:
                           actual: "receivedAmount"
                           operator: EQUALS
                           expected: "1250"
-                          customErrorMessage: "The amount did not arrive - check that the input uses expression:, not a static string."
+                          customErrorMessage: "The amount did not arrive."
 
                 # -----------------------------------------------------
-                # ASIDE - there is no string interpolation in this YAML.
+                # ASIDE - text or typed value.
                 #
-                # Every reference to a variable above uses `expression:`.
-                # A plain string is a STATIC value, passed through as-is:
-                #
-                #     - amount: "${amount}"     # WRONG - the keyword
-                #                               # receives the literal
-                #                               # 9 characters "${amount}"
-                #     - amount:                 # RIGHT
-                #         expression: "amount"
-                #
-                # This is easiest to miss when the keyword ignores the input
-                # or only checks that it is non-empty: the plan goes green
-                # while the bot has been fed nonsense. This holds in keyword
-                # inputs, echo text and return outputs alike.
-                #
-                # To build a message out of variables, concatenate in the
-                # expression: expression: "'Record ' + recordId + ' done'"
+                # `${...}` embeds a variable in a text value, as in the echo
+                # above: "Submitting ${amount} for ${customer}". The result is
+                # always text. `amount` is passed with `expression:` because
+                # the keyword expects a number.
                 # -----------------------------------------------------
 
                 # -----------------------------------------------------

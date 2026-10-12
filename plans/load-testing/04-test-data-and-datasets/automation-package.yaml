@@ -8,7 +8,7 @@
 #
 # `dataSet` is the control for that, and it does NOT work like `forEach`.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "load-04-test-data-and-datasets"
 
 plans:
@@ -66,16 +66,13 @@ plans:
           - callKeyword:
               keyword: "Login"
               inputs:
-                - user:
-                    expression: "shopper.Username"
-                - password:
-                    expression: "shopper.Password"
+                - user: "${shopper.Username}"
+                - password: "${shopper.Password}"
 
           - callKeyword:
               keyword: "Place Order"
               inputs:
-                - productId:
-                    expression: "shopper.ProductId"
+                - productId: "${shopper.ProductId}"
               children:
                 - assert:
                     actual: "product"
@@ -129,8 +126,7 @@ plans:
                 - callKeyword:
                     keyword: "Login"
                     inputs:
-                      - user:
-                          expression: "shopper.Username"
+                      - user: "${shopper.Username}"
                     children:
                       - assert:
                           actual: "account"
@@ -149,8 +145,7 @@ plans:
                 - callKeyword:
                     keyword: "Place Order"
                     inputs:
-                      - productId:
-                          expression: "shopper.ProductId"
+                      - productId: "${shopper.ProductId}"
                     children:
                       - assert:
                           actual: "product"
@@ -197,10 +192,8 @@ plans:
                 keyword: "Login"
                 nodeName: "Log in"
                 inputs:
-                  - user:
-                      expression: "myShopper.Username"
-                  - password:
-                      expression: "myShopper.Password"
+                  - user: "${myShopper.Username}"
+                  - password: "${myShopper.Password}"
                 children:
                   - assert:
                       actual: "account"
@@ -211,8 +204,7 @@ plans:
           - callKeyword:
               keyword: "Place Order"
               inputs:
-                - productId:
-                    expression: "myShopper.ProductId"
+                - productId: "${myShopper.ProductId}"
               children:
                 - assert:
                     actual: "product"
@@ -262,8 +254,7 @@ plans:
           - callKeyword:
               keyword: "Place Order"
               inputs:
-                - productId:
-                    expression: "shopper.ProductId"
+                - productId: "${shopper.ProductId}"
 
   # =========================================================================
   # E. Other data sources.
@@ -313,8 +304,7 @@ plans:
           - callKeyword:
               keyword: "Place Order"
               inputs:
-                - productId:
-                    expression: "product.ProductId"
+                - productId: "${product.ProductId}"
               children:
                 - assert:
                     actual: "product"

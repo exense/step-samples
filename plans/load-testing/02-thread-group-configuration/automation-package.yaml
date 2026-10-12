@@ -10,7 +10,7 @@
 # decide what runs once, what runs once per virtual user, and what runs on
 # every iteration.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "load-02-thread-group-configuration"
 
 plans:
@@ -45,8 +45,7 @@ plans:
               inputs:
                 # gcounter: unique across the whole thread group, so
                 # every order reference in the run is different.
-                - orderRef:
-                    expression: "'ORD-' + gcounter"
+                - orderRef: "ORD-${gcounter}"
                 # userId: stable for the life of this virtual user.
                 - shopper:
                     expression: "userId"

@@ -9,7 +9,7 @@
 # There are three sources of measurements, and only two of them can carry an
 # SLA.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "load-05-measurements"
 
 plans:

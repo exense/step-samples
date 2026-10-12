@@ -36,8 +36,8 @@ inputs each run.
 | Step parameter | `parameters:` in `automation-package.yaml` | Credentials, endpoints, anything centrally managed |
 | Schedule parameter | `schedules[].executionParameters` | The values an unattended run starts with |
 
-All three end up as ordinary plan variables, read with `expression: "name"`. Note there is
-**no** `${...}` interpolation in this YAML — see [01-linear-bot](../01-linear-bot/).
+All three end up as ordinary plan variables, read with `"${name}"` in a text value, or with
+`expression: "name"` when the value must keep its type — see [01-linear-bot](../01-linear-bot/).
 
 ## Defaulting an execution parameter
 

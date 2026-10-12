@@ -9,7 +9,7 @@ documentation:
 | File | Shows |
 |------|-------|
 | [basic-plan-syntax.yml](basic-plan-syntax.yml) | The shape of a plan: a root artefact, `callKeyword` with inputs, capturing an output with a nested `set`, `if`, `assert` and `check` |
-| [dynamic-values.yml](dynamic-values.yml) | Static values vs `expression:`, where plan variables come from, and dynamic keyword names and `routing` |
+| [dynamic-values.yml](dynamic-values.yml) | Static values, `${...}` interpolation and `expression:`, where plan variables come from, and dynamic keyword names and `routing` |
 | [performance-assert.yml](performance-assert.yml) | A `threadGroup` with a `performanceAssert` — the load-testing shape, and the `after`-block rule |
 
 These files are **syntax illustrations, not runnable plans**: the keywords they call do not
@@ -40,7 +40,7 @@ Inside an `automation-package.yaml` the same tree sits one level deeper, under a
 in `plans:`:
 
 ```yaml
-version: "1.2.0"
+version: "1.3.0"
 name: "my-package"
 plans:
   - name: "Basic plan syntax"

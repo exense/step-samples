@@ -9,8 +9,8 @@
 #   inside an automation package manifest.
 #
 # This file is a syntax illustration, not a runnable plan - the keywords it
-# calls do not exist. For plans you can execute, see ../rpa/ and
-# ../load-testing/
+# calls do not exist. For plans you can execute, see ../functional-testing/,
+# ../rpa/ and ../load-testing/
 # ==============================================================================
 ---
 version: 1.0.0
@@ -22,14 +22,16 @@ root:
     children:
 
       # ------------------------------------------------------------------
-      # Every value is one of two things.
+      # Every value is one of three things.
       #
       #   a plain value          a STATIC literal, passed through verbatim
-      #   expression: "..."      Groovy, evaluated against the plan variables
+      #   "...${expr}..."        text with Groovy expressions embedded; the
+      #                          result is always text
+      #   expression: "..."      Groovy, evaluated against the plan variables;
+      #                          the result keeps its type (number, boolean,
+      #                          object)
       #
-      # There is NO string interpolation: "${amount}" is the literal seven
-      # characters, not the value of `amount`. To build a string from
-      # variables, concatenate inside the expression.
+      # Write $${ for a literal ${.
       # ------------------------------------------------------------------
       - set:
           key: recordId
@@ -44,8 +46,7 @@ root:
             expression: "attempts + 1"         # arithmetic, not string work
 
       - echo:
-          text:
-            expression: "'Record ' + recordId + ' attempt ' + attempts"
+          text: "Record ${recordId} attempt ${attempts}"   # text built from variables
 
       # ------------------------------------------------------------------
       # The same choice applies to keyword inputs - and to the keyword name
@@ -59,10 +60,9 @@ root:
             - literalString: "abc"             # static string
             - quotedNumber: "777"              # static STRING "777"
             - unquotedNumber: 777              # static NUMBER 777
-            - fromVariable:
-                expression: "recordId"         # a plan variable
+            - fromVariable: "${recordId}"      # a plan variable, as text
             - computed:
-                expression: "attempts * 10"    # any Groovy
+                expression: "attempts * 10"    # any Groovy; stays a NUMBER
 
       - callKeyword:
           keyword:

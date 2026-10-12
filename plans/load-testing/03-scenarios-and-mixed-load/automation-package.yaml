@@ -10,7 +10,7 @@
 # `testScenario` is the control that composes those populations: it runs its
 # children IN PARALLEL, each with its own load profile.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "load-03-scenarios-and-mixed-load"
 
 plans:

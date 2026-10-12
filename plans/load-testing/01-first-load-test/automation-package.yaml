@@ -10,7 +10,7 @@
 # that simulate a shop API, so the package runs on any Java agent with no
 # build, no browser and no system under test.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "load-01-first-load-test"
 
 plans:
@@ -62,27 +62,23 @@ plans:
                       # so later siblings can read it.
                       - set:
                           key: productId
-                          value:
-                            expression: "output.firstProductId"
+                          value: "${output.firstProductId}"
 
                 - callKeyword:
                     keyword: "Add To Cart"
                     nodeName: "Add the product to the cart"
                     inputs:
-                      - productId:
-                          expression: "productId"
+                      - productId: "${productId}"
                     children:
                       - set:
                           key: cartId
-                          value:
-                            expression: "output.cartId"
+                          value: "${output.cartId}"
 
                 - callKeyword:
                     keyword: "Checkout"
                     nodeName: "Check out"
                     inputs:
-                      - cartId:
-                          expression: "cartId"
+                      - cartId: "${cartId}"
                     children:
 
                       # ---------------------------------------------

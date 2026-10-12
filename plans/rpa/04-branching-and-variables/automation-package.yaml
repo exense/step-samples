@@ -6,7 +6,7 @@
 # auto-approve small amounts, escalate large ones. This is where an RPA plan
 # stops being a script and starts encoding business rules.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "rpa-04-branching-and-variables"
 
 plans:
@@ -55,18 +55,15 @@ plans:
                     keyword: "Read Record"
                     nodeName: "Read the record"
                     inputs:
-                      - recordId:
-                          expression: "row.RecordId"
-                      - recordType:
-                          expression: "row.Type"
+                      - recordId: "${row.RecordId}"
+                      - recordType: "${row.Type}"
                       - amount:
                           expression: "row.Amount"
                     children:
                       # Promote the fields the routing below needs.
                       - set:
                           key: recordType
-                          value:
-                            expression: "output.recordType"
+                          value: "${output.recordType}"
                       - set:
                           key: amount
                           value:
@@ -89,8 +86,7 @@ plans:
                           value: "INVOICE"
                           children:
                             - echo:
-                                text:
-                                  expression: "'Invoice path for ' + recordType"
+                                text: "Invoice path for ${recordType}"
                             - set:
                                 key: routed
                                 value: "INVOICE"
@@ -98,8 +94,7 @@ plans:
                           value: "ORDER"
                           children:
                             - echo:
-                                text:
-                                  expression: "'Order path for ' + recordType"
+                                text: "Order path for ${recordType}"
                             - set:
                                 key: routed
                                 value: "ORDER"
@@ -107,8 +102,7 @@ plans:
                           value: "CREDIT_NOTE"
                           children:
                             - echo:
-                                text:
-                                  expression: "'Credit note path for ' + recordType"
+                                text: "Credit note path for ${recordType}"
                             - set:
                                 key: routed
                                 value: "CREDIT_NOTE"
@@ -121,8 +115,7 @@ plans:
                       expression: "routed == 'NONE'"
                     children:
                       - echo:
-                          text:
-                            expression: "'Unhandled type ' + recordType + ' - sending to manual review'"
+                          text: "Unhandled type ${recordType} - sending to manual review"
                       - set:
                           key: routed
                           value: "MANUAL"
@@ -162,8 +155,7 @@ plans:
                       expression: "output.amount as Integer"
                 - set:
                     key: recordId
-                    value:
-                      expression: "output.recordId"
+                    value: "${output.recordId}"
 
           # ---------------------------------------------------------------
           # The decision. Note the variable `decision` is declared BEFORE the
@@ -188,8 +180,7 @@ plans:
                 - callKeyword:
                     keyword: "Escalate"
                     inputs:
-                      - recordId:
-                          expression: "recordId"
+                      - recordId: "${recordId}"
                     children:
                       - assert:
                           actual: "decision"
@@ -207,8 +198,7 @@ plans:
                 - callKeyword:
                     keyword: "Auto Approve"
                     inputs:
-                      - recordId:
-                          expression: "recordId"
+                      - recordId: "${recordId}"
                     children:
                       # `doNegate` inverts the operator: assert that the
                       # decision is NOT the escalation outcome.
@@ -229,8 +219,7 @@ plans:
               expression: "decision != 'UNDECIDED'"
 
           - echo:
-              text:
-                expression: "'Record ' + recordId + ' (' + amount + ') -> ' + decision"
+              text: "Record ${recordId} (${amount}) -> ${decision}"
 
   # =========================================================================
   # C. skipNode - switching a branch off without deleting it.

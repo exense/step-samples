@@ -12,7 +12,7 @@
 #   3. Schedule parameters  - the same mechanism, pre-filled for an unattended
 #                             run (see sample 06)
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "rpa-02-parameterized-bot"
 
 plans:
@@ -54,8 +54,7 @@ plans:
               nodeName: "Use the default amount when none is given"
 
           - echo:
-              text:
-                expression: "'Bot starting for record ' + recordId + ', amount ' + amount"
+              text: "Bot starting for record ${recordId}, amount ${amount}"
 
           # -------------------------------------------------------------
           # 2. Step parameters, inside a session.
@@ -80,10 +79,8 @@ plans:
                     nodeName: "Log into the back office"
                     description: "Credentials come from protected Step parameters, not from the plan."
                     inputs:
-                      - user:
-                          expression: "botUser"
-                      - password:
-                          expression: "botPassword"
+                      - user: "${botUser}"
+                      - password: "${botPassword}"
                     children:
                       - assert:
                           actual: "status"
@@ -103,15 +100,13 @@ plans:
                     keyword: "Submit Record"
                     nodeName: "Submit the requested record"
                     inputs:
-                      - recordId:
-                          expression: "recordId"
+                      - recordId: "${recordId}"
                       - amount:
                           expression: "amount"
                     children:
                       - set:
                           key: confirmationId
-                          value:
-                            expression: "output.confirmationId"
+                          value: "${output.confirmationId}"
                       - assert:
                           actual: "status"
                           operator: EQUALS
@@ -131,8 +126,7 @@ plans:
                 # the enclosing block by the nested `set`, and that block is
                 # the session body - not the test case around it.
                 - echo:
-                    text:
-                      expression: "'Record ' + recordId + ' submitted - confirmation ' + confirmationId"
+                    text: "Record ${recordId} submitted - confirmation ${confirmationId}"
                     description: "The value the caller cares about, surfaced in the execution report."
 
 # ---------------------------------------------------------------------------

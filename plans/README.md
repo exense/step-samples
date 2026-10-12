@@ -40,7 +40,7 @@ For what each control does and how to configure it, see the official
 | File | Shows |
 |------|-------|
 | [reference/basic-plan-syntax.yml](reference/basic-plan-syntax.yml) | The shape of a plan: root artefact, `callKeyword` with inputs, capturing an output, `if`, `assert`, `check` |
-| [reference/dynamic-values.yml](reference/dynamic-values.yml) | Static values vs `expression:`, where plan variables come from, dynamic keyword names and `routing` |
+| [reference/dynamic-values.yml](reference/dynamic-values.yml) | Static values, `${...}` interpolation and `expression:`, where plan variables come from, dynamic keyword names and `routing` |
 | [reference/performance-assert.yml](reference/performance-assert.yml) | A `threadGroup` with a `performanceAssert` — the load-testing shape, and the `after`-block rule |
 
 ## Plan formats
@@ -88,8 +88,8 @@ plansPlainText:
 
 ## Schema
 
-The `rpa/` and `load-testing/` samples target Automation Package schema **1.2.0**; the
-`functional-testing/` samples target **1.3.0** (Step 31, adds `${...}` string interpolation).
+All samples target Automation Package schema **1.3.0** (Step 31), which adds `${...}` string
+interpolation.
 Any Step instance serves its own schema at:
 
 ```

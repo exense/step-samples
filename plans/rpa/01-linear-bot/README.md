@@ -71,19 +71,21 @@ scope**, so it stays readable by every following sibling — not just the next o
 `previous` is shown once in the plan (the `check` after *Submit the record*) and is deliberately
 flagged there as the fragile option.
 
-### There is no string interpolation
+### `${...}` or `expression:`
 
-`"${myVar}"` is **not** expanded anywhere in this YAML. A plain string is a static value and
-is passed through verbatim, so the keyword receives the literal characters `${myVar}`. This
-holds in keyword inputs, `echo` text and `return` outputs alike.
-
-It fails silently: if the keyword ignores the input, or only checks that it is non-empty,
-the plan goes green while the bot was fed nonsense. Always use
-`expression:`, and concatenate to build strings:
+`${...}` embeds a variable in a text value — a keyword input, an `echo` text, a `return`
+output:
 
 ```yaml
-text:
-  expression: "'Record ' + recordId + ' submitted'"
+text: "Submitting ${amount} for ${customer}"
+```
+
+The result is always text. When the keyword expects a number or a boolean, pass the value with
+`expression:` so it keeps its type — as the `amount` input of *Submit the record* does:
+
+```yaml
+- amount:
+    expression: "amount"
 ```
 
 ## What the plan does *not* carry: the application context

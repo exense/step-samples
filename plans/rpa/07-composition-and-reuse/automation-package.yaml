@@ -15,7 +15,7 @@
 # It also uses `testSet`, which is not a reuse mechanism but the control for
 # running several test cases from one plan.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "rpa-07-composition-and-reuse"
 
 plans:
@@ -47,23 +47,20 @@ plans:
                     keyword: "Process One Record"
                     nodeName: "Process the record"
                     inputs:
-                      - recordId:
-                          expression: "row.RecordId"
+                      - recordId: "${row.RecordId}"
                     children:
                       # The composite's `return` outputs are read exactly like
                       # any other keyword's outputs.
                       - set:
                           key: confirmationId
-                          value:
-                            expression: "output.confirmationId"
+                          value: "${output.confirmationId}"
                       - assert:
                           actual: "confirmationId"
                           operator: BEGINS_WITH
                           expected: "CONF-"
 
                 - echo:
-                    text:
-                      expression: "'Sub-bot returned ' + confirmationId"
+                    text: "Sub-bot returned ${confirmationId}"
 
   # =========================================================================
   # B. callPlan - invoking another plan by name.
@@ -111,8 +108,7 @@ plans:
         nodeName: "Archive what the bots processed"
         children:
           - echo:
-              text:
-                expression: "'Archiving into ' + input.archiveFolder"
+              text: "Archiving into ${input.archiveFolder}"
               description: "Reads the value the caller passed through callPlan input."
 
   # =========================================================================
@@ -192,8 +188,7 @@ plans:
                       - callKeyword:
                           keyword: "Submit Record"
                           inputs:
-                            - recordId:
-                                expression: "row.RecordId"
+                            - recordId: "${row.RecordId}"
 
 keywords:
 
@@ -230,8 +225,7 @@ keywords:
                   keyword: "Read Record"
                   inputs:
                     # The composite's own inputs arrive under `input`.
-                    - recordId:
-                        expression: "input.recordId"
+                    - recordId: "${input.recordId}"
                   children:
                     - set:
                         key: amount
@@ -241,26 +235,20 @@ keywords:
               - callKeyword:
                   keyword: "Submit Record"
                   inputs:
-                    - recordId:
-                        expression: "input.recordId"
+                    - recordId: "${input.recordId}"
                     - amount:
                         expression: "amount"
                   children:
                     - set:
                         key: confirmationId
-                        value:
-                          expression: "output.confirmationId"
+                        value: "${output.confirmationId}"
 
               # `return` is what makes this a keyword rather than a plan:
               # these become the outputs the caller reads with `output.*`.
-              #
-              # NOTE: these MUST use `expression:`. A plain string is a
-              # static value - "${confirmationId}" would hand the caller the
-              # literal seven-character string, not the id.
+              # `amount` keeps `expression:` so it is returned as a number.
               - return:
                   output:
-                    - confirmationId:
-                        expression: "confirmationId"
+                    - confirmationId: "${confirmationId}"
                     - amount:
                         expression: "amount"
 

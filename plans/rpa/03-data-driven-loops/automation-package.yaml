@@ -6,7 +6,7 @@
 # loop controls and the data sources that feed them, plus how to WRITE RESULTS
 # BACK into the source so a re-run can skip what is already done.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "rpa-03-data-driven-loops"
 
 plans:
@@ -31,13 +31,11 @@ plans:
                   delimiter: ","
               children:
                 - echo:
-                    text:
-                      expression: "'Processing ' + row.RecordId + ' for ' + row.Customer"
+                    text: "Processing ${row.RecordId} for ${row.Customer}"
                 - callKeyword:
                     keyword: "Submit Record"
                     inputs:
-                      - recordId:
-                          expression: "row.RecordId"
+                      - recordId: "${row.RecordId}"
                       - amount:
                           expression: "row.Amount"
 
@@ -68,13 +66,11 @@ plans:
                   file: "data/records.csv"
               children:
                 - echo:
-                    text:
-                      expression: "'Worker processing ' + invoice.RecordId"
+                    text: "Worker processing ${invoice.RecordId}"
                 - callKeyword:
                     keyword: "Submit Record"
                     inputs:
-                      - recordId:
-                          expression: "invoice.RecordId"
+                      - recordId: "${invoice.RecordId}"
 
   # =========================================================================
   # C. Other data sources.
@@ -99,8 +95,7 @@ plans:
                 - callKeyword:
                     keyword: "Submit Record"
                     inputs:
-                      - recordId:
-                          expression: "row.RecordId"
+                      - recordId: "${row.RecordId}"
 
           # ---------------------------------------------------------------
           # A drop folder - the classic "process whatever lands here" bot.
@@ -145,8 +140,7 @@ plans:
                   inc: 1
               children:
                 - echo:
-                    text:
-                      expression: "'Iteration ' + n"
+                    text: "Iteration ${n}"
 
   # =========================================================================
   # D. `for` - a plain counter loop.
@@ -168,8 +162,7 @@ plans:
               item: "page"
               children:
                 - echo:
-                    text:
-                      expression: "'Opening page ' + page"
+                    text: "Opening page ${page}"
 
 
   # =========================================================================
@@ -248,13 +241,11 @@ plans:
                 - callKeyword:
                     keyword: "Submit Record"
                     inputs:
-                      - recordId:
-                          expression: "row.RecordId"
+                      - recordId: "${row.RecordId}"
                     children:
                       - set:
                           key: confirmationId
-                          value:
-                            expression: "output.confirmationId"
+                          value: "${output.confirmationId}"
 
                 # The write-back itself.
                 - script:

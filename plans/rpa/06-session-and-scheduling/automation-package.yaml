@@ -8,7 +8,7 @@
 #      can share a browser, a login, or an application handle.
 #   2. A SCHEDULE, so the bot runs at 03:00 without anybody launching it.
 # ---------------------------------------------------------------------------
-version: "1.2.0"
+version: "1.3.0"
 name: "rpa-06-session-and-scheduling"
 
 plans:
@@ -76,8 +76,7 @@ plans:
                           children:
                             - set:
                                 key: browserHandle
-                                value:
-                                  expression: "output.browser"
+                                value: "${output.browser}"
 
                       - check:
                           nodeName: "Both pages were opened in the same browser"

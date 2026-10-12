@@ -115,9 +115,8 @@ Two details that are easy to get wrong:
 
 - The root is a **`sequence`**, not a `testCase` — a composite is a step inside someone
   else's plan, not a test case of its own.
-- `return.output` values need `expression:`, like every other value in this YAML. There is
-  no string interpolation — `"${confirmationId}"` would hand the caller that literal string.
-  See [01-linear-bot](../01-linear-bot/).
+- `return.output` values work like keyword inputs: `"${confirmationId}"` returns text,
+  `expression:` keeps a number (`amount`). See [01-linear-bot](../01-linear-bot/).
 
 ## `testSet`: running several test cases
 

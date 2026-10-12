@@ -1,8 +1,7 @@
 // Simulates submitting the record through the back-office UI.
 //
 // It echoes back the amount it actually received, so the plan can assert the
-// value really arrived - a static "${amount}" would show up here as the
-// literal string instead of the number.
+// value really arrived.
 //
 // `amount` arrives as a NUMBER, so it is read with getInt. getString on a
 // numeric input throws ClassCastException.
