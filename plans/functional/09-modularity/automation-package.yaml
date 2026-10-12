@@ -1,0 +1,127 @@
+---
+# Functional testing sample 09 - Modularity
+version: "1.3.0"
+name: "functional-09-modularity"
+
+plans:
+  - name: "A - Composite keyword"
+    root:
+      testCase:
+        nodeName: "Customer can place an order"
+        children:
+          # One call runs Login, Add To Cart and Checkout
+          - callKeyword:
+              keyword: "Place Order"
+              inputs:
+                - username: "jane"
+                - sku: "KB-100"
+              children:
+                - assert:
+                    actual: "orderId"
+                    operator: EQUALS
+                    expected: "ORD-JANE"
+
+  - name: "B - Call plans from a test suite"
+    root:
+      testSet:
+        children:
+          - callPlan:
+              plan: "Customer can log in"
+          - callPlan:
+              plan: "Customer can search the catalogue"
+
+  # Test plans reused by plan B. They also run on their own.
+  - name: "Customer can log in"
+    root:
+      testCase:
+        nodeName: "Customer can log in"
+        children:
+          - callKeyword:
+              keyword: "Login"
+              inputs:
+                - username: "jane"
+              children:
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "LOGGED_IN"
+
+  - name: "Customer can search the catalogue"
+    root:
+      testCase:
+        nodeName: "Customer can search the catalogue"
+        children:
+          - callKeyword:
+              keyword: "Search Products"
+              inputs:
+                - query: "keyboard"
+              children:
+                - assert:
+                    actual: "firstProduct"
+                    operator: CONTAINS
+                    expected: "keyboard"
+
+keywords:
+  - Composite:
+      name: "Place Order"
+      description: "Logs in, adds a product to the cart and checks out."
+      schema:
+        type: object
+        properties:
+          username:
+            type: string
+          sku:
+            type: string
+        required:
+          - username
+          - sku
+      plan:
+        root:
+          sequence:
+            children:
+              - callKeyword:
+                  keyword: "Login"
+                  inputs:
+                    - username: "${input.username}"
+                  children:
+                    - assert:
+                        actual: "status"
+                        operator: EQUALS
+                        expected: "LOGGED_IN"
+              - callKeyword:
+                  keyword: "Add To Cart"
+                  inputs:
+                    - username: "${input.username}"
+                    - sku: "${input.sku}"
+                  children:
+                    - set:
+                        key: "cartId"
+                        value: "${output.cartId}"
+              - callKeyword:
+                  keyword: "Checkout"
+                  inputs:
+                    - cartId: "${cartId}"
+                  children:
+                    - set:
+                        key: "orderId"
+                        value: "${output.orderId}"
+              - return:
+                  output:
+                    - orderId: "${orderId}"
+
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy
+  - GeneralScript:
+      name: "Add To Cart"
+      scriptLanguage: groovy
+      scriptFile: keywords/addToCart.groovy
+  - GeneralScript:
+      name: "Checkout"
+      scriptLanguage: groovy
+      scriptFile: keywords/checkout.groovy
+  - GeneralScript:
+      name: "Search Products"
+      scriptLanguage: groovy
+      scriptFile: keywords/searchProducts.groovy

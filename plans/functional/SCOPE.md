@@ -1,11 +1,11 @@
 # Functional testing samples: scope (working document, delete before PR)
 
-Eight automation packages, ordered from simple to complex. Every plan has a `testSet` root with
-one `testCase` per scenario. Keywords are 3-line Groovy `GeneralScript` stubs that simulate a
+Nine automation packages, ordered from simple to complex, one plan per topic (see Naming and
+structure below). Keywords are 3-line Groovy `GeneralScript` stubs that simulate a
 small web shop (login, catalogue, orders). Each plan asserts its own outcome.
 
-Overlap with RPA: each sample stands on its own and is written from a testing angle. Where RPA
-covers a control in more detail, the sample links to it.
+Overlap with RPA: each sample stands on its own and is written from a testing angle. No links
+to the RPA samples.
 
 **Artificial patterns.** These samples are read by AI agents as well as by people. Anything
 added only to demonstrate a feature (a failure on purpose, a stub that fails twice, a forced
@@ -14,8 +14,7 @@ error) must be obvious as such:
 - a one-line comment in the YAML says why it is there and that it does not belong in a real plan
 - the README lists the expected outcome of each plan
 
-Out of scope: `testScenario` (load testing), composites and `callPlan` (rpa/07), plain-text
-plans (their own section later).
+Out of scope: `testScenario` (load testing), plain-text plans (their own section later).
 
 **Target: Step 31.** Descriptors declare schema `version: "1.3.0"`.
 - Validation runs against stepee-master.stepcloud-test.ch, using the Step 31 CLI and MCP from
@@ -73,7 +72,6 @@ Interpolation is shown first, for text built from variables, e.g. `"Order ${orde
 non-string input (a number or a boolean), and logic containing braces.
 
 **Controls:** `set`, `output.`, `previous.`, `${...}` interpolation, `expression:` inputs
-**Links:** rpa/01 for the binding table
 
 ## 03 Parameters and environments
 
@@ -114,7 +112,6 @@ version supports this) or `step ap execute -ep env=...`.
 | Verify by account type | `switch`/`case` on a keyword output (STANDARD / PREMIUM / BUSINESS), each case asserting its own expected discount; a fallback when no case matches |
 
 **Controls:** `if`, `switch`, `case`
-**Links:** rpa/04 for switch notes
 
 ## 05 Assertions in depth
 
@@ -147,7 +144,6 @@ plan.
 | A, the two test cases above | PASSED |
 | B, "Expected to fail - one failing row": the same loop, with one row whose expected value is wrong on purpose (the row's own data says so). The other rows still run and report separately. | FAILED (on purpose) |
 
-**Links:** rpa/03 for data sources
 
 ## 07 Setup, teardown and test selection
 
@@ -178,10 +174,34 @@ selection part becomes two plans, "Smoke tests" (`smoke`) and "Regression tests"
 | Wait for an event | the event is published (built-in `EBC_Put` keyword, standing in for the system under test); `waitForEvent` on `group` / `name` with `timeout` / `pollingSpeed`; then a check on the received event (the docs say it is stored in a `result` variable) |
 
 **Controls:** `retryIfFails`, `waitForEvent`
-**Links:** rpa/05 for retries and `while`
 
 **To verify in phase 2:**
 - `EBC_Put` / `EBC_Get` / `EBC_Peek` are available on stepee-master and how their `ebcUrl`
   input is set (a parameter, e.g. `"${controllerUrl}"`); if they are not available, publish
   from a Groovy stub instead
 - the variable the received event is exposed in, and its shape (payload access)
+
+## 09 Modularity
+
+**Concept:** Reuse a business flow instead of copying its steps. Two mechanisms:
+- a **composite keyword** packs several keyword calls into one keyword, with declared inputs and
+  outputs. It is called and asserted like any other keyword.
+- **`callPlan`** runs another complete plan, e.g. to build a regression suite from existing test
+  plans. It returns nothing to the caller.
+
+| Plan | Test case | Shows | Expected |
+|------|-----------|-------|----------|
+| A - Composite keyword | "Customer can place an order" | Composite "Place Order" (Login + Add To Cart + Checkout, inputs `username`, `sku`, `return` of `orderId`), called once and asserted on its output | PASSED |
+| B - Call plans from a suite | test set with two test cases, each calling an existing plan | `callPlan` by name | PASSED |
+| "Customer can log in" | (called plan, business name) | standalone test plan reused by B; also runs on its own | PASSED |
+| "Customer can search the catalogue" | (called plan, business name) | idem | PASSED |
+
+The called plans are complete test plans that also pass on their own, so no category is needed
+to exclude them from a normal run.
+
+**Controls:** Composite keyword (`schema`, `plan`, `return`), `callPlan` with `plan: "<name>"`
+
+**To verify in phase 2:**
+- how `callPlan` results appear in the caller's report (own branch, verdict propagation when the
+  called plan fails)
+- `${...}` interpolation inside the composite (`input.username`)
