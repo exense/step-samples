@@ -25,9 +25,9 @@ everything else. That is where you go while writing a plan.
 
 | Use case | Samples | Status |
 |----------|---------|--------|
-| [**RPA**](rpa/) | 7 samples — loops, branching, resilience, sessions, scheduling, reuse | available |
+| [**Functional testing**](functional-testing/) | 9 samples — test sets, inputs and outputs, parameters, assertions, data-driven tests, setup and cleanup, async testing, modularity | available |
 | [**Load testing**](load-testing/) | 6 samples — thread groups, scenarios, data sets, measurements, SLA gates | available |
-| Functional testing | — | planned |
+| [**RPA**](rpa/) | 7 samples — loops, branching, resilience, sessions, scheduling, reuse | available |
 | Monitoring | — | planned |
 
 ## Reference
@@ -49,7 +49,7 @@ Step has three plan formats:
 
 | Format | Written as | Used by these samples |
 |--------|-----------|-----------------------|
-| **YAML** | The tree of controls documented at [step.dev](https://step.dev/knowledgebase/userdocs/plans/controls/) | Yes — the whole `rpa/` and `load-testing/` sets |
+| **YAML** | The tree of controls documented at [step.dev](https://step.dev/knowledgebase/userdocs/plans/controls/) | Yes — the whole `rpa/`, `load-testing/` and `functional-testing/` sets |
 | **Plain text** | A compact line-based syntax, one keyword call per line | No |
 | **UI** | Built in the Step plan editor; [imported and exported](https://step.dev/knowledgebase/userdocs/import-export-entities/) as JSON | No — see [legacy-exports/](legacy-exports/) for what an export looks like |
 
@@ -88,8 +88,9 @@ plansPlainText:
 
 ## Schema
 
-All YAML here targets Automation Package schema **1.2.0**. Any Step instance serves its own
-schema at:
+The `rpa/` and `load-testing/` samples target Automation Package schema **1.2.0**; the
+`functional-testing/` samples target **1.3.0** (Step 31, adds `${...}` string interpolation).
+Any Step instance serves its own schema at:
 
 ```
 <your-step-instance>/rest/automation-packages/schema

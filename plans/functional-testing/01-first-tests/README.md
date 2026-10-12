@@ -17,9 +17,9 @@ outputs. A test set groups several test cases and reports a verdict for each of 
 
 | Plan | Shows | Expected |
 |------|-------|----------|
-| A - First test case | `testCase` as the plan root, `callKeyword` with inputs, `assert` on two outputs | PASSED |
-| B - Test set | `testSet` with two `testCase`s | PASSED |
-| C - One failing test case in a test set (intentionally fails) | One test case fails, the other one still runs and passes | FAILED |
+| A - First test case | A test case that calls a keyword and asserts on its outputs | PASSED |
+| B - Test set | Grouping test cases in a test set, with a verdict per test case | PASSED |
+| C - One failing test case in a test set (intentionally fails) | A failing test case does not stop the other test cases of the set | FAILED |
 
 ## Notes
 
