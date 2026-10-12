@@ -17,6 +17,21 @@ error) must be obvious as such:
 Out of scope: `testScenario` (load testing), composites and `callPlan` (rpa/07), plain-text
 plans (their own section later).
 
+**Target: Step 31.** Descriptors declare schema `version: "1.3.0"`.
+- Validation runs against stepee-master.stepcloud-test.ch, using the Step 31 CLI and MCP from
+  PATH.
+- Reference docs: the unreleased knowledgebase in `step-knowledgebase-website` (master).
+- **String interpolation** (`${...}`) is the default way to put variables into text values
+  (keyword inputs, control fields, parameters). `expression:` is used only where interpolation
+  can't do the job: a non-string value (number, boolean, object), or logic containing braces
+  (closures, map literals).
+
+**Assert vs check**, a rule for every sample:
+- `assert` is a child of a `callKeyword` and validates that keyword's output. Use it wherever
+  it is possible.
+- `check` is a general expression-based check anywhere in a plan. Use it only when there is no
+  keyword output to assert on, or when the condition needs a custom expression.
+
 ---
 
 ## 01 First tests
@@ -38,11 +53,15 @@ or a value computed at run time.
 
 | Test case | Shows |
 |-----------|-------|
-| Create then read an order | `createOrder` returns `orderId`; `set` stores it; `getOrder` takes it as input; `check` on the result |
+| Create then read an order | `createOrder` returns `orderId`; `set` stores it; `getOrder` takes it as input; `assert` on `getOrder`'s output |
 | Output scope | `output.<field>` is readable only under the calling node; `previous.<field>` is replaced by the next call; a `set` variable lasts for its whole block |
-| Unique test data | Inputs from `expression:`: a UUID, a timestamp-based username, a delivery date set to today + 3 days in a given format |
+| Unique test data | Computed inputs: a UUID, a timestamp-based username, a delivery date set to today + 3 days in a given format |
 
-**Controls:** `set`, `output.`, `previous.`, `expression:` inputs
+Interpolation is shown first, for text built from variables, e.g. `"Order ${orderId}"` and
+`"user-${runId}@test.local"`. Then `expression:` for the cases it is still needed for: a
+non-string input (a number or a boolean), and logic containing braces.
+
+**Controls:** `set`, `output.`, `previous.`, `${...}` interpolation, `expression:` inputs
 **Links:** rpa/01 for the binding table
 
 ## 03 Parameters and environments
@@ -55,10 +74,11 @@ or a value computed at run time.
 | `url` | one per environment with `activationScript: env == 'DEV'` (and `'TEST'`, `'PROD'`), plus one with no activation script as the default |
 | `user` / `password` | protected value |
 | A second key | shows `priority` choosing between two entries that both match |
+| `apiUrl` | built from another parameter with interpolation: `"${url}/api"` |
 
 | Test case | Shows |
 |-----------|-------|
-| Open the application | keyword input `url` taken from the parameter; `check` that the URL matches `env` |
+| Open the application | keyword input `url` taken from the parameter; `assert` on the keyword's output that the URL matches `env` |
 | Log in | credentials from protected parameters |
 
 **Controls:** `parameters`, `activationScript`, `priority`, `protectedValue`, execution
@@ -68,9 +88,10 @@ parameters
 - the activation script can read the `env` execution parameter
 - what happens when `env` is not set (the default entry is used)
 - priority order between matching entries
+- a parameter value referencing another parameter with `${...}`
 
-The MCP execute tool does not pass execution parameters, so the DEV/TEST/PROD runs need the CLI
-with `-ep env=...`. The user runs those.
+The DEV/TEST/PROD runs pass `env` as an execution parameter, through the MCP (the Step 31
+version supports this) or `step ap execute -ep env=...`.
 
 ## 04 Conditional blocks
 
@@ -87,21 +108,31 @@ with `-ep env=...`. The user runs those.
 ## 05 Assertions in depth
 
 **Concept:** Check exactly what is expected, test that invalid input is rejected, and report
-every failed check instead of only the first.
+every failed check instead of only the first. Explains `assert` vs `check`: `assert` validates
+a keyword's output and is preferred wherever possible; `check` evaluates any expression in the
+plan.
 
 | Plan | Shows | Expected |
 |------|-------|----------|
-| A, Assert operators | `equals`, `contains`, `beginsWith`, `endsWith`, `matches`, `lessThan`, `greaterThan`, `doNegate`, `check` with an expression | PASSED |
+| A, Assert operators | `assert` with `equals`, `contains`, `beginsWith`, `endsWith`, `matches`, `lessThan`, `greaterThan`, `isNull`, `doNegate`, `customErrorMessage`; one `check` for a condition across two keyword outputs, which `assert` cannot express | PASSED |
 | B, Negative tests: business errors (priority) | Invalid login and an invalid order are rejected: the keyword returns a business error output, and the test asserts on it | PASSED |
-| C, Negative tests: technical errors | A keyword that raises a technical error (exception, unreachable system). Shows what the report looks like and how to handle the error path in the plan. | PASSED (if the expected error can be asserted) |
+| C, Handling a technical error | See below | to define (FAILED is likely: the error stays an error) |
 | D, "Expected to fail - collect all failures" | Several asserts with `continueOnError`; two fail on purpose and both are reported | FAILED (on purpose) |
 
-**Controls:** `assert`, `check`, `doNegate`, `continueOnError`
+**Plan C framing.** A technical error means something unexpected went wrong, so handling it in
+the plan is not good practice: it should fail the test. The plan is there for the cases where
+people still want to act on the error, such as reporting it somewhere else. Pattern: a `set`
+inside the `callKeyword` node reads the error with `callReport.error.msg`, then passes it on
+(e.g. to a reporting keyword). The README states this framing first.
 
-**To verify in phase 2 (plan C):** which mechanism lets a plan expect and assert a technical
-error: `continueOnError` / `continueParentNodeExecutionOnError` followed by a check on the error,
-a keyword-side business/technical error distinction, or something else. Choose the cleanest
-working pattern and show only that one.
+**Controls:** `assert`, `check`, `doNegate`, `customErrorMessage`, `continueOnError`,
+`callReport.error.msg`
+
+**To verify in phase 2 (plan C):**
+- `callReport.error.msg` is readable from a `set` child of the failing `callKeyword` (probably
+  undocumented)
+- whether children of a failed call run at all
+- the resulting verdict of the test case
 
 ## 06 Data-driven tests
 
@@ -109,10 +140,11 @@ working pattern and show only that one.
 
 | Test case | Shows |
 |-----------|-------|
-| One test case per row | `forEach` over `csv`, with a `testCase` inside the loop whose `nodeName` is set from the row |
-| Rows with expected results | each row holds inputs and an expected value; the test asserts against the expected value |
+| One test case per row | `forEach` over `csv`, with a `testCase` inside the loop whose `nodeName` is interpolated from the row (`"Login as ${row.user}"`) |
+| Rows with expected results | each row holds inputs and an expected value; `assert` on the keyword output against the row's expected value |
 
-**Controls:** `forEach`, `csv`, `testCase` inside a loop, dynamic `nodeName`
+**Controls:** `forEach`, `csv`, `testCase` inside a loop, interpolated `nodeName`
+
 | Plan | Expected |
 |------|----------|
 | A, the two test cases above | PASSED |
@@ -133,8 +165,10 @@ subset of them by category.
 
 **Controls:** `before`, `after`, `continueOnError` on `after`, `categories`
 
-**To verify in phase 2:** whether `--includeCategories` filters test cases inside a plan or
-only whole plans. If it filters only plans, split this into a smoke plan and a regression plan.
+**Selection:** in the Step 31 CLI, `--includeCategories` / `--excludeCategories` select whole
+plans by their `categories`. There is no option to filter individual test cases. So the
+selection part becomes two plans, "Smoke tests" (`smoke`) and "Regression tests"
+(`regression`), plus the CLI command that runs only the smoke plan.
 
 ## 08 Retries and async testing
 
@@ -143,13 +177,14 @@ only whole plans. If it filters only plans, split this into a smoke plan and a r
 | Test case | Shows |
 |-----------|-------|
 | Flaky step | `retryIfFails` with `maxRetries` / `gracePeriod` around a keyword that fails twice |
-| Poll for a status | `retryIfFails` around `getOrderStatus` + `assert status == SHIPPED`, with a `timeout` |
-| Wait for an event | a keyword publishes an event; `waitForEvent` on `group` / `name` with `timeout`; `check` on the received event |
+| Poll for a status | `retryIfFails` around `getOrderStatus` + `assert` on `status` equals `SHIPPED`, with a `timeout` |
+| Wait for an event | the event is published (built-in `EBC_Put` keyword, standing in for the system under test); `waitForEvent` on `group` / `name` with `timeout` / `pollingSpeed`; then a check on the received event (the docs say it is stored in a `result` variable) |
 
 **Controls:** `retryIfFails`, `waitForEvent`
 **Links:** rpa/05 for retries and `while`
 
 **To verify in phase 2:**
-- how a stub keyword publishes the event: Step's built-in event-broker Put keyword if the
-  instance has it, otherwise the REST API
-- how the received event is exposed to the following nodes (a `result` variable?)
+- `EBC_Put` / `EBC_Get` / `EBC_Peek` are available on stepee-master and how their `ebcUrl`
+  input is set (a parameter, e.g. `"${controllerUrl}"`); if they are not available, publish
+  from a Groovy stub instead
+- the variable the received event is exposed in, and its shape (payload access)
