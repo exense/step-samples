@@ -1,0 +1,78 @@
+---
+# Functional testing sample 03 - Parameters and environments
+version: "1.3.0"
+name: "functional-03-parameters-and-environments"
+
+parameters:
+  # One entry per environment, selected by the "env" execution parameter
+  - key: "shopUrl"
+    value: "https://dev.shop.example"
+    activationScript: "env == 'DEV'"
+    priority: 10
+  - key: "shopUrl"
+    value: "https://test.shop.example"
+    activationScript: "env == 'TEST'"
+    priority: 10
+  - key: "shopUrl"
+    value: "https://shop.example"
+    activationScript: "env == 'PROD'"
+    priority: 10
+  # Default, used when no environment-specific entry is active
+  - key: "shopUrl"
+    value: "http://localhost:8080"
+    priority: 1
+  # Built from another parameter
+  - key: "shopApiUrl"
+    value: "${shopUrl}/api"
+  - key: "shopUser"
+    value: "shop-tester"
+  - key: "shopPassword"
+    value: "demo-secret"
+    protectedValue: true
+
+plans:
+  - name: "Parameters and environments"
+    root:
+      testSet:
+        nodeName: "Web shop"
+        children:
+          - testCase:
+              nodeName: "Open the application"
+              children:
+                - callKeyword:
+                    keyword: "Open Application"
+                    inputs:
+                      - url: "${shopUrl}"
+                      - apiUrl: "${shopApiUrl}"
+                    children:
+                      - assert:
+                          actual: "title"
+                          operator: EQUALS
+                          expected: "Web shop"
+                      - assert:
+                          actual: "apiUrl"
+                          operator: EQUALS
+                          expected: "${shopUrl}/api"
+          - testCase:
+              nodeName: "Log in"
+              children:
+                - callKeyword:
+                    keyword: "Login"
+                    inputs:
+                      - username: "${shopUser}"
+                      - password: "${shopPassword}"
+                    children:
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "LOGGED_IN"
+
+keywords:
+  - GeneralScript:
+      name: "Open Application"
+      scriptLanguage: groovy
+      scriptFile: keywords/openApplication.groovy
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy

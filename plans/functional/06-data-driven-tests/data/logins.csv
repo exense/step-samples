@@ -1,0 +1,5 @@
+username,password,expectedStatus
+jane,demo-secret,LOGGED_IN
+john,demo-secret,LOGGED_IN
+jane,wrong-password,REJECTED
+mallory,demo-secret,REJECTED

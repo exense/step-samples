@@ -1,0 +1,120 @@
+---
+# Functional testing sample 02 - Inputs, outputs and variables
+version: "1.3.0"
+name: "functional-02-inputs-outputs-and-variables"
+
+plans:
+  - name: "Inputs outputs and variables"
+    root:
+      testSet:
+        nodeName: "Order management"
+        children:
+
+          - testCase:
+              nodeName: "Create then read an order"
+              children:
+                - callKeyword:
+                    keyword: "Create Order"
+                    inputs:
+                      - customer: "jane"
+                      - quantity: 2
+                    children:
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "CREATED"
+                      # Keep the output for later steps
+                      - set:
+                          key: "orderId"
+                          value:
+                            expression: "output.orderId"
+                - callKeyword:
+                    keyword: "Get Order"
+                    inputs:
+                      - orderId: "${orderId}"
+                    children:
+                      - assert:
+                          actual: "orderId"
+                          operator: EQUALS
+                          expected: "${orderId}"
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "CONFIRMED"
+
+          - testCase:
+              nodeName: "Where outputs can be read"
+              children:
+                - callKeyword:
+                    keyword: "Create Order"
+                    inputs:
+                      - customer: "jane"
+                      - quantity: 1
+                    children:
+                      - set:
+                          key: "firstOrderId"
+                          value:
+                            expression: "output.orderId"
+                - check:
+                    nodeName: "previous holds the output of the call just before"
+                    expression: "previous.orderId == 'ORD-JANE-1'"
+                - callKeyword:
+                    keyword: "Create Order"
+                    inputs:
+                      - customer: "john"
+                      - quantity: 1
+                - check:
+                    nodeName: "previous now holds the second call, the variable still holds the first"
+                    expression: "previous.orderId == 'ORD-JOHN-1' && firstOrderId == 'ORD-JANE-1'"
+
+          - testCase:
+              nodeName: "Unique test data"
+              children:
+                - set:
+                    key: "runId"
+                    value:
+                      expression: "UUID.randomUUID().toString().take(8)"
+                - set:
+                    key: "basketSize"
+                    value:
+                      expression: "3"
+                - callKeyword:
+                    keyword: "Register Customer"
+                    inputs:
+                      - username: "user-${runId}"
+                      - email: "user-${runId}@test.local"
+                      - deliveryDate: "${java.time.LocalDate.now().plusDays(3)}"
+                      # A computed number: expression keeps the type, interpolation would produce text
+                      - maxOrders:
+                          expression: "basketSize * 2"
+                    children:
+                      - assert:
+                          actual: "username"
+                          operator: EQUALS
+                          expected: "user-${runId}"
+                      - assert:
+                          actual: "email"
+                          operator: MATCHES
+                          expected: 'user-[0-9a-f]{8}@test\.local'
+                      - assert:
+                          actual: "deliveryDate"
+                          operator: EQUALS
+                          expected: "${java.time.LocalDate.now().plusDays(3)}"
+                      - assert:
+                          actual: "maxOrdersType"
+                          operator: EQUALS
+                          expected: "NUMBER"
+
+keywords:
+  - GeneralScript:
+      name: "Create Order"
+      scriptLanguage: groovy
+      scriptFile: keywords/createOrder.groovy
+  - GeneralScript:
+      name: "Get Order"
+      scriptLanguage: groovy
+      scriptFile: keywords/getOrder.groovy
+  - GeneralScript:
+      name: "Register Customer"
+      scriptLanguage: groovy
+      scriptFile: keywords/registerCustomer.groovy
