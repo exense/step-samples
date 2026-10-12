@@ -226,11 +226,6 @@ plans:
   # errors until the service is up - since that is retry, not polling.
   #
   # Both call keywords perfectly well.
-  #
-  # NOTE: on older Step versions, keyword calls nested in a `while` are not
-  # counted when forecasting how many agents to provision, so such a loop can
-  # fail to obtain an agent token on an auto-provisioned instance. Declaring
-  # `agents` on the plan avoids it if you encounter the issue.
   # =========================================================================
   - name: "D1 - Wait with while"
     categories: ["RPA"]

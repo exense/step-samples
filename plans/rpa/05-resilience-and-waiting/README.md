@@ -61,10 +61,6 @@ Using `retryIfFails` purely to wait, with an `assert` added only to force a retr
 is a workaround: it records every wait as a failed attempt. Plan D2 shows the shape, so that
 both forms appear side by side.
 
-> On older Step versions, keyword calls nested in a `while` are not counted when forecasting
-> how many agents to provision, so such a loop can fail to obtain an agent token on an
-> auto-provisioned instance. Declaring `agents` on the plan avoids it.
-
 ### Retry on a fresh session, not the same one
 
 Neither plan A nor plan D2 wraps its retry in a `session`, and that is deliberate.
