@@ -20,7 +20,7 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "Process every row of records.csv"
+        nodeName: "Process every record"
         children:
           - forEach:
               nodeName: "For each record"
@@ -56,10 +56,10 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "Process records with 2 parallel workers"
+        nodeName: "Process all records"
         children:
           - forEach:
-              nodeName: "For each record (2 workers)"
+              nodeName: "For each record"
               item: "invoice"
               threads: 2
               maxFailedLoops: 2
@@ -86,12 +86,12 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "json-array, folder and sequence sources"
+        nodeName: "Process records from other sources"
         children:
 
           # A JSON array - handy when the work list comes from an API.
           - forEach:
-              nodeName: "For each record in a JSON array"
+              nodeName: "For each record in the list"
               dataSource:
                 json-array:
                   json: '[{"RecordId":"REC-101"},{"RecordId":"REC-102"}]'
@@ -136,7 +136,7 @@ plans:
 
           # An integer sequence - no external data needed.
           - forEach:
-              nodeName: "For each number in a sequence"
+              nodeName: "For each record number"
               item: "n"
               dataSource:
                 sequence:
@@ -258,14 +258,14 @@ plans:
 
                 # The write-back itself.
                 - script:
-                    nodeName: "Write the result back into the row"
+                    nodeName: "Stamp the result on the record"
                     script: 'row.put("Result", "OK:" + confirmationId)'
 
                 # Reading the value straight back proves the row was mutated.
                 # (Persisting it beyond the run needs a Step resource - see
                 # the note above.)
                 - check:
-                    nodeName: "The row now carries the confirmation"
+                    nodeName: "The record carries its confirmation"
                     expression: "row.Result.startsWith('OK:')"
 
 keywords:

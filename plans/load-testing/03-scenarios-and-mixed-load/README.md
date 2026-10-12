@@ -22,10 +22,10 @@ holds the plan index and the reference tables.
 
 | Plan | Shows |
 |------|-------|
-| A — Browsers and buyers at the same time | `testScenario` with two thread groups, `startOffset`, scenario-wide `after` |
+| A — Parallel thread groups | `testScenario` with two thread groups, `startOffset`, scenario-wide `after` |
 | B — Step ramp in three stages | A staged ramp built from several thread groups |
-| C — Measure the site while the batch job runs | A thread group next to a plain `sequence` |
-| D — Warm-up phase then measured phase | `sequence` as the root — phases instead of parallelism |
+| C — Background load | A thread group next to a plain `sequence` |
+| D — Warm-up phase | `sequence` as the root — phases instead of parallelism |
 
 All four are expected to pass.
 

@@ -35,7 +35,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "2 users x 3 iterations"
+        nodeName: "Shoppers"
         users: 2
         iterations: 3
         children:
@@ -115,7 +115,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "One user checking out every 3 seconds"
+        nodeName: "Shoppers"
         users: 1
         iterations: 3
         # 1 iteration every 3s
@@ -146,7 +146,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "4 users released two at a time over 8 seconds"
+        nodeName: "Shoppers"
         users: 4
         iterations: 2
         rampup: 8000
@@ -160,7 +160,7 @@ plans:
           continueOnError: true
           steps:
             - performanceAssert:
-                nodeName: "Every user completed its iterations"
+                nodeName: "Every shopper completed their checkouts"
                 measurementName: "Checkout"
                 aggregator: COUNT
                 comparator: EQUALS
@@ -185,16 +185,16 @@ plans:
   # So the form for a duration-bounded run is `iterations: 0` WITH
   # `maxDuration`, as below
   #
-  # This plan loops one user for 4 seconds and asserts the rate it sustained.
+  # This plan loops one user for 60 seconds and asserts the rate it sustained.
   # =========================================================================
   - name: "D - Run for a fixed time"
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "One user for 4 seconds"
+        nodeName: "Shoppers"
         users: 1
         iterations: 0            # unlimited: loop until maxDuration
-        maxDuration: 4000        # stop after 4s
+        maxDuration: 60000       # stop after 60s
         pacing: 1000             # aim for one checkout per second
         children:
           - callKeyword:
@@ -203,14 +203,15 @@ plans:
         after:
           continueOnError: true
           steps:
-            # A 4s window paced at one checkout per second gives about 4
-            # iterations; asserting more than 2 leaves headroom on a busy agent.
+            # A 60s window paced at one checkout per second gives about 60
+            # iterations; asserting more than 20 leaves headroom for a slow
+            # first call on an agent that has just started.
             - performanceAssert:
-                nodeName: "Sustained about one checkout per second"
+                nodeName: "More than 20 checkouts in a minute"
                 measurementName: "Checkout"
                 aggregator: COUNT
                 comparator: HIGHER_THAN
-                expectedValue: 2
+                expectedValue: 20
 
   # =========================================================================
   # E. The four blocks: what runs once, per user, per iteration.
@@ -232,7 +233,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "2 users x 3 checkouts, logging in once each"
+        nodeName: "Shoppers"
         users: 2
         iterations: 3
 
@@ -240,24 +241,24 @@ plans:
           steps:
             - callKeyword:
                 keyword: "Warm Up Cache"
-                nodeName: "Warm the cache once for the whole test"
+                nodeName: "Warm the cache"
 
         beforeThread:
           steps:
             - callKeyword:
                 keyword: "Login"
-                nodeName: "Log in once per virtual user"
+                nodeName: "Log in"
 
         children:
           - callKeyword:
               keyword: "Checkout"
-              nodeName: "What the user does on every visit"
+              nodeName: "Check out"
 
         afterThread:
           steps:
             - callKeyword:
                 keyword: "Logout"
-                nodeName: "Log out once per virtual user"
+                nodeName: "Log out"
 
 keywords:
   - GeneralScript:

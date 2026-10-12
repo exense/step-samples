@@ -34,7 +34,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "2 users x 3 checkouts"
+        nodeName: "Shoppers"
         users: 2
         iterations: 3
         children:
@@ -55,7 +55,7 @@ plans:
             # COMPLETENESS check to catch iterations that failed part
             # way and never reached the checkout.
             - performanceAssert:
-                nodeName: "All the work was done"
+                nodeName: "All checkouts ran"
                 measurementName: "Checkout"
                 aggregator: COUNT
                 comparator: EQUALS
@@ -91,7 +91,7 @@ plans:
     categories: ["Load testing"]
     root:
       testScenario:
-        nodeName: "Two populations with two SLAs"
+        nodeName: "Searchers and buyers"
         children:
 
           - threadGroup:
@@ -128,7 +128,7 @@ plans:
                 continueOnError: true
                 steps:
                   - performanceAssert:
-                      nodeName: "Checkout has a looser budget than search"
+                      nodeName: "Checkout answers within its own budget"
                       measurementName: "Checkout"
                       aggregator: AVG
                       comparator: LOWER_THAN
@@ -179,7 +179,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "2 users x 3 payments against a wobbly provider"
+        nodeName: "Customers paying"
         users: 2
         iterations: 3
         children:
@@ -253,7 +253,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "2 users x 2 slow searches"
+        nodeName: "Searchers"
         users: 2
         iterations: 2
         children:
@@ -264,13 +264,13 @@ plans:
           continueOnError: true
           steps:
             - performanceAssert:
-                nodeName: "Average must stay under 100ms - it does not"
+                nodeName: "Search answers within 100ms on average"
                 measurementName: "Slow Search"
                 aggregator: AVG
                 comparator: LOWER_THAN
                 expectedValue: 100
             - performanceAssert:
-                nodeName: "Worst case must stay under 200ms - it does not"
+                nodeName: "No search over 200ms"
                 measurementName: "Slow Search"
                 aggregator: MAX
                 comparator: LOWER_THAN
@@ -278,7 +278,7 @@ plans:
             # This one passes, which is the point: the run reports exactly
             # which thresholds failed, not just that something did.
             - performanceAssert:
-                nodeName: "All four searches ran - this one passes"
+                nodeName: "All four searches ran"
                 measurementName: "Slow Search"
                 aggregator: COUNT
                 comparator: EQUALS

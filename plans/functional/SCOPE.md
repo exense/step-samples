@@ -26,6 +26,17 @@ plans (their own section later).
   can't do the job: a non-string value (number, boolean, object), or logic containing braces
   (closures, map literals).
 
+**Naming and structure** (same convention as rpa/ and load-testing/):
+- The AP name and plan names are topic-specific. One plan per topic, named
+  `"<letter> - <topic>"` ("A - If block"). A deliberately failing plan ends with
+  " (intentionally fails)". No commas, because `--includePlans` splits on them.
+- Exception: a plan that is not a demo but is called by another plan (`callPlan`) keeps a
+  business name, e.g. rpa/07 "Archive processed records".
+- Test cases and every other `nodeName` use business names, phrased as an expectation
+  ("Cookie banner is closed when shown").
+- The plan root is the `testCase` itself. A `testSet` root only where test sets are the topic
+  (01 B/C, 06, 07 A); it has no `nodeName`, since the report shows the plan name there.
+
 **Assert vs check**, a rule for every sample:
 - `assert` is a child of a `callKeyword` and validates that keyword's output. Use it wherever
   it is possible.

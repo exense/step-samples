@@ -45,7 +45,7 @@ plans:
               children:
                 - callKeyword:
                     keyword: "Process One Record"
-                    nodeName: "Run the reusable sub-bot"
+                    nodeName: "Process the record"
                     inputs:
                       - recordId:
                           expression: "row.RecordId"
@@ -81,12 +81,12 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "Delegate to a standalone bot plan"
+        nodeName: "Archive after processing"
         children:
           - callPlan:
-              nodeName: "Run the shared cleanup bot"
+              nodeName: "Archive processed records"
               selectionAttributes:
-                - name: "Shared - Archive processed records"
+                - name: "Archive processed records"
               input:
                 - archiveFolder: "/archive/2026-08"
 
@@ -104,7 +104,7 @@ plans:
   # under `input.`, the same way a Composite keyword receives its inputs.
   # A bare `archiveFolder` is NOT bound.
   # -------------------------------------------------------------------------
-  - name: "Shared - Archive processed records"
+  - name: "Archive processed records"
     categories: ["RPA", "sub-plan"]
     root:
       testCase:
@@ -126,7 +126,7 @@ plans:
   # Note the difference from `forEach threads`: forEach parallelises ROWS
   # within one test case, testSet parallelises the TEST CASES.
   # =========================================================================
-  - name: "C - Nightly batch of bots"
+  - name: "C - Test set of bots"
     categories: ["RPA"]
     root:
       testSet:
@@ -169,14 +169,14 @@ plans:
   #
   # Here three parallel workers contend for a single licence.
   # =========================================================================
-  - name: "D - Queue for a single licence"
+  - name: "D - Synchronized block"
     categories: ["RPA"]
     root:
       testCase:
         nodeName: "Three bots, one licence"
         children:
           - forEach:
-              nodeName: "For each record (3 workers)"
+              nodeName: "For each record"
               threads: 3
               dataSource:
                 json-array:

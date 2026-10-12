@@ -14,7 +14,7 @@ version: "1.2.0"
 name: "load-01-first-load-test"
 
 plans:
-  - name: "First load test"
+  - name: "A - First load test"
     categories:
       - "Load testing"
     root:
@@ -38,7 +38,7 @@ plans:
       # subject of sample 02.
       # =====================================================================
       threadGroup:
-        nodeName: "2 virtual users, 3 iterations each"
+        nodeName: "Shoppers"
         users: 2
         iterations: 3
         children:

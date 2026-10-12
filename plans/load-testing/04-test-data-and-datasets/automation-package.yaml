@@ -27,7 +27,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "1 user placing 3 orders"
+        nodeName: "Shoppers"
         users: 1
         iterations: 3
 
@@ -61,7 +61,7 @@ plans:
               key: shopper
               value:
                 expression: "shopperPool.next()"
-              nodeName: "Take the next account from the pool"
+              nodeName: "Take the next shopper account"
 
           - callKeyword:
               keyword: "Login"
@@ -103,7 +103,7 @@ plans:
     categories: ["Load testing"]
     root:
       testScenario:
-        nodeName: "Browsers and buyers drawing from one pool"
+        nodeName: "Browsers and buyers"
 
         before:
           steps:
@@ -169,7 +169,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "2 users doing 3 orders each"
+        nodeName: "Shoppers"
         users: 2
         iterations: 3
 
@@ -192,10 +192,10 @@ plans:
                 key: myShopper
                 value:
                   expression: "shopperPool.next()"
-                nodeName: "Claim one account for this virtual user"
+                nodeName: "Take a shopper account"
             - callKeyword:
                 keyword: "Login"
-                nodeName: "Log in once per virtual user"
+                nodeName: "Log in"
                 inputs:
                   - user:
                       expression: "myShopper.Username"
@@ -235,7 +235,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "1 user asking for 6 accounts"
+        nodeName: "Shoppers"
         users: 1
         iterations: 6
 
@@ -256,7 +256,7 @@ plans:
                 expression: "shopperPool.next()"
 
           - check:
-              nodeName: "The pool still had a row to give"
+              nodeName: "A shopper account was available"
               expression: "shopper != null"
 
           - callKeyword:
@@ -291,7 +291,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "1 user ordering 2 products"
+        nodeName: "Shoppers"
         users: 1
         iterations: 2
 

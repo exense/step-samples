@@ -38,7 +38,7 @@ plans:
   # The fourth record has a type no case handles, so it exercises exactly
   # that path.
   # =========================================================================
-  - name: "A - Route records by type"
+  - name: "A - Switch with a fallback"
     categories: ["RPA"]
     root:
       testCase:
@@ -78,7 +78,7 @@ plans:
                 - set:
                     key: routed
                     value: "NONE"
-                    nodeName: "Declare the routing outcome"
+                    nodeName: "Not routed yet"
 
                 - switch:
                     nodeName: "Route by record type"
@@ -116,7 +116,7 @@ plans:
                 # The replacement for the `default` case Step does not have:
                 # if nothing matched, `routed` is still NONE.
                 - if:
-                    nodeName: "Nothing matched?"
+                    nodeName: "Unknown record type?"
                     condition:
                       expression: "routed == 'NONE'"
                     children:
@@ -131,7 +131,7 @@ plans:
                 # matched nothing - the static-expression mistake above - every
                 # record would come out MANUAL and this fails.
                 - check:
-                    nodeName: "The record took the branch its type demands"
+                    nodeName: "Each record went to its sub-process"
                     expression: "recordType == 'UNKNOWN_TYPE' ? routed == 'MANUAL' : routed == recordType"
 
 
@@ -142,7 +142,7 @@ plans:
   # A common mistake is leaving it as a plain string: a non-empty string is
   # not automatically truthy here, so write a real comparison.
   # =========================================================================
-  - name: "B - Approve or escalate"
+  - name: "B - If and variable scope"
     categories: ["RPA"]
     root:
       testCase:
@@ -177,7 +177,7 @@ plans:
           - set:
               key: decision
               value: "UNDECIDED"
-              nodeName: "Declare the decision variable in the outer scope"
+              nodeName: "No decision yet"
 
           - if:
               nodeName: "Amount over 1000?"
@@ -242,13 +242,13 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "Run with one step switched off"
+        nodeName: "Submit without notifying approvals"
         children:
           - echo:
               text: "This step runs"
           - callKeyword:
               keyword: "Escalate"
-              nodeName: "Notify the approvals team (disabled)"
+              nodeName: "Notify the approvals team"
               description: "skipNode leaves the step in the plan but does not execute it."
               skipNode: true
           - echo:

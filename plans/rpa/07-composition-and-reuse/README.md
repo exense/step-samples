@@ -38,7 +38,7 @@ convention a Composite keyword uses. A bare `archiveFolder` is not bound:
 ```yaml
 - callPlan:
     selectionAttributes:
-      - name: "Shared - Archive processed records"
+      - name: "Archive processed records"
     input:
       - archiveFolder: "/archive/2026-08"
 ```
@@ -122,14 +122,14 @@ Note what `threads` means in each place:
 
 ## Keeping a sub-plan out of a normal run
 
-`Shared - Archive processed records` exists to be called by plan B. It expects
+`Archive processed records` exists to be called by plan B. It expects
 `archiveFolder` from its caller, so running it on its own fails — and by default, executing
 the package runs every plan in it, including this one.
 
 Mark it with a category and exclude that category at execution:
 
 ```yaml
-- name: "Shared - Archive processed records"
+- name: "Archive processed records"
   categories: ["RPA", "sub-plan"]
 ```
 
@@ -157,6 +157,6 @@ missing input rather than reporting it.
 step ap execute -p . -u <your-step-url> --token <your-token> --projectName <your-project> --excludeCategories=sub-plan
 ```
 
-`--excludeCategories=sub-plan` leaves out `Shared - Archive processed records`, which is
+`--excludeCategories=sub-plan` leaves out `Archive processed records`, which is
 meant to be reached through `callPlan` rather than run on its own. Without the flag that
 plan is executed too, and fails for want of the `archiveFolder` its caller supplies.

@@ -13,7 +13,7 @@ version: "1.2.0"
 name: "rpa-01-linear-bot"
 
 plans:
-  - name: "Linear RPA bot"
+  - name: "A - Linear bot"
     categories:
       - "RPA"
     root:
@@ -49,7 +49,7 @@ plans:
           # cleanup is guaranteed.
           # =============================================================
           - session:
-              nodeName: "One agent for the whole bot run"
+              nodeName: "Work in the back office"
               children:
 
                 # -----------------------------------------------------
@@ -228,7 +228,7 @@ plans:
                 # -------------------------------------------------------------
                 - check:
                     expression: "confirmationId == 'CONF-REC-001'"
-                    nodeName: "Verify the confirmation id survived the whole plan"
+                    nodeName: "Record carries its confirmation id"
                     description: "Uses check, not assert: this reads a plan variable, not a keyword output report."
 
 keywords:

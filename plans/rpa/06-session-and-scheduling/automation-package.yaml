@@ -40,25 +40,25 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "Drive one browser across several keywords"
+        nodeName: "Check orders and invoices"
         children:
           - session:
-              nodeName: "One agent, one browser, whole run"
+              nodeName: "Work in the browser"
               description: "All keywords below share an agent token and therefore a browser."
               children:
                 - sequence:
-                    nodeName: "Bot run with guaranteed browser cleanup"
+                    nodeName: "Browser run"
                     before:
                       steps:
                         - callKeyword:
                             keyword: "Open Browser"
-                            nodeName: "Open the browser (before)"
+                            nodeName: "Open the browser"
                     after:
                       continueOnError: true
                       steps:
                         - callKeyword:
                             keyword: "Close Browser"
-                            nodeName: "Close the browser (after) - always runs"
+                            nodeName: "Close the browser"
                     children:
 
                       # Each of these finds the browser the `before` step opened.
@@ -80,7 +80,7 @@ plans:
                                   expression: "output.browser"
 
                       - check:
-                          nodeName: "The same browser served both pages"
+                          nodeName: "Both pages were opened in the same browser"
                           expression: "browserHandle != null && browserHandle.startsWith('BROWSER-')"
 
   # =========================================================================
@@ -112,10 +112,10 @@ plans:
     agents: auto_detect
     root:
       testCase:
-        nodeName: "Run on an agent that can do RPA"
+        nodeName: "Use the browser on the RPA workstation"
         children:
           - session:
-              nodeName: "Session on a selected agent"
+              nodeName: "Work on the RPA workstation"
               # routing:
               #   - role: "rpa-workstation"
               #   - os: "windows"

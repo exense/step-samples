@@ -41,7 +41,7 @@ plans:
     categories: ["Load testing"]
     root:
       threadGroup:
-        nodeName: "2 users x 2 iterations"
+        nodeName: "Shoppers"
         users: 2
         iterations: 2
         children:
@@ -87,7 +87,7 @@ plans:
                 expectedValue: 150
 
             - performanceAssert:
-                nodeName: "And so was the product page"
+                nodeName: "The product page was measured separately"
                 measurementName: "Product page"
                 aggregator: COUNT
                 comparator: EQUALS

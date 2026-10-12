@@ -47,7 +47,7 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "Absorb a transient UI failure"
+        nodeName: "Submit despite a transient UI failure"
         children:
 
           # `expression:` makes this a NUMBER. A plain "0" would be the
@@ -56,10 +56,10 @@ plans:
               key: attempt
               value:
                 expression: "0"
-              nodeName: "Declare the attempt counter in the outer scope"
+              nodeName: "No attempt yet"
 
           - retryIfFails:
-              nodeName: "Retry the flaky step"
+              nodeName: "Try the submission until it succeeds"
               maxRetries: 5
               gracePeriod: 1000
               timeout: 30000
@@ -73,13 +73,13 @@ plans:
                       expression: "attempt + 1"
                 - callKeyword:
                     keyword: "Flaky Step"
-                    nodeName: "A step that fails the first two times"
+                    nodeName: "Submit the record"
                     inputs:
                       - attempt:
                           expression: "attempt"
 
           - check:
-              nodeName: "It took three attempts"
+              nodeName: "Submitted on the third attempt"
               expression: "attempt == 3"
 
   # =========================================================================
@@ -111,12 +111,12 @@ plans:
         nodeName: "The bot crashes but still logs out"
         children:
           - sequence:
-              nodeName: "Bot run with guaranteed cleanup"
+              nodeName: "Bot run"
               before:
                 steps:
                   - callKeyword:
                       keyword: "Login"
-                      nodeName: "Log in (before)"
+                      nodeName: "Log in"
               after:
                 # Two cleanup steps, so continueOnError is doing something:
                 # if the logout failed, the second step would still run.
@@ -124,16 +124,16 @@ plans:
                 steps:
                   - callKeyword:
                       keyword: "Logout"
-                      nodeName: "Log out (after) - runs even after a failure"
+                      nodeName: "Log out"
                   - echo:
                       text: "Session released"
-                      nodeName: "Release the licence (after)"
+                      nodeName: "Release the licence"
               children:
                 - echo:
                     text: "Doing the work..."
                 - callKeyword:
                     keyword: "Always Fails"
-                    nodeName: "The step that breaks the bot"
+                    nodeName: "Process the record"
                 - echo:
                     text: "This is NOT reached - the sequence stops at the first error"
 
@@ -171,11 +171,11 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "Two ways to keep going after an error"
+        nodeName: "Keep processing after an error"
         children:
 
           - sequence:
-              nodeName: "continueOnError on the container"
+              nodeName: "First batch"
               description: "The failing child does not stop its siblings inside this block."
               continueOnError: true
               # ...and this lets the testCase move on to the second block,
@@ -184,18 +184,18 @@ plans:
               children:
                 - callKeyword:
                     keyword: "Always Fails"
-                    nodeName: "Fails here"
+                    nodeName: "Process a broken record"
                 - echo:
                     text: "REACHED - continueOnError let the sequence carry on"
 
           - sequence:
-              nodeName: "continueParentNodeExecutionOnError on the child"
+              nodeName: "Second batch"
               description: "The failing child tells this sequence to carry on."
               continueParentNodeExecutionOnError: true
               children:
                 - callKeyword:
                     keyword: "Always Fails"
-                    nodeName: "Fails, but lets the parent continue"
+                    nodeName: "Process a broken record"
                     continueParentNodeExecutionOnError: true
                 - echo:
                     text: "REACHED - the child released the parent"
@@ -236,7 +236,7 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "Count a backlog down to zero"
+        nodeName: "Work off the backlog"
         children:
 
           # The loop counts down a plan variable to keep the sample
@@ -248,7 +248,7 @@ plans:
               key: remaining
               value:
                 expression: "3"
-              nodeName: "Seed the loop variable"
+              nodeName: "Backlog of 3 items"
 
           # condition     evaluated BEFORE each iteration (a classic while)
           # postCondition evaluated AFTER each iteration - use it for do-while,
@@ -277,7 +277,7 @@ plans:
                       expression: "'Backlog is now ' + remaining"
 
           - check:
-              nodeName: "The backlog drained before the guards fired"
+              nodeName: "The backlog is empty"
               expression: "remaining == 0"
 
   - name: "D2 - Wait with retryIfFails"
@@ -309,7 +309,7 @@ plans:
               key: polls
               value:
                 expression: "0"
-              nodeName: "Declare the poll counter in the outer scope"
+              nodeName: "No poll yet"
 
           - retryIfFails:
               nodeName: "Poll until the queue is empty"
@@ -336,7 +336,7 @@ plans:
                           customErrorMessage: "Queue not drained yet - retrying."
 
           - check:
-              nodeName: "The queue drained within the guards"
+              nodeName: "The queue is empty"
               expression: "polls == 3"
 
   # =========================================================================
@@ -357,7 +357,7 @@ plans:
     categories: ["RPA"]
     root:
       testCase:
-        nodeName: "Stop the run with a business message"
+        nodeName: "Reconcile the totals"
         children:
           - set:
               key: reconciled

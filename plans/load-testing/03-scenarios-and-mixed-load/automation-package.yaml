@@ -26,7 +26,7 @@ plans:
   # as one thread group doing "browse then buy" would produce a traffic mix
   # no real shop ever sees.
   # =========================================================================
-  - name: "A - Browsers and buyers at the same time"
+  - name: "A - Parallel thread groups"
     categories: ["Load testing"]
     root:
       testScenario:
@@ -94,11 +94,11 @@ plans:
     categories: ["Load testing"]
     root:
       testScenario:
-        nodeName: "Find the level where response times turn"
+        nodeName: "Shop under growing load"
         children:
 
           - threadGroup:
-              nodeName: "Stage 1 - 1 user"
+              nodeName: "First wave of shoppers"
               users: 1
               iterations: 2
               startOffset: 0
@@ -107,7 +107,7 @@ plans:
                     keyword: "Checkout"
 
           - threadGroup:
-              nodeName: "Stage 2 - 2 users"
+              nodeName: "Second wave of shoppers"
               users: 2
               iterations: 2
               startOffset: 3000
@@ -116,7 +116,7 @@ plans:
                     keyword: "Checkout"
 
           - threadGroup:
-              nodeName: "Stage 3 - 2 users"
+              nodeName: "Third wave of shoppers"
               users: 2
               iterations: 2
               startOffset: 6000
@@ -134,7 +134,7 @@ plans:
   # The sequence runs once, in parallel with the load, and its own duration
   # is measured like anything else.
   # =========================================================================
-  - name: "C - Measure the site while the batch job runs"
+  - name: "C - Background load"
     categories: ["Load testing"]
     root:
       testScenario:
@@ -180,15 +180,15 @@ plans:
   # threshold below applies only to the measured phase.
   #
   # =========================================================================
-  - name: "D - Warm-up phase then measured phase"
+  - name: "D - Warm-up phase"
     categories: ["Load testing"]
     root:
       sequence:
-        nodeName: "Two phases in order"
+        nodeName: "Shop after a warm-up"
         children:
 
           - threadGroup:
-              nodeName: "Warm-up phase"
+              nodeName: "Warm-up shoppers"
               users: 1
               iterations: 2
               children:
@@ -196,7 +196,7 @@ plans:
                     keyword: "Warm Up"
 
           - threadGroup:
-              nodeName: "Measured phase"
+              nodeName: "Measured shoppers"
               users: 2
               iterations: 3
               children:

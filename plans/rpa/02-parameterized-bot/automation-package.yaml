@@ -16,7 +16,7 @@ version: "1.2.0"
 name: "rpa-02-parameterized-bot"
 
 plans:
-  - name: "Self-service record submission"
+  - name: "A - Parameterized bot"
     categories:
       - "RPA"
     root:
@@ -44,14 +44,14 @@ plans:
               key: recordId
               value:
                 expression: "binding.variables.containsKey('recordId') ? recordId : 'REC-001'"
-              nodeName: "Default the recordId execution parameter"
+              nodeName: "Use the default record when none is given"
               description: "Falls back to REC-001 when the caller supplies nothing."
 
           - set:
               key: amount
               value:
                 expression: "binding.variables.containsKey('amount') ? amount : '1000'"
-              nodeName: "Default the amount execution parameter"
+              nodeName: "Use the default amount when none is given"
 
           - echo:
               text:
@@ -72,7 +72,7 @@ plans:
           # passed between them here. See 01-linear-bot for the full note.
           # -------------------------------------------------------------
           - session:
-              nodeName: "One agent for the whole bot run"
+              nodeName: "Work in the back office"
               children:
 
                 - callKeyword:
