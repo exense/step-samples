@@ -4,12 +4,11 @@ version: "1.3.0"
 name: "functional-07-setup-teardown-and-selection"
 
 plans:
-  - name: "Smoke tests"
+  - name: "A - Shared setup and cleanup for a test set"
     categories: ["smoke"]
     root:
       testSet:
-        nodeName: "Web shop smoke tests"
-        # Shared fixture: one test customer for all test cases of the set
+        # One test customer for all test cases of the set
         before:
           steps:
             - callKeyword:
@@ -17,8 +16,7 @@ plans:
                 children:
                   - set:
                       key: "customerId"
-                      value:
-                        expression: "output.customerId"
+                      value: "${output.customerId}"
         after:
           continueOnError: true
           steps:
@@ -45,66 +43,6 @@ plans:
                           operator: EQUALS
                           expected: "LOGGED_IN"
           - testCase:
-              nodeName: "Customer can place an order"
-              # Test data owned by this test case only
-              before:
-                steps:
-                  - callKeyword:
-                      keyword: "Add To Cart"
-                      inputs:
-                        - customerId: "${customerId}"
-                        - sku: "KB-100"
-                      children:
-                        - set:
-                            key: "cartId"
-                            value:
-                              expression: "output.cartId"
-              after:
-                continueOnError: true
-                steps:
-                  - callKeyword:
-                      keyword: "Clear Cart"
-                      inputs:
-                        - cartId: "${cartId}"
-                      children:
-                        - assert:
-                            actual: "cleared"
-                            operator: EQUALS
-                            expected: "${cartId}"
-              children:
-                - callKeyword:
-                    keyword: "Place Order"
-                    inputs:
-                      - cartId: "${cartId}"
-                    children:
-                      - assert:
-                          actual: "status"
-                          operator: EQUALS
-                          expected: "PLACED"
-
-  - name: "Regression tests"
-    categories: ["regression"]
-    root:
-      testSet:
-        nodeName: "Web shop regression tests"
-        before:
-          steps:
-            - callKeyword:
-                keyword: "Create Test Customer"
-                children:
-                  - set:
-                      key: "customerId"
-                      value:
-                        expression: "output.customerId"
-        after:
-          continueOnError: true
-          steps:
-            - callKeyword:
-                keyword: "Delete Test Customer"
-                inputs:
-                  - customerId: "${customerId}"
-        children:
-          - testCase:
               nodeName: "A new customer has no orders"
               children:
                 - callKeyword:
@@ -117,10 +55,11 @@ plans:
                           operator: EQUALS
                           expected: "0"
 
-  - name: "Expected to fail - cleanup runs after a failure"
+  - name: "B - Setup and cleanup for a test case"
+    categories: ["regression"]
     root:
-      testSet:
-        nodeName: "Web shop"
+      testCase:
+        nodeName: "Customer can place an order"
         before:
           steps:
             - callKeyword:
@@ -128,8 +67,60 @@ plans:
                 children:
                   - set:
                       key: "customerId"
-                      value:
-                        expression: "output.customerId"
+                      value: "${output.customerId}"
+            - callKeyword:
+                keyword: "Add To Cart"
+                inputs:
+                  - customerId: "${customerId}"
+                  - sku: "KB-100"
+                children:
+                  - set:
+                      key: "cartId"
+                      value: "${output.cartId}"
+        after:
+          continueOnError: true
+          steps:
+            - callKeyword:
+                keyword: "Clear Cart"
+                inputs:
+                  - cartId: "${cartId}"
+                children:
+                  - assert:
+                      actual: "cleared"
+                      operator: EQUALS
+                      expected: "${cartId}"
+            - callKeyword:
+                keyword: "Delete Test Customer"
+                inputs:
+                  - customerId: "${customerId}"
+                children:
+                  - assert:
+                      actual: "deleted"
+                      operator: EQUALS
+                      expected: "${customerId}"
+        children:
+          - callKeyword:
+              keyword: "Place Order"
+              inputs:
+                - cartId: "${cartId}"
+              children:
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "PLACED"
+
+  - name: "C - Cleanup after a failure (intentionally fails)"
+    root:
+      testCase:
+        nodeName: "Customer can log in"
+        before:
+          steps:
+            - callKeyword:
+                keyword: "Create Test Customer"
+                children:
+                  - set:
+                      key: "customerId"
+                      value: "${output.customerId}"
         after:
           continueOnError: true
           steps:
@@ -143,19 +134,16 @@ plans:
                       operator: EQUALS
                       expected: "${customerId}"
         children:
-          - testCase:
-              nodeName: "Customer can log in"
+          - callKeyword:
+              keyword: "Login"
+              inputs:
+                - customerId: "${customerId}"
               children:
-                - callKeyword:
-                    keyword: "Login"
-                    inputs:
-                      - customerId: "${customerId}"
-                    children:
-                      # Wrong on purpose, to show that the after block still runs. Not a pattern for real plans.
-                      - assert:
-                          actual: "status"
-                          operator: EQUALS
-                          expected: "LOCKED"
+                # Wrong on purpose, to show that the after block still runs. Not a pattern for real plans.
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "LOCKED"
 
 keywords:
   - GeneralScript:

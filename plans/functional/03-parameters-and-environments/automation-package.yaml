@@ -31,46 +31,63 @@ parameters:
     protectedValue: true
 
 plans:
-  - name: "Parameters and environments"
+  - name: "A - Environment-specific parameters"
     root:
-      testSet:
-        nodeName: "Web shop"
+      testCase:
+        nodeName: "Application opens"
         children:
-          - testCase:
-              nodeName: "Open the application"
+          - callKeyword:
+              keyword: "Open Application"
+              inputs:
+                - url: "${shopUrl}"
               children:
-                - callKeyword:
-                    keyword: "Open Application"
-                    inputs:
-                      - url: "${shopUrl}"
-                    children:
-                      - assert:
-                          actual: "title"
-                          operator: EQUALS
-                          expected: "Web shop"
-                      - assert:
-                          actual: "apiUrl"
-                          operator: EQUALS
-                          expected: "${shopUrl}/api"
-          - testCase:
-              nodeName: "Log in"
+                - assert:
+                    actual: "title"
+                    operator: EQUALS
+                    expected: "Web shop"
+
+  - name: "B - Technical settings as keyword properties"
+    root:
+      testCase:
+        nodeName: "Shop API is available"
+        children:
+          - callKeyword:
+              keyword: "Check Shop API"
               children:
-                - callKeyword:
-                    keyword: "Login"
-                    inputs:
-                      - username: "${shopUser}"
-                      - password: "${shopPassword}"
-                    children:
-                      - assert:
-                          actual: "status"
-                          operator: EQUALS
-                          expected: "LOGGED_IN"
+                - assert:
+                    actual: "apiUrl"
+                    operator: EQUALS
+                    expected: "${shopUrl}/api"
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "UP"
+
+  - name: "C - Protected parameters"
+    root:
+      testCase:
+        nodeName: "User can log in"
+        children:
+          - callKeyword:
+              keyword: "Login"
+              inputs:
+                - username: "${shopUser}"
+                - password: "${shopPassword}"
+              children:
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "LOGGED_IN"
 
 keywords:
   - GeneralScript:
       name: "Open Application"
       scriptLanguage: groovy
       scriptFile: keywords/openApplication.groovy
+  - GeneralScript:
+      name: "Check Shop API"
+      scriptLanguage: groovy
+      scriptFile: keywords/checkShopApi.groovy
   - GeneralScript:
       name: "Login"
       scriptLanguage: groovy

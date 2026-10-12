@@ -4,10 +4,9 @@ version: "1.3.0"
 name: "functional-06-data-driven-tests"
 
 plans:
-  - name: "Login with every user"
+  - name: "A - One test case per data row"
     root:
       testSet:
-        nodeName: "Login"
         children:
           - forEach:
               dataSource:
@@ -29,10 +28,9 @@ plans:
                                 operator: EQUALS
                                 expected: "${row.expectedStatus}"
 
-  - name: "Expected to fail - one failing row"
+  - name: "B - One failing data row (intentionally fails)"
     root:
       testSet:
-        nodeName: "Login"
         children:
           - forEach:
               dataSource:

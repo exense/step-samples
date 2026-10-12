@@ -4,93 +4,90 @@ version: "1.3.0"
 name: "functional-04-conditional-blocks"
 
 plans:
-  - name: "Conditional blocks"
+  - name: "A - If block"
     root:
-      testSet:
-        nodeName: "Web shop"
+      testCase:
+        nodeName: "Cookie banner is closed when shown"
         children:
-
-          - testCase:
-              nodeName: "Close the cookie banner if it is shown"
+          - callKeyword:
+              keyword: "Open Home Page"
+              inputs:
+                - firstVisit: true
+              children:
+                - set:
+                    key: "cookieBannerShown"
+                    value:
+                      expression: "output.cookieBannerShown"
+          - if:
+              condition:
+                expression: "cookieBannerShown"
               children:
                 - callKeyword:
-                    keyword: "Open Home Page"
-                    inputs:
-                      - firstVisit: true
+                    keyword: "Accept Cookies"
                     children:
-                      - set:
-                          key: "cookieBannerShown"
-                          value:
-                            expression: "output.cookieBannerShown"
-                - if:
-                    condition:
-                      expression: "cookieBannerShown"
+                      - assert:
+                          actual: "cookieBannerShown"
+                          operator: EQUALS
+                          expected: "false"
+
+  - name: "B - Switch"
+    root:
+      testCase:
+        nodeName: "Discount matches the account type"
+        children:
+          - callKeyword:
+              keyword: "Get Customer"
+              inputs:
+                - customerId: "acme"
+              children:
+                # Fail early on a type the switch below does not handle
+                - assert:
+                    actual: "accountType"
+                    operator: MATCHES
+                    expected: "STANDARD|PREMIUM|BUSINESS"
+                - set:
+                    key: "accountType"
+                    value: "${output.accountType}"
+          - switch:
+              expression:
+                expression: "accountType"
+              children:
+                - case:
+                    value: "STANDARD"
                     children:
                       - callKeyword:
-                          keyword: "Accept Cookies"
+                          keyword: "Get Discount"
+                          inputs:
+                            - customerId: "acme"
                           children:
                             - assert:
-                                actual: "cookieBannerShown"
+                                actual: "discount"
                                 operator: EQUALS
-                                expected: "false"
-
-          - testCase:
-              nodeName: "Discount matches the account type"
-              children:
-                - callKeyword:
-                    keyword: "Get Customer"
-                    inputs:
-                      - customerId: "acme"
+                                expected: "0"
+                - case:
+                    value: "PREMIUM"
                     children:
-                      # Fail early on a type the switch below does not handle
-                      - assert:
-                          actual: "accountType"
-                          operator: MATCHES
-                          expected: "STANDARD|PREMIUM|BUSINESS"
-                      - set:
-                          key: "accountType"
-                          value:
-                            expression: "output.accountType"
-                - switch:
-                    expression:
-                      expression: "accountType"
+                      - callKeyword:
+                          keyword: "Get Discount"
+                          inputs:
+                            - customerId: "acme"
+                          children:
+                            - assert:
+                                actual: "discount"
+                                operator: EQUALS
+                                expected: "10"
+                - case:
+                    value: "BUSINESS"
                     children:
-                      - case:
-                          value: "STANDARD"
+                      - callKeyword:
+                          keyword: "Get Discount"
+                          inputs:
+                            - customerId: "acme"
                           children:
-                            - callKeyword:
-                                keyword: "Get Discount"
-                                inputs:
-                                  - customerId: "acme"
-                                children:
-                                  - assert:
-                                      actual: "discount"
-                                      operator: EQUALS
-                                      expected: "0"
-                      - case:
-                          value: "PREMIUM"
-                          children:
-                            - callKeyword:
-                                keyword: "Get Discount"
-                                inputs:
-                                  - customerId: "acme"
-                                children:
-                                  - assert:
-                                      actual: "discount"
-                                      operator: EQUALS
-                                      expected: "10"
-                      - case:
-                          value: "BUSINESS"
-                          children:
-                            - callKeyword:
-                                keyword: "Get Discount"
-                                inputs:
-                                  - customerId: "acme"
-                                children:
-                                  - assert:
-                                      actual: "discount"
-                                      operator: EQUALS
-                                      expected: "20"
+                            - assert:
+                                actual: "discount"
+                                operator: EQUALS
+                                expected: "20"
 
 keywords:
   - GeneralScript:

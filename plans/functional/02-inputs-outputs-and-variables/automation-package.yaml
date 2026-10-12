@@ -4,98 +4,102 @@ version: "1.3.0"
 name: "functional-02-inputs-outputs-and-variables"
 
 plans:
-  - name: "Inputs outputs and variables"
+  - name: "A - Store an output in a variable"
     root:
-      testSet:
-        nodeName: "Order management"
+      testCase:
+        nodeName: "Order can be read back after creation"
         children:
-
-          - testCase:
-              nodeName: "Create then read an order"
+          - callKeyword:
+              keyword: "Create Order"
+              inputs:
+                - customer: "jane"
+                - quantity: 2
               children:
-                - callKeyword:
-                    keyword: "Create Order"
-                    inputs:
-                      - customer: "jane"
-                      - quantity: 2
-                    children:
-                      - assert:
-                          actual: "status"
-                          operator: EQUALS
-                          expected: "CREATED"
-                      # Keep the output for later steps
-                      - set:
-                          key: "orderId"
-                          value: "${output.orderId}"
-                - callKeyword:
-                    keyword: "Get Order"
-                    inputs:
-                      - orderId: "${orderId}"
-                    children:
-                      - assert:
-                          actual: "orderId"
-                          operator: EQUALS
-                          expected: "${orderId}"
-                      - assert:
-                          actual: "status"
-                          operator: EQUALS
-                          expected: "CONFIRMED"
-
-          - testCase:
-              nodeName: "Pass an output to the next keyword"
-              children:
-                - callKeyword:
-                    keyword: "Create Order"
-                    inputs:
-                      - customer: "john"
-                      - quantity: 1
-                # previous holds the outputs of the keyword call just before
-                - callKeyword:
-                    keyword: "Get Order"
-                    inputs:
-                      - orderId: "${previous.orderId}"
-                    children:
-                      - assert:
-                          actual: "orderId"
-                          operator: EQUALS
-                          expected: "ORD-JOHN-1"
-
-          - testCase:
-              nodeName: "Unique test data"
-              children:
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "CREATED"
+                # Keep the output for later steps
                 - set:
-                    key: "runId"
-                    value: "${UUID.randomUUID().toString().take(8)}"
-                - set:
-                    key: "basketSize"
-                    value:
-                      expression: "3"
-                - callKeyword:
-                    keyword: "Register Customer"
-                    inputs:
-                      - username: "user-${runId}"
-                      - email: "user-${runId}@test.local"
-                      - deliveryDate: "${java.time.LocalDate.now().plusDays(3)}"
-                      # A computed number: expression keeps the type, interpolation would produce text
-                      - maxOrders:
-                          expression: "basketSize * 2"
-                    children:
-                      - assert:
-                          actual: "username"
-                          operator: EQUALS
-                          expected: "user-${runId}"
-                      - assert:
-                          actual: "email"
-                          operator: MATCHES
-                          expected: 'user-[0-9a-f]{8}@test\.local'
-                      - assert:
-                          actual: "deliveryDate"
-                          operator: EQUALS
-                          expected: "${java.time.LocalDate.now().plusDays(3)}"
-                      - assert:
-                          actual: "maxOrdersType"
-                          operator: EQUALS
-                          expected: "NUMBER"
+                    key: "orderId"
+                    value: "${output.orderId}"
+          - callKeyword:
+              keyword: "Get Order"
+              inputs:
+                - orderId: "${orderId}"
+              children:
+                - assert:
+                    actual: "orderId"
+                    operator: EQUALS
+                    expected: "${orderId}"
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "CONFIRMED"
+
+  - name: "B - Pass an output to the next keyword"
+    root:
+      testCase:
+        nodeName: "Order can be cancelled"
+        children:
+          - callKeyword:
+              keyword: "Create Order"
+              inputs:
+                - customer: "john"
+                - quantity: 1
+          # previous holds the outputs of the keyword call just before
+          - callKeyword:
+              keyword: "Cancel Order"
+              inputs:
+                - orderId: "${previous.orderId}"
+              children:
+                - assert:
+                    actual: "orderId"
+                    operator: EQUALS
+                    expected: "ORD-JOHN-1"
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "CANCELLED"
+
+  - name: "C - Computed inputs"
+    root:
+      testCase:
+        nodeName: "Customer can register"
+        children:
+          - set:
+              key: "runId"
+              value: "${UUID.randomUUID().toString().take(8)}"
+          - set:
+              key: "basketSize"
+              value:
+                expression: "3"
+          - callKeyword:
+              keyword: "Register Customer"
+              inputs:
+                - username: "user-${runId}"
+                - email: "user-${runId}@test.local"
+                - deliveryDate: "${java.time.LocalDate.now().plusDays(3)}"
+                # A computed number: expression keeps the type, interpolation would produce text
+                - maxOrders:
+                    expression: "basketSize * 2"
+              children:
+                - assert:
+                    actual: "username"
+                    operator: EQUALS
+                    expected: "user-${runId}"
+                - assert:
+                    actual: "email"
+                    operator: MATCHES
+                    expected: 'user-[0-9a-f]{8}@test\.local'
+                - assert:
+                    actual: "deliveryDate"
+                    operator: EQUALS
+                    expected: "${java.time.LocalDate.now().plusDays(3)}"
+                - assert:
+                    actual: "maxOrdersType"
+                    operator: EQUALS
+                    expected: "NUMBER"
 
 keywords:
   - GeneralScript:
@@ -106,6 +110,10 @@ keywords:
       name: "Get Order"
       scriptLanguage: groovy
       scriptFile: keywords/getOrder.groovy
+  - GeneralScript:
+      name: "Cancel Order"
+      scriptLanguage: groovy
+      scriptFile: keywords/cancelOrder.groovy
   - GeneralScript:
       name: "Register Customer"
       scriptLanguage: groovy

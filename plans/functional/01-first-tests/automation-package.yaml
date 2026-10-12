@@ -4,10 +4,28 @@ version: "1.3.0"
 name: "functional-01-first-tests"
 
 plans:
-  - name: "First test set"
+  - name: "A - First test case"
+    root:
+      testCase:
+        nodeName: "Login succeeds"
+        children:
+          - callKeyword:
+              keyword: "Login"
+              inputs:
+                - username: "jane"
+              children:
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "LOGGED_IN"
+                - assert:
+                    actual: "displayName"
+                    operator: EQUALS
+                    expected: "Jane"
+
+  - name: "B - Test set"
     root:
       testSet:
-        nodeName: "Web shop"
         children:
           - testCase:
               nodeName: "Login succeeds"
@@ -21,10 +39,6 @@ plans:
                           actual: "status"
                           operator: EQUALS
                           expected: "LOGGED_IN"
-                      - assert:
-                          actual: "displayName"
-                          operator: EQUALS
-                          expected: "Jane"
           - testCase:
               nodeName: "Search returns results"
               children:
@@ -42,10 +56,9 @@ plans:
                           operator: CONTAINS
                           expected: "keyboard"
 
-  - name: "Expected to fail - one failing test case"
+  - name: "C - One failing test case in a test set (intentionally fails)"
     root:
       testSet:
-        nodeName: "Web shop"
         children:
           - testCase:
               nodeName: "Login succeeds"

@@ -4,71 +4,69 @@ version: "1.3.0"
 name: "functional-08-retries-and-async-testing"
 
 plans:
-  - name: "Retries and async testing"
+  - name: "A - Retry a flaky step"
     root:
-      testSet:
-        nodeName: "Web shop"
+      testCase:
+        nodeName: "Dashboard opens"
         children:
-
-          - testCase:
-              nodeName: "Open the dashboard despite transient failures"
-              children:
-                - retryIfFails:
-                    maxRetries: 3
-                    gracePeriod: 500
-                    children:
-                      - callKeyword:
-                          keyword: "Load Dashboard"
-
-          - testCase:
-              nodeName: "Order is shipped (polling)"
+          - retryIfFails:
+              maxRetries: 3
+              gracePeriod: 500
               children:
                 - callKeyword:
-                    keyword: "Place Order"
-                    children:
-                      - set:
-                          key: "orderId"
-                          value:
-                            expression: "output.orderId"
-                # Poll until the assert passes, at most 10 times or 30 seconds
-                - retryIfFails:
-                    maxRetries: 10
-                    gracePeriod: 1000
-                    timeout: 30000
-                    reportLastTryOnly: true
-                    children:
-                      - callKeyword:
-                          keyword: "Get Order Status"
-                          inputs:
-                            - orderId: "${orderId}"
-                          children:
-                            - assert:
-                                actual: "status"
-                                operator: EQUALS
-                                expected: "SHIPPED"
+                    keyword: "Load Dashboard"
 
-          - testCase:
-              nodeName: "Order is shipped (event)"
+  - name: "B - Poll until a condition is met"
+    root:
+      testCase:
+        nodeName: "Order status becomes SHIPPED"
+        children:
+          - callKeyword:
+              keyword: "Place Order"
+              children:
+                - set:
+                    key: "orderId"
+                    value: "${output.orderId}"
+          # Poll until the assert passes, at most 10 times or 30 seconds
+          - retryIfFails:
+              maxRetries: 10
+              gracePeriod: 1000
+              timeout: 30000
+              reportLastTryOnly: true
               children:
                 - callKeyword:
-                    keyword: "Place Order"
-                    children:
-                      - set:
-                          key: "orderId"
-                          value:
-                            expression: "output.orderId"
-                # Stands in for the shop, which publishes this event when the order ships
-                - callKeyword:
-                    keyword: "EBC_Put"
+                    keyword: "Get Order Status"
                     inputs:
-                      - eventGroup: "order-shipped"
-                      - eventName: "${orderId}"
-                      - payloadAsJson: '{"orderId":"${orderId}","status":"SHIPPED"}'
-                - waitForEvent:
-                    group: "order-shipped"
-                    name: "${orderId}"
-                    pollingSpeed: 500
-                    timeout: 30000
+                      - orderId: "${orderId}"
+                    children:
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "SHIPPED"
+
+  - name: "C - Wait for an event"
+    root:
+      testCase:
+        nodeName: "Shipping notification is published"
+        children:
+          - callKeyword:
+              keyword: "Place Order"
+              children:
+                - set:
+                    key: "orderId"
+                    value: "${output.orderId}"
+          # Stands in for the shop, which publishes this event when the order ships
+          - callKeyword:
+              keyword: "EBC_Put"
+              inputs:
+                - eventGroup: "order-shipped"
+                - eventName: "${orderId}"
+                - payloadAsJson: '{"orderId":"${orderId}","status":"SHIPPED"}'
+          - waitForEvent:
+              group: "order-shipped"
+              name: "${orderId}"
+              pollingSpeed: 500
+              timeout: 30000
 
 keywords:
   - GeneralScript:
