@@ -1,0 +1,60 @@
+---
+# Functional testing sample 06 - Data-driven tests
+version: "1.3.0"
+name: "functional-06-data-driven-tests"
+
+plans:
+  - name: "A - One test case per data row"
+    root:
+      testSet:
+        children:
+          - forEach:
+              dataSource:
+                csv:
+                  file: "data/logins.csv"
+              children:
+                - testCase:
+                    nodeName:
+                      expression: "'Login as ' + row.username + ' expecting ' + row.expectedStatus"
+                    children:
+                      - callKeyword:
+                          keyword: "Login"
+                          inputs:
+                            - username: "${row.username}"
+                            - password: "${row.password}"
+                          children:
+                            - assert:
+                                actual: "status"
+                                operator: EQUALS
+                                expected: "${row.expectedStatus}"
+
+  - name: "B - One failing data row (intentionally fails)"
+    root:
+      testSet:
+        children:
+          - forEach:
+              dataSource:
+                csv:
+                  # Row "expected-to-fail" has a wrong expected status on purpose. Not a pattern for real data.
+                  file: "data/logins-with-wrong-expectation.csv"
+              children:
+                - testCase:
+                    nodeName:
+                      expression: "'Login as ' + row.username + ' expecting ' + row.expectedStatus"
+                    children:
+                      - callKeyword:
+                          keyword: "Login"
+                          inputs:
+                            - username: "${row.username}"
+                            - password: "${row.password}"
+                          children:
+                            - assert:
+                                actual: "status"
+                                operator: EQUALS
+                                expected: "${row.expectedStatus}"
+
+keywords:
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy

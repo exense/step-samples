@@ -1,0 +1,97 @@
+---
+# Functional testing sample 01 - First tests
+version: "1.3.0"
+name: "functional-01-first-tests"
+
+plans:
+  - name: "A - First test case"
+    root:
+      testCase:
+        nodeName: "Login succeeds"
+        children:
+          - callKeyword:
+              keyword: "Login"
+              inputs:
+                - username: "jane"
+              children:
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "LOGGED_IN"
+                - assert:
+                    actual: "displayName"
+                    operator: EQUALS
+                    expected: "Jane"
+
+  - name: "B - Test set"
+    root:
+      testSet:
+        children:
+          - testCase:
+              nodeName: "Login succeeds"
+              children:
+                - callKeyword:
+                    keyword: "Login"
+                    inputs:
+                      - username: "jane"
+                    children:
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "LOGGED_IN"
+          - testCase:
+              nodeName: "Search returns results"
+              children:
+                - callKeyword:
+                    keyword: "Search Products"
+                    inputs:
+                      - query: "keyboard"
+                    children:
+                      - assert:
+                          actual: "resultCount"
+                          operator: GREATER_THAN
+                          expected: "0"
+                      - assert:
+                          actual: "firstProduct"
+                          operator: CONTAINS
+                          expected: "keyboard"
+
+  - name: "C - One failing test case in a test set (intentionally fails)"
+    root:
+      testSet:
+        children:
+          - testCase:
+              nodeName: "Login succeeds"
+              children:
+                - callKeyword:
+                    keyword: "Login"
+                    inputs:
+                      - username: "jane"
+                    children:
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "LOGGED_IN"
+          - testCase:
+              nodeName: "Search returns results"
+              children:
+                - callKeyword:
+                    keyword: "Search Products"
+                    inputs:
+                      - query: "keyboard"
+                    children:
+                      # Wrong on purpose, to show a failing test case next to a passing one. Not a pattern for real plans.
+                      - assert:
+                          actual: "resultCount"
+                          operator: EQUALS
+                          expected: "10"
+
+keywords:
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy
+  - GeneralScript:
+      name: "Search Products"
+      scriptLanguage: groovy
+      scriptFile: keywords/searchProducts.groovy

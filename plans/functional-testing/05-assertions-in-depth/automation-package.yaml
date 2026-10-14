@@ -1,0 +1,152 @@
+---
+# Functional testing sample 05 - Assertions in depth
+version: "1.3.0"
+name: "functional-05-assertions-in-depth"
+
+plans:
+  - name: "A - Assert operators"
+    root:
+      testCase:
+        nodeName: "Product details are correct"
+        children:
+          - callKeyword:
+              keyword: "Get Product"
+              inputs:
+                - sku: "KB-100"
+              children:
+                - assert:
+                    actual: "sku"
+                    operator: EQUALS
+                    expected: "KB-100"
+                - assert:
+                    actual: "sku"
+                    operator: MATCHES
+                    expected: '[A-Z]{2}-\d{3}'
+                - assert:
+                    actual: "name"
+                    operator: BEGINS_WITH
+                    expected: "Wireless"
+                - assert:
+                    actual: "name"
+                    operator: ENDS_WITH
+                    expected: "keyboard"
+                - assert:
+                    actual: "description"
+                    operator: CONTAINS
+                    expected: "numeric pad"
+                - assert:
+                    actual: "price"
+                    operator: LESS_THAN
+                    expected: "50"
+                - assert:
+                    actual: "stock"
+                    operator: GREATER_THAN_OR_EQUALS
+                    expected: "1"
+                    customErrorMessage: "The product is out of stock"
+                - assert:
+                    actual: "discontinuedReason"
+                    operator: IS_NULL
+                - assert:
+                    actual: "name"
+                    operator: CONTAINS
+                    expected: "mouse"
+                    doNegate: true
+
+  - name: "B - Check across keyword outputs"
+    root:
+      testCase:
+        nodeName: "Cart total matches the catalogue price"
+        children:
+          - callKeyword:
+              keyword: "Get Product"
+              inputs:
+                - sku: "KB-100"
+              children:
+                - set:
+                    key: "price"
+                    value:
+                      expression: "output.price"
+          - callKeyword:
+              keyword: "Add To Cart"
+              inputs:
+                - sku: "KB-100"
+                - quantity: 2
+              children:
+                - set:
+                    key: "lineTotal"
+                    value:
+                      expression: "output.lineTotal"
+          # Compares the outputs of two keywords, which a single assert cannot do
+          - check:
+              expression: "lineTotal == price * 2"
+
+  - name: "C - Negative test"
+    root:
+      testCase:
+        nodeName: "Wrong password is rejected"
+        children:
+          - callKeyword:
+              keyword: "Login"
+              inputs:
+                - username: "jane"
+                - password: "wrong-password"
+              children:
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "REJECTED"
+                - assert:
+                    actual: "errorMessage"
+                    operator: EQUALS
+                    expected: "Invalid username or password"
+
+  - name: "D - Collect all failures (intentionally fails)"
+    root:
+      testCase:
+        nodeName: "Product details are correct"
+        children:
+          - sequence:
+              continueOnError: true
+              children:
+                # Two expected values below are wrong on purpose, to show that every failure is reported. Not a pattern for real plans.
+                - callKeyword:
+                    keyword: "Get Product"
+                    inputs:
+                      - sku: "KB-100"
+                    children:
+                      - assert:
+                          actual: "name"
+                          operator: EQUALS
+                          expected: "Wireless mouse"
+                      - assert:
+                          actual: "price"
+                          operator: EQUALS
+                          expected: "39"
+                      - assert:
+                          actual: "stock"
+                          operator: GREATER_THAN
+                          expected: "0"
+                - callKeyword:
+                    keyword: "Add To Cart"
+                    inputs:
+                      - sku: "KB-100"
+                      - quantity: 2
+                    children:
+                      - assert:
+                          actual: "lineTotal"
+                          operator: EQUALS
+                          expected: "98"
+
+keywords:
+  - GeneralScript:
+      name: "Get Product"
+      scriptLanguage: groovy
+      scriptFile: keywords/getProduct.groovy
+  - GeneralScript:
+      name: "Add To Cart"
+      scriptLanguage: groovy
+      scriptFile: keywords/addToCart.groovy
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy

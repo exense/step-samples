@@ -1,19 +1,33 @@
-# step-samples
+# Step Samples
 
-Sample projects for [Step](https://step.dev) — the open-source open-source automation platform that unifies software automation across the entire DevOps lifecycle.
+Official samples for [Step](https://step.dev), the open-source automation platform that unifies software automation across the entire DevOps lifecycle.
+
+Explore ready-to-run automation projects, learn Step's core concepts, and use these examples as starting points for your own projects.
 
 ---
 
-## Start here: Automation Packages
+## How the samples are organised
 
-The **[automation-packages](automation-packages/)** directory is the primary entry point for this repository. It contains ready-to-run samples covering the most common automation use cases, each structured as a self-contained Step Automation Package.
+The repository is organized into three main categories. Each sample is designed to illustrate a specific use case, technology, or automation concept.
 
-> **What is an Automation Package?**  
-> An Automation Package is a single deployable artifact (JAR, zip, or folder) that bundles keywords, plans, schedules, and parameters together. It is the recommended way to organize and deploy automation with Step.
+| Directory | Contents                                                                                           | Best for                                  |
+|-----------|----------------------------------------------------------------------------------------------------|-------------------------------------------|
+| **[automation-packages](automation-packages/)** | Blueprints: complete projects for a given use case and stack, with their build, keywords and plans | Starting a new automation project         |
+| **[plans](plans/)** | Plan samples: focused examples of Step's automation logic and orchestration capabilities           | Learning how to build and structure plans |
+| **[keywords](keywords/)** | Keyword samples: examples of integrating programming languages and automation frameworks with Step | Implementing and integrating keywords     |
 
-Browse the **[automation-packages/README.md](automation-packages/README.md)** for a full index of samples with filtering by use-case, framework, language, and complexity level.
+> All these samples are packages as Automation Packages, the Step standard for packaging portable automation and everything that belongs to it: keywords, plans, schedules, and parameters together.
 
-### Quick overview of available samples
+---
+
+## Automation Package blueprints
+
+The **[automation-packages](automation-packages/)** directory contains complete, real-world
+blueprints. Each one is a self-contained project for a given use case and stack: load testing
+with Playwright/TypeScript, synthetic monitoring with Cypress, RPA with Selenium. Take one as
+the starting point for your own project.
+
+Browse the **[automation-packages/README.md](automation-packages/README.md)** for a full index of blueprints with filtering by use-case, framework, language, and complexity level.
 
 | Use case | Examples |
 |----------|---------|
@@ -24,29 +38,77 @@ Browse the **[automation-packages/README.md](automation-packages/README.md)** fo
 
 ---
 
-## Other directories
+## Plan samples
 
-These directories contain older, lower-level samples that predate Automation Packages. They remain useful as reference material for individual keywords or Step client usage.
+The **[plans](plans/)** directory is about **plans** — the implementation of an automation
+scenario, whether that is a functional test case, a load test, an RPA routine or a synthetic
+monitoring probe. A plan combines keywords with the controls that build up its execution
+logic: loops, branches, retries, waits.
+
+Each sample covers one plan concept, with keyword code deliberately reduced to 3-line stubs so
+the plan itself is the subject. Look things up here when you are writing a plan. See
+**[plans/README.md](plans/README.md)** for the full index.
+
+| Section | Contents |
+|---------|----------|
+| [plans/functional-testing](plans/functional-testing/) | Nine functional-testing plan samples: test sets, inputs and outputs, parameters, assertions, data-driven tests, setup and cleanup, async testing, modularity |
+| [plans/load-testing](plans/load-testing/) | Six load-testing plan samples: thread groups, scenarios and mixed load, test data, measurements, SLA gates |
+| [plans/rpa](plans/rpa/) | Seven RPA plan samples: loops and data sources, branching, resilience, sessions, scheduling, reuse |
+| [plans/reference](plans/reference/) | Standalone YAML plans illustrating the syntax — the shape of a plan, and static values vs expressions |
+
+Samples for monitoring will follow the same structure.
+
+---
+
+## Keyword samples
+
+The **[keywords](keywords/)** directory holds keyword examples by technology (Java, .NET,
+Cypress, TypeScript/Playwright, JMeter, k6, Oryon, gRPC, SoapUI, …).
+
+New keyword samples will be added in the same form as `plans/`: one keyword concept per
+sample, each shipped as a runnable automation package. The existing examples predate
+automation packages and remain useful as reference until then.
+
+---
+
+## Other directories
 
 | Directory | Contents |
 |-----------|----------|
-| [keywords](keywords/) | Standalone keyword examples by technology (Java, .NET, Cypress, TypeScript/Playwright, JMeter, k6, Oryon, gRPC, SoapUI, …) |
-| [plans](plans/) | Example Step plan files (JSON and YAML) |
 | [step-client](step-client/) | Sample projects using the Step Controller API (Java and REST) |
 | [plugins](plugins/) | Example Step plugin |
 | [maven-plugins](maven-plugins/) | Sample for the Step Maven upload plugin |
 
 ---
 
-## Setup
+## Getting started
 
-### Open-source samples
+### 1. Get access to Step
 
-Samples of open-source features rely exclusively on public dependencies and build without any specific prerequisites.
+The easiest way to get started is [Step Cloud](https://www.stepcloud.ch/). Create a free account and use the included evaluation credits to explore and run the samples without setting up infrastructure.
 
-### Enterprise samples
+Alternatively, you can run Step on-premises:
 
-Enterprise samples require a Step Enterprise license and depend on artifacts hosted on the exense private Nexus. Add the following to your `~/.m2/settings.xml`:
+- [Download Step from GitHub](https://github.com/exense/step-distribution/releases)
+- [Follow the installation guide](https://step.dev/knowledgebase/setup/installation/binaries/quick-setup/)
+
+### 2. Choose a sample
+
+Browse the [Automation Package blueprints](automation-packages/README.md) for complete projects or the [Plan samples](plans/README.md) to learn specific automation concepts.
+
+Each sample contains the relevant source files and configuration for its use case.
+
+### 3. Build and run
+
+Follow the instructions in the selected sample's README to build its Automation Package, deploy it to Step, and execute the corresponding plans.
+
+### Enterprise dependencies
+
+Open-source samples use publicly available dependencies and require no private repository credentials.
+
+Some samples use Step Enterprise features and require a valid Enterprise license and access to the exense private Nexus repository.
+
+Configure your Maven credentials in `~/.m2/settings.xml`:
 
 ```xml
 <servers>
@@ -58,7 +120,7 @@ Enterprise samples require a Step Enterprise license and depend on artifacts hos
 </servers>
 ```
 
-If your environment uses an HTTP proxy:
+If your environment requires an HTTP proxy, add the following configuration:
 
 ```xml
 <proxies>
@@ -73,15 +135,7 @@ If your environment uses an HTTP proxy:
 </proxies>
 ```
 
-### Running Step
+## Documentation and support
 
-The quickest way to get started is **[stepcloud.ch](https://www.stepcloud.ch/)** — create a free account, get evaluation credits, and have a fully managed Step instance running in minutes with no infrastructure to set up. This is the recommended approach for trying out these samples.
-
-For an on-premise installation, download the latest release from [github.com/exense/step/releases](https://github.com/exense/step/releases) and follow the [installation guide](https://step.dev/knowledgebase/setup/installation/binaries/quick-setup/).
-
----
-
-## Help
-
-- Documentation: [step.dev](https://step.dev)
-- Support: [step.dev/contact](https://step.dev/contact/)
+- **Documentation:** [step.dev](https://step.dev)
+- **Support and questions:** [step.dev/contact](https://step.dev/contact/)

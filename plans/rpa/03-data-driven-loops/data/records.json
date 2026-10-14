@@ -1,0 +1,4 @@
+[
+  { "RecordId": "REC-101", "Customer": "Umbrella", "Amount": 500 },
+  { "RecordId": "REC-102", "Customer": "Soylent", "Amount": 1750 }
+]

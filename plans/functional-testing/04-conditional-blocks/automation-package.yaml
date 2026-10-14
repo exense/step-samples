@@ -1,0 +1,108 @@
+---
+# Functional testing sample 04 - Conditional blocks
+version: "1.3.0"
+name: "functional-04-conditional-blocks"
+
+plans:
+  - name: "A - If block"
+    root:
+      testCase:
+        nodeName: "Cookie banner is closed when shown"
+        children:
+          - callKeyword:
+              keyword: "Open Home Page"
+              inputs:
+                - firstVisit: true
+              children:
+                - set:
+                    key: "cookieBannerShown"
+                    value:
+                      expression: "output.cookieBannerShown"
+          - if:
+              condition:
+                expression: "cookieBannerShown"
+              children:
+                - callKeyword:
+                    keyword: "Accept Cookies"
+                    children:
+                      - assert:
+                          actual: "cookieBannerShown"
+                          operator: EQUALS
+                          expected: "false"
+
+  - name: "B - Switch"
+    root:
+      testCase:
+        nodeName: "Discount matches the account type"
+        children:
+          - callKeyword:
+              keyword: "Get Customer"
+              inputs:
+                - customerId: "acme"
+              children:
+                # Fail early on a type the switch below does not handle
+                - assert:
+                    actual: "accountType"
+                    operator: MATCHES
+                    expected: "STANDARD|PREMIUM|BUSINESS"
+                - set:
+                    key: "accountType"
+                    value: "${output.accountType}"
+          - switch:
+              expression:
+                expression: "accountType"
+              children:
+                - case:
+                    value: "STANDARD"
+                    children:
+                      - callKeyword:
+                          keyword: "Get Discount"
+                          inputs:
+                            - customerId: "acme"
+                          children:
+                            - assert:
+                                actual: "discount"
+                                operator: EQUALS
+                                expected: "0"
+                - case:
+                    value: "PREMIUM"
+                    children:
+                      - callKeyword:
+                          keyword: "Get Discount"
+                          inputs:
+                            - customerId: "acme"
+                          children:
+                            - assert:
+                                actual: "discount"
+                                operator: EQUALS
+                                expected: "10"
+                - case:
+                    value: "BUSINESS"
+                    children:
+                      - callKeyword:
+                          keyword: "Get Discount"
+                          inputs:
+                            - customerId: "acme"
+                          children:
+                            - assert:
+                                actual: "discount"
+                                operator: EQUALS
+                                expected: "20"
+
+keywords:
+  - GeneralScript:
+      name: "Open Home Page"
+      scriptLanguage: groovy
+      scriptFile: keywords/openHomePage.groovy
+  - GeneralScript:
+      name: "Accept Cookies"
+      scriptLanguage: groovy
+      scriptFile: keywords/acceptCookies.groovy
+  - GeneralScript:
+      name: "Get Customer"
+      scriptLanguage: groovy
+      scriptFile: keywords/getCustomer.groovy
+  - GeneralScript:
+      name: "Get Discount"
+      scriptLanguage: groovy
+      scriptFile: keywords/getDiscount.groovy
