@@ -30,6 +30,9 @@ every failed check reported, not only the first one.
 - **Operators:** `EQUALS`, `BEGINS_WITH`, `ENDS_WITH`, `CONTAINS`, `MATCHES` (regular
   expression), `LESS_THAN`, `LESS_THAN_OR_EQUALS`, `GREATER_THAN`, `GREATER_THAN_OR_EQUALS` and
   `IS_NULL` (the output is missing). `doNegate: true` inverts any of them.
+- **Numbers and booleans.** In the YAML, `expected` is always written as a string (`"50"`,
+  `"true"`). Step converts it to the type of the output, so `expected: "50"` compares as the
+  number 50 with `LESS_THAN` or `EQUALS` when the output is a number.
 - **Negative tests.** A negative test passes when the application refuses the action. For that,
   the keyword reports the refusal as outputs (`status`, `errorMessage`) instead of failing, and
   the test asserts on them.

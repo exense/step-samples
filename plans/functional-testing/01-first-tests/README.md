@@ -27,7 +27,7 @@ outputs. A test set groups several test cases and reports a verdict for each of 
 - A **test set** runs all its test cases, also after one of them has failed, and the report
   lists the verdict of each test case. The test set itself fails if any of its test cases fails.
 - An `assert` is placed under the keyword call whose output it checks. `actual` names the output
-  field, `expected` is compared as text, so numbers are written as strings (`"0"`).
+  field, `expected` the value it must have.
 
 ## Key files
 
