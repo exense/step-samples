@@ -33,7 +33,7 @@
 
     <properties>
         <junit.version>4.13.1</junit.version>
-        <step-api.version>1.1.5</step-api.version>
+        <step-api.version>1.6.4</step-api.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -73,8 +73,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>21</source>
+                    <target>21</target>
                 </configuration>
             </plugin>
             <!-- Create a uber-jar which is the default packaging format for Keyword

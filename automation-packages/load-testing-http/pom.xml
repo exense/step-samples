@@ -41,11 +41,11 @@
     </scm>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>3.25.3</step.version>
+        <step.version>3.30.5</step.version>
         <junit.version>4.13.1</junit.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
 
@@ -56,6 +56,26 @@
         <step.step-project-name>Common</step.step-project-name>
         <step-library-kw.version>1.0.24</step-library-kw.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>exense-oss</id>
+            <url>https://repository.exense.ch/maven-oss/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>exense-oss</id>
+            <url>https://repository.exense.ch/maven-oss/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <!-- Dependency to the community keyword library step-library-kw-http that contains the HTTP keywords -->

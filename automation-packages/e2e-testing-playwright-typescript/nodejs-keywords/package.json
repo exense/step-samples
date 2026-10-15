@@ -16,12 +16,12 @@
   "author": "exense GmbH",
   "license": "ISC",
   "dependencies": {
-    "playwright": "1.58.2",
+    "playwright": "1.63.0",
     "@types/node": "24.6.2",
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "step-node-agent": "3.30.3",
+    "step-node-agent": "3.30.5",
     "tsx": "^4.19.3"
   }
 }
