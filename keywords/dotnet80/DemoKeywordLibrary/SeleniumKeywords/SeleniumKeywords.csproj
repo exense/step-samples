@@ -13,8 +13,8 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Selenium.WebDriver" Version="4.18.1" />
 		<PackageReference Include="log4net" Version="2.0.15" />
-		<PackageReference Include="StepApiFunction" Version="1.2.3" />
-		<PackageReference Include="StepApiKeyword" Version="1.2.3" />
-		<PackageReference Include="StepApiReporting" Version="1.2.3" />
+		<PackageReference Include="StepApiFunction" Version="1.6.4" />
+		<PackageReference Include="StepApiKeyword" Version="1.6.4" />
+		<PackageReference Include="StepApiReporting" Version="1.6.4" />
 	</ItemGroup>
 </Project>

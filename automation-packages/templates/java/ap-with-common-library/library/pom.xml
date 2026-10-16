@@ -14,18 +14,38 @@
 
     <properties>
         <!-- Java & encoding -->
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Dependency versions -->
-        <step.version>3.29.1</step.version>
-        <step-api.version>1.5.0</step-api.version>
+        <step.version>3.30.5</step.version>
+        <step-api.version>1.6.4</step-api.version>
 
         <!-- Maven plugins -->
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-shade-plugin.version>3.5.3</maven-shade-plugin.version>
         <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>exense-oss</id>
+            <url>https://repository.exense.ch/maven-oss/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>exense-oss</id>
+            <url>https://repository.exense.ch/maven-oss/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <!-- Step dependencies -->

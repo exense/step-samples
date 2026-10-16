@@ -1,4 +1,4 @@
-image: maven:3-openjdk-11
+image: maven:3-eclipse-temurin-21
 
 variables:
   STEP_URL: "https://your-step-instance.url/"

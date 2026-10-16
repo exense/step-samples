@@ -216,11 +216,11 @@ mvn install -pl playwright-automation-package-test
 
 ## Dependencies
 
-- **Java**: 11 or higher
+- **Java**: 21 or higher
 - **Maven**: 3.6 or higher
-- **Step**: 3.29.0
-- **Step API**: 1.5.0
-- **Playwright**: 1.56.0
+- **Step**: 3.30.5
+- **Step API**: 1.6.4
+- **Playwright**: 1.63.0
 - **JUnit**: 4.13.1
 
 ## License

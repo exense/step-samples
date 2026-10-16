@@ -1,5 +1,5 @@
 ---
-schemaVersion: 1.0.0
+version: 1.2.0
 name: "load-testing-k6-automation-package"
 keywords:
   # Declare a Keyword which runs the K6 test 'opencart-test.js' with 1 VU and 10 iterations
