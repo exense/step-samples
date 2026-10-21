@@ -41,12 +41,12 @@
     </scm>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <step.version>3.28.1</step.version>
-        <step-api.version>1.4.0</step-api.version>
+        <step.version>3.30.5</step.version>
+        <step-api.version>1.6.4</step-api.version>
         <okhttp.version>4.12.0</okhttp.version>
         <junit.version>4.13.1</junit.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
@@ -59,28 +59,22 @@
     </properties>
 
     <repositories>
-        <!-- staging nexus -->
         <repository>
-            <id>nexus-staging</id>
-            <url>https://nexus-enterprise-staging.stepcloud-test.ch/repository/staging-maven/</url>
-        </repository>
-        <!-- private nexus -->
-        <repository>
-            <id>nexus-exense</id>
-            <url>https://nexus-enterprise.exense.ch/repository/exense/</url>
+            <id>exense-oss</id>
+            <url>https://repository.exense.ch/maven-oss/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
     <pluginRepositories>
-        <!-- staging nexus -->
         <pluginRepository>
-            <id>nexus-staging</id>
-            <url>https://nexus-enterprise-staging.stepcloud-test.ch/repository/staging-maven/</url>
-        </pluginRepository>
-        <!-- private nexus -->
-        <pluginRepository>
-            <id>nexus-exense</id>
-            <url>https://nexus-enterprise.exense.ch/repository/exense/</url>
+            <id>exense-oss</id>
+            <url>https://repository.exense.ch/maven-oss/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </pluginRepository>
     </pluginRepositories>
 

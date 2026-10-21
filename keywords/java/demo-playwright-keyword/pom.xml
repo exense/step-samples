@@ -28,8 +28,8 @@
 	</developers>
 
 	<properties>
-		<step-api.version>1.2.5</step-api.version>
-		<playwright.version>1.44.0</playwright.version>
+		<step-api.version>1.6.4</step-api.version>
+		<playwright.version>1.63.0</playwright.version>
 		<junit.version>4.13.2</junit.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -60,8 +60,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>11</source>
-					<target>11</target>
+					<source>21</source>
+					<target>21</target>
 				</configuration>
 			</plugin>
 			<!-- Create a uber-jar which is the default packaging format for Step Keyword Packages -->

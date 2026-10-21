@@ -1,5 +1,5 @@
 ---
-schemaVersion: 1.0.0
+version: 1.2.0
 name: "Playwright Test Runner Sample"
 plans:
   - name: "Playwright Test Runner Sample - Plan 1"

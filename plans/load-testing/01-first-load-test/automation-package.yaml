@@ -1,0 +1,169 @@
+---
+# ---------------------------------------------------------------------------
+# Load-testing sample 01 - First load test
+#
+# The baseline shape of a load-testing plan: a thread group runs one business
+# transaction over and over, from several virtual users at once, and the plan
+# states the SLA the transaction has to meet.
+#
+# The focus of this sample is the PLAN. The keywords are 3-line Groovy stubs
+# that simulate a shop API, so the package runs on any Java agent with no
+# build, no browser and no system under test.
+# ---------------------------------------------------------------------------
+version: "1.3.0"
+name: "load-01-first-load-test"
+
+plans:
+  - name: "A - First load test"
+    categories:
+      - "Load testing"
+    root:
+
+      # =====================================================================
+      # A `threadGroup` is the usual root for a load test, the way `testCase`
+      # is for a functional test or a bot.
+      #
+      # It says: start `users` virtual users, and have each of them run the
+      # children `iterations` times.
+      #
+      #   users       how many virtual users run IN PARALLEL. Each one takes
+      #               its own agent token for the whole thread group, so this
+      #               is what actually sizes the load - and what sizes the
+      #               agent capacity you need.
+      #   iterations  how many times EACH user repeats the children. Total
+      #               transactions = users x iterations = 6 here.
+      #
+      # Both are deliberately tiny in this sample so it runs in seconds. The
+      # other knobs - pacing, rampup, startOffset, maxDuration - are the
+      # subject of sample 02.
+      # =====================================================================
+      threadGroup:
+        nodeName: "Shoppers"
+        users: 2
+        iterations: 3
+        children:
+          - sequence:
+              nodeName: "Search and buy"
+              instrumentNode: true
+              children:
+
+                # Every keyword call is measured automatically, under the
+                # KEYWORD's name - "Search Products" here. That happens with
+                # no configuration at all, and it is the raw material of
+                # every load-test report.
+                - callKeyword:
+                    keyword: "Search Products"
+                    nodeName: "Search the catalogue"
+                    inputs:
+                      - term: "laptop"
+                    children:
+                      # Chaining outputs works exactly as in any other plan:
+                      # a nested `set` promotes the value to the parent scope
+                      # so later siblings can read it.
+                      - set:
+                          key: productId
+                          value: "${output.firstProductId}"
+
+                - callKeyword:
+                    keyword: "Add To Cart"
+                    nodeName: "Add the product to the cart"
+                    inputs:
+                      - productId: "${productId}"
+                    children:
+                      - set:
+                          key: cartId
+                          value: "${output.cartId}"
+
+                - callKeyword:
+                    keyword: "Checkout"
+                    nodeName: "Check out"
+                    inputs:
+                      - cartId: "${cartId}"
+                    children:
+
+                      # ---------------------------------------------
+                      # A LOAD TEST STILL HAS TO CHECK ITS ANSWERS.
+                      #
+                      # A system under load frequently starts returning
+                      # fast, cheap, WRONG responses - an error page is
+                      # quicker to render than a checkout. Without this
+                      # assert the response times would look excellent
+                      # and mean nothing.
+                      #
+                      # ---------------------------------------------
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "CONFIRMED"
+                          customErrorMessage: "Checkout did not confirm - the response was fast but wrong."
+
+        # =====================================================================
+        # THE SLA, EXPRESSED IN THE PLAN.
+        #
+        # `performanceAssert` compares an aggregate of a measurement against a
+        # threshold. It turns a load test from "here are
+        # some numbers, go and look" into a pass/fail gate you can put in a
+        # pipeline.
+        #
+        #   measurementName  which measurement to aggregate
+        #   aggregator       AVG | MAX | MIN | COUNT | SUM
+        #   comparator       LOWER_THAN | HIGHER_THAN | EQUALS
+        #   expectedValue    the threshold
+        #
+        # TWO RULES ABOUT WHERE IT GOES, both easy to get wrong:
+        #
+        #  1. A `performanceAssert` MUST live in an `after` or `afterThread`
+        #     block. As an ordinary child - of the thread group, of a testCase,
+        #     anywhere
+        #
+        #     `after`       runs once, when the whole thread group is done -
+        #                   the right place for an SLA over the whole run.
+        #     `afterThread` runs once per virtual user, as that user finishes.
+        #
+        #  2. `measurementName` must name a KEYWORD measurement (or a custom
+        #     one a keyword created itself - see sample 05). Measurements
+        #     produced by `instrumentNode` like on the sequence above are currently
+        #     not supported in performanceAssert.
+        #
+        # `continueOnError: true` matters here. Without it the block stops at
+        # the first breached threshold, and you learn about one SLA violation
+        # per run instead of all of them.
+        # =====================================================================
+        after:
+          continueOnError: true
+          steps:
+
+            # A sanity check that every transaction completed. COUNT here is
+            # how many times "Checkout" ran; if an earlier step failed - as
+            # it might under load - that iteration aborts before checkout and
+            # the count falls short of 6. Paired with the AVG/MAX below, it
+            # stops a run that quietly did less work from hiding behind a
+            # healthy average.
+            - performanceAssert:
+                nodeName: "All 6 checkouts ran"
+                measurementName: "Checkout"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 6
+
+            # The SLA proper.
+            - performanceAssert:
+                nodeName: "Checkout stays under 5s on average"
+                measurementName: "Checkout"
+                aggregator: AVG
+                comparator: LOWER_THAN
+                expectedValue: 5000
+
+keywords:
+  - GeneralScript:
+      name: "Search Products"
+      scriptLanguage: groovy
+      scriptFile: keywords/searchProducts.groovy
+  - GeneralScript:
+      name: "Add To Cart"
+      scriptLanguage: groovy
+      scriptFile: keywords/addToCart.groovy
+  - GeneralScript:
+      name: "Checkout"
+      scriptLanguage: groovy
+      scriptFile: keywords/checkout.groovy

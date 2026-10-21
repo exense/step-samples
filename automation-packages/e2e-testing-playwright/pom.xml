@@ -41,9 +41,9 @@
     </scm>
 
     <properties>
-        <step.version>3.29.4</step.version>
-        <step-api.version>1.5.0</step-api.version>
-        <playwright.version>1.49.0</playwright.version>
+        <step.version>3.30.5</step.version>
+        <step-api.version>1.6.4</step-api.version>
+        <playwright.version>1.63.0</playwright.version>
         <junit.version>4.13.1</junit.version>
 
         <maven.compiler.source>21</maven.compiler.source>
@@ -58,6 +58,26 @@
          -->
         <step.step-project-name>Common</step.step-project-name>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>exense-oss</id>
+            <url>https://repository.exense.ch/maven-oss/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>exense-oss</id>
+            <url>https://repository.exense.ch/maven-oss/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>

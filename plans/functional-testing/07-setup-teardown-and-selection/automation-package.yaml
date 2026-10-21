@@ -1,0 +1,176 @@
+---
+# Functional testing sample 07 - Setup, teardown and test selection
+version: "1.3.0"
+name: "functional-07-setup-teardown-and-selection"
+
+plans:
+  - name: "A - Shared setup and cleanup for a test set"
+    categories: ["smoke"]
+    root:
+      testSet:
+        # One test customer for all test cases of the set
+        before:
+          steps:
+            - callKeyword:
+                keyword: "Create Test Customer"
+                children:
+                  - set:
+                      key: "customerId"
+                      value: "${output.customerId}"
+        after:
+          continueOnError: true
+          steps:
+            - callKeyword:
+                keyword: "Delete Test Customer"
+                inputs:
+                  - customerId: "${customerId}"
+                children:
+                  - assert:
+                      actual: "deleted"
+                      operator: EQUALS
+                      expected: "${customerId}"
+        children:
+          - testCase:
+              nodeName: "Customer can log in"
+              children:
+                - callKeyword:
+                    keyword: "Login"
+                    inputs:
+                      - customerId: "${customerId}"
+                    children:
+                      - assert:
+                          actual: "status"
+                          operator: EQUALS
+                          expected: "LOGGED_IN"
+          - testCase:
+              nodeName: "A new customer has no orders"
+              children:
+                - callKeyword:
+                    keyword: "Get Order History"
+                    inputs:
+                      - customerId: "${customerId}"
+                    children:
+                      - assert:
+                          actual: "orderCount"
+                          operator: EQUALS
+                          expected: "0"
+
+  - name: "B - Setup and cleanup for a test case"
+    categories: ["regression"]
+    root:
+      testCase:
+        nodeName: "Customer can place an order"
+        before:
+          steps:
+            - callKeyword:
+                keyword: "Create Test Customer"
+                children:
+                  - set:
+                      key: "customerId"
+                      value: "${output.customerId}"
+            - callKeyword:
+                keyword: "Add To Cart"
+                inputs:
+                  - customerId: "${customerId}"
+                  - sku: "KB-100"
+                children:
+                  - set:
+                      key: "cartId"
+                      value: "${output.cartId}"
+        after:
+          continueOnError: true
+          steps:
+            - callKeyword:
+                keyword: "Clear Cart"
+                inputs:
+                  - cartId: "${cartId}"
+                children:
+                  - assert:
+                      actual: "cleared"
+                      operator: EQUALS
+                      expected: "${cartId}"
+            - callKeyword:
+                keyword: "Delete Test Customer"
+                inputs:
+                  - customerId: "${customerId}"
+                children:
+                  - assert:
+                      actual: "deleted"
+                      operator: EQUALS
+                      expected: "${customerId}"
+        children:
+          - callKeyword:
+              keyword: "Place Order"
+              inputs:
+                - cartId: "${cartId}"
+              children:
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "PLACED"
+
+  - name: "C - Cleanup after a failure (intentionally fails)"
+    root:
+      testCase:
+        nodeName: "Customer can log in"
+        before:
+          steps:
+            - callKeyword:
+                keyword: "Create Test Customer"
+                children:
+                  - set:
+                      key: "customerId"
+                      value: "${output.customerId}"
+        after:
+          continueOnError: true
+          steps:
+            - callKeyword:
+                keyword: "Delete Test Customer"
+                inputs:
+                  - customerId: "${customerId}"
+                children:
+                  - assert:
+                      actual: "deleted"
+                      operator: EQUALS
+                      expected: "${customerId}"
+        children:
+          - callKeyword:
+              keyword: "Login"
+              inputs:
+                - customerId: "${customerId}"
+              children:
+                # Wrong on purpose, to show that the after block still runs. Not a pattern for real plans.
+                - assert:
+                    actual: "status"
+                    operator: EQUALS
+                    expected: "LOCKED"
+
+keywords:
+  - GeneralScript:
+      name: "Create Test Customer"
+      scriptLanguage: groovy
+      scriptFile: keywords/createTestCustomer.groovy
+  - GeneralScript:
+      name: "Delete Test Customer"
+      scriptLanguage: groovy
+      scriptFile: keywords/deleteTestCustomer.groovy
+  - GeneralScript:
+      name: "Login"
+      scriptLanguage: groovy
+      scriptFile: keywords/login.groovy
+  - GeneralScript:
+      name: "Add To Cart"
+      scriptLanguage: groovy
+      scriptFile: keywords/addToCart.groovy
+  - GeneralScript:
+      name: "Place Order"
+      scriptLanguage: groovy
+      scriptFile: keywords/placeOrder.groovy
+  - GeneralScript:
+      name: "Clear Cart"
+      scriptLanguage: groovy
+      scriptFile: keywords/clearCart.groovy
+  - GeneralScript:
+      name: "Get Order History"
+      scriptLanguage: groovy
+      scriptFile: keywords/getOrderHistory.groovy

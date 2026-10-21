@@ -1,0 +1,109 @@
+---
+# ---------------------------------------------------------------------------
+# Load-testing sample 05 - Measurements
+#
+# Everything a load test reports comes out of measurements. Which ones exist,
+# what they are called, and how they nest is decided partly by Step and partly
+# by the plan.
+#
+# There are three sources of measurements, and only two of them can carry an
+# SLA.
+# ---------------------------------------------------------------------------
+version: "1.3.0"
+name: "load-05-measurements"
+
+plans:
+
+  # =========================================================================
+  # A. The three sources, side by side.
+  #
+  #  1. AUTOMATIC, per keyword call.
+  #     Every `callKeyword` is timed and reported under the KEYWORD's name -
+  #     never the node name. Two calls to "Checkout" from different nodes
+  #     land in the same series. This also applies to composite keywords,
+  #     which allows to measure multi-keyword transactions.
+  #
+  #  2. INSTRUMENTED NODES, per plan node.
+  #     `instrumentNode: true` on any node times that node and reports it
+  #     under its `nodeName`. This is how a multi-keyword transaction gets an
+  #     end-to-end number.
+  #
+  #  3. CUSTOM, from inside the keyword.
+  #     `output.startMeasure(name)` / `output.stopMeasure()` create
+  #     measurements the keyword decides on, to time PART of the keyword's
+  #     execution.
+  #
+  # IMPORTANT NOTE: `performanceAssert` supports keyword and
+  # custom measurements. Measurements produced by `instrumentNode` are
+  # currently not supported.
+  # =========================================================================
+  - name: "A - Where measurements come from"
+    categories: ["Load testing"]
+    root:
+      threadGroup:
+        nodeName: "Shoppers"
+        users: 2
+        iterations: 2
+        children:
+
+          # (2) Instrumented node: one measurement named "Search and buy",
+          # covering both keyword calls below it.
+          - sequence:
+              nodeName: "Search and buy"
+              instrumentNode: true
+              children:
+
+                # (3) The keyword creates its own measurements - see
+                # keywords/browseCatalog.groovy. The call still produces its
+                # own automatic "Browse Catalog" measurement as well, so this
+                # one call yields three series.
+                - callKeyword:
+                    keyword: "Browse Catalog"
+                    nodeName: "Browse two pages"
+
+                # (1) Automatic: one measurement named "Checkout".
+                - callKeyword:
+                    keyword: "Checkout"
+                    nodeName: "Check out"
+
+        after:
+          continueOnError: true
+          steps:
+
+            # A keyword measurement.
+            - performanceAssert:
+                nodeName: "Checkout stays under 500ms on average"
+                measurementName: "Checkout"
+                aggregator: AVG
+                comparator: LOWER_THAN
+                expectedValue: 500
+
+            # A custom measurement, created by the keyword.
+            - performanceAssert:
+                nodeName: "The catalog page was measured separately"
+                measurementName: "Catalog page"
+                aggregator: AVG
+                comparator: LOWER_THAN
+                expectedValue: 150
+
+            - performanceAssert:
+                nodeName: "The product page was measured separately"
+                measurementName: "Product page"
+                aggregator: COUNT
+                comparator: EQUALS
+                expectedValue: 4
+
+            # There is no assert on "Search and buy" here: measurements
+            # produced by `instrumentNode` are currently not supported in
+            # performanceAssert. To put a threshold on a whole transaction,
+            # implement it as one composite keyword.
+
+keywords:
+  - GeneralScript:
+      name: "Browse Catalog"
+      scriptLanguage: groovy
+      scriptFile: keywords/browseCatalog.groovy
+  - GeneralScript:
+      name: "Checkout"
+      scriptLanguage: groovy
+      scriptFile: keywords/checkout.groovy
